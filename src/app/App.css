@@ -1,0 +1,38 @@
+@import '../assets/styles/normalize.css';
+@import '../assets/styles/bootstrap.flatly.min.css';
+@import '../assets/styles/font-awesome.min.css';
+.number-field {
+  text-align: right
+}
+
+.msg {
+  font-style: italic;
+  font-size: 1.2em;
+  padding: 5px;
+}
+
+.panel-watchlists .panel-heading {
+	border: 0;
+  border-radius: 0;  
+}
+
+.panel-watchlists .panel-body {
+  padding: 5px;
+  background: #222230;
+}
+
+.panel-watchlists .list-group {
+  margin: 0px;
+}
+
+.panel-watchlists .list-group-item {
+  background: lightblue;
+}
+
+.panel-watchlists .list-group-item:first-child {
+	border-radius: 0;
+}
+.panel-watchlists .active,
+.panel-watchlists .active:focus {
+  background: steelblue;
+}
