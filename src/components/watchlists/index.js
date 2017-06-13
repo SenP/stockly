@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { Panel } from "react-bootstrap";
+
 import { Watchlist, WatchlistService, QuotesService } from "../../services";
 import WatchlistForm from "./WatchlistForm";
 import Header from "./WatchlistsHeader";
@@ -32,14 +33,17 @@ export default class WatchlistsContainer extends Component {
 
   componentWillMount() {
     WatchlistService.getWatchlists().then(watchlists => {
-      this.setState(() => ({ watchlists, selectedWatchlist: watchlists[0]}));
-      watchlists.forEach(wl => {
-        wl.instruments.forEach(stock => {
-          QuotesService.register(stock.instrument, stock.exchange);
+      if (watchlists && watchlists.length > 0) {
+        this.setState(() => ({ watchlists }));
+        this.onChangeSelection(watchlists[0]);
+        watchlists.forEach(wl => {
+          wl.stocks.forEach(stock => {
+            QuotesService.register(stock.code);
+          });
         });
-      });
+      }
     });
-  }  
+  }
 
   onChangeSelection = wl => {
     this.setState({ selectedWatchlist: wl });
@@ -84,18 +88,16 @@ export default class WatchlistsContainer extends Component {
   deleteWatchlist = () => {
     let watchlists = this.state.watchlists;
     let selectedWL = this.state.selectedWatchlist;
-    if (
-      window.confirm(
-        "Delete " + this.state.selectedWatchlist.name + " watchlist?"
-      )
-    ) {
+    let delMsg = "Delete " + this.state.selectedWatchlist.name + " watchlist?";
+
+    if (window.confirm(delMsg)) {
       this.setState({
         isDeleting: true,
         msg: "Deleting...please wait.",
         msgClass: msgClasses.info
       });
       let delidx = watchlists.findIndex(wl => wl.id === selectedWL.id);
-      WatchlistService.deleteWatchlist(selectedWL).then(res => {
+      WatchlistService.deleteWatchlist(selectedWL).then(() => {
         this.resetView();
         //reset selected watchlist
         if (watchlists.length === 0) {
@@ -142,7 +144,14 @@ export default class WatchlistsContainer extends Component {
         }}
       >
         <h4> No Watchlists available! </h4>
-        <p> Click the + button above to create a new watchlist.</p>
+        <p>
+          {" "}
+          Click the
+          {" "}
+          <i className="fa fa-plus btn btn-success btn-xs" />
+          {" "}
+          button above to create a new watchlist.
+        </p>
       </div>
     );
 

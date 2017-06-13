@@ -1,7 +1,7 @@
 import React from "react";
 import { Button } from "react-bootstrap";
 import Watchlists from "../watchlists";
-import { refFreqs } from "../../app/Config";
+import { refFreqs } from "../app/Config";
 
 const sidebarStyle = {
   padding: "0px 0px",

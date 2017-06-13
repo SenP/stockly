@@ -32,15 +32,15 @@ export class QuotesService {
   }
 
   // Add instrument to the quotes map
-  static register(stock, exchg) {
-    if (!this.quotesMap.get(exchg + ":" + stock)) {
-      this.quotesMap.set(exchg + ":" + stock, new Quote());
+  static register(stockCode) {
+    if (!this.quotesMap.get(stockCode)) {
+      this.quotesMap.set(stockCode, new Quote());
     }
   }
 
   // Remove instrument from the quotes map
-  static deregister(stock, exchg) {
-    this.quotesMap.delete(exchg + ":" + stock);
+  static deregister(stockCode) {
+    this.quotesMap.delete(stockCode);
   }
 
   // Clear the quotes map
@@ -50,12 +50,15 @@ export class QuotesService {
 
   // Refresh the quotes map with latest quotes from Google Finance API
   static refreshQuotes() {
+    console.log(this.quotesMap);
     if (this.quotesMap.size > 0) {
       let stockcodes = "";
 
       // create stock codes list, each stock code is in format 'exchange:stockcode'
       this.quotesMap.forEach((value, key) => {
-        stockcodes += key + ",";
+        console.log(key);
+        let [code, exchange] = key.split(':');
+        stockcodes += exchange + ":" + code + ",";
       });
 
       let gUrl = `${this.base_url}?client=ig&q=${stockcodes}&format=json`;
@@ -74,7 +77,7 @@ export class QuotesService {
   // Update the quotes map with the new quote values from API (called from refreshQuotes method)
   static updateQuotesMap(newquotes) {
     newquotes.forEach(newquote => {
-      let quote = this.quotesMap.get(newquote.e + ":" + newquote.t);
+      let quote = this.quotesMap.get(newquote.t + ":" + newquote.e );
       if (quote) {
         quote.lastPrice =
           parseFloat(newquote.l.replace(",", "")) *

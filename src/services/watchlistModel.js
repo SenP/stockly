@@ -1,6 +1,5 @@
-export class WatchlistItem {
-  instrument = "";
-  exchange = "";
+export class Stock {
+  code = "";
   unitsOwned = 0;
   avgPrice = 0;
   lastPrice = 0;
@@ -35,10 +34,10 @@ export class Watchlist {
   description = "";
   owner = "";
   createdOn = new Date();
-  instruments = [];
+  stocks = [];
 
   get totalMarketValue() {
-    let total = this.instruments.reduce(
+    let total = this.stocks.reduce(
       (totalV, wl) => totalV + wl.marketValue,
       0
     );
@@ -46,7 +45,7 @@ export class Watchlist {
   }
 
   get totalDayChange() {
-    let total = this.instruments.reduce(
+    let total = this.stocks.reduce(
       (totalV, wl) => totalV + wl.dayChange,
       0
     );
@@ -54,7 +53,7 @@ export class Watchlist {
   }
 
   get totalPnL() {
-    let total = this.instruments.reduce((totalV, wl) => totalV + wl.netPnL, 0);
+    let total = this.stocks.reduce((totalV, wl) => totalV + wl.netPnL, 0);
     return parseFloat(total.toFixed(2));
   }
 }

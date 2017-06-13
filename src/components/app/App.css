@@ -1,6 +1,6 @@
-@import '../assets/styles/normalize.css';
-@import '../assets/styles/bootstrap.flatly.min.css';
-@import '../assets/styles/font-awesome.min.css';
+@import '../../assets/styles/normalize.css';
+@import '../../assets/styles/bootstrap.flatly.min.css';
+@import '../../assets/styles/font-awesome.min.css';
 .number-field {
   text-align: right
 }
@@ -11,9 +11,13 @@
   padding: 5px;
 }
 
+.number-field {
+  text-align: right
+}
+
 .panel-watchlists .panel-heading {
-	border: 0;
-  border-radius: 0;  
+  border: 0;
+  border-radius: 0;
 }
 
 .panel-watchlists .panel-body {
@@ -30,9 +34,18 @@
 }
 
 .panel-watchlists .list-group-item:first-child {
-	border-radius: 0;
+  border-radius: 0;
 }
+
 .panel-watchlists .active,
 .panel-watchlists .active:focus {
   background: steelblue;
+}
+
+.panel-watchlist .panel-heading {
+  font-size: 2em;
+}
+
+.panel-watchlist .panel-body {
+  padding: 0px;
 }

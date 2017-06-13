@@ -5,7 +5,7 @@ import {Watchlist} from '../../services';
 
 export default class WatchlistForm extends Component {
   static propTypes = {
-    watchlist: PropTypes.objectOf(Watchlist).isRequired,
+    watchlist: PropTypes.instanceOf(Watchlist).isRequired,
     submitFn: PropTypes.func.isRequired,
     cancelFn: PropTypes.func.isRequired
   };

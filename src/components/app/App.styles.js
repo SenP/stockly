@@ -14,6 +14,6 @@ export const contentColStyle = {
   top: "40px",
   left: "310px",
   minWidth: "400px",
-  maxWidth: "1400px"
+  maxWidth: "1600px",
   // border: "2px solid green"
 };

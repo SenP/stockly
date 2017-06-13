@@ -3,10 +3,10 @@ import ReactDOM from "react-dom";
 import { Grid, Row, Col } from "react-bootstrap";
 import injectTapEventPlugin from "react-tap-event-plugin";
 // import { BrowserRouter as Router, Route } from "react-router-dom";
-import Header from "../components/layout/Header";
-import Sidebar from "../components/layout/Sidebar";
-import Content from "../components/layout/Content";
-import { WatchlistService, QuotesService } from "../services";
+import Header from "../layout/Header";
+import Sidebar from "../layout/Sidebar";
+import Content from "../layout/Content";
+import { WatchlistService, QuotesService } from "../../services";
 
 import "./App.css";
 import { sidebarColStyle, contentColStyle } from "./App.styles.js";
@@ -16,13 +16,21 @@ injectTapEventPlugin();
 class App extends Component {
   state = {
     selectedWatchlist: null,
-    refInterval: 60
+    refInterval: 60,
+    refreshQuotes: false
   };
 
   componentWillMount() {
     // Start quote service and update quotes at refInterval
     QuotesService.init(this.state.refInterval * 1000).subscribe(qmap => {
-      WatchlistService.updateQuotes(qmap);
+      this.setState({
+        refreshQuotes: false
+      });
+      WatchlistService.updateQuotes(qmap).then(() =>
+        this.setState({
+          refreshQuotes: true
+        })
+      );
     });
 
     // Load the supported tickers
@@ -50,11 +58,14 @@ class App extends Component {
               </Col>
             </Row>
             <Row className="app-container">
-              <Col className="hidden-xs" style={sidebarColStyle}>
+              <Col lg={2} md={4} className="hidden-sm hidden-xs" style={sidebarColStyle}>
                 <Sidebar onSelect={this.onSelect} />
               </Col>
-              <Col lg={12} md={12} sm={12} style={contentColStyle}>
-                <Content watchlist={this.state.selectedWatchlist} />
+              <Col lg={10} md={8} style={contentColStyle}>
+                <Content
+                  watchlist={this.state.selectedWatchlist}
+                  refresh={this.state.refreshQuotes}
+                />
               </Col>
             </Row>
           </Grid>

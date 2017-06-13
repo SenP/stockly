@@ -1,5 +1,6 @@
-import { WatchlistItem, Watchlist } from "./watchlistModel";
-import QuoteService from "./quotesService";
+import { Stock, Watchlist } from "./watchlistModel";
+import QuotesService from "./quotesService";
+import SampleWatchlists from "./SampleWatchlists";
 
 export class WatchlistService {
   static watchlists = [];
@@ -13,36 +14,40 @@ export class WatchlistService {
         if (watchlistsRaw && watchlistsRaw.length > 0) {
           watchlistsRaw.forEach(wlraw => {
             let newWL = Object.assign(new Watchlist(), wlraw);
-            newWL.instruments = []; //reset so we can create and assign watchlist items
-            wlraw.instruments.forEach(ins => {
-              let newWLItem = Object.assign(new WatchlistItem(), ins);
-              newWL.instruments.push(newWLItem);
+            newWL.stocks = []; //reset so we can create and assign watchlist items
+            wlraw.stocks.forEach(stock => {
+              let newStock = Object.assign(new Stock(), stock);
+              newWL.stocks.push(newStock);
             });
             this.watchlists.push(newWL);
           });
         } else {
-          this.getSampleWatchlists();
+          this.watchlists = SampleWatchlists;
         }
       }
       resolve(this.watchlists);
     });
   }
 
-  // Update all watchlist instruments with the given quotes
+  // Update all stocks in all watchlists with the new quotes
   static updateQuotes(qmap) {
-    this.watchlists.forEach(wl => {
-      wl.instruments.forEach(stock => {
-        let quote = qmap.get(stock.exchange + ":" + stock.instrument);
-        if (quote) {
-          stock.lastPrice = quote.lastPrice || 0;
-          stock.change = quote.change || 0;
-          stock.percentChange = quote.percentChange || 0;
-        }
+    console.log("new quotes:", qmap);
+    return new Promise(resolve => {
+      this.watchlists.forEach(wl => {
+        wl.stocks.forEach(stock => {
+          let quote = qmap.get(stock.code);
+          if (quote) {
+            stock.lastPrice = quote.lastPrice || 0;
+            stock.change = quote.change || 0;
+            stock.percentChange = quote.percentChange || 0;
+          }
+        });
       });
+      resolve(true);
     });
   }
 
-  //Save a watchlist, simulate http post delay
+  // Save a watchlist, simulate http post delay
   static saveWatchlist(wl) {
     return new Promise(resolve =>
       setTimeout(() => {
@@ -51,7 +56,7 @@ export class WatchlistService {
     );
   }
 
-  //utility: save the edited/new watchlist
+  // save the edited/new watchlist
   static doSaveWatchlist(wlist) {
     let i = this.watchlists.findIndex(wl => wl.id === wlist.id);
     let data = null;
@@ -80,7 +85,7 @@ export class WatchlistService {
           (prev, curr) => (prev.id > curr.id ? prev : curr),
           { id: 0 }
         ).id + 1;
-      wlist.instruments = [];
+      wlist.stocks = [];
       this.watchlists.push(Object.assign(new Watchlist(), wlist));
       data = this.watchlists[this.watchlists.length - 1];
     }
@@ -88,48 +93,57 @@ export class WatchlistService {
     return { status: "success", data: data };
   }
 
-  //Save a watchlist item, simulate http post delay
-  static saveWatchlistItem(wlist, wlItem) {
+  // Save a stock, simulate http post delay
+  static saveStock(wlist, stock) {
     let p = new Promise(resolve =>
       setTimeout(() => {
-        resolve(this.doSaveWatchlistItem(wlist, wlItem));
+        resolve(this.doSaveStock(wlist, stock));
       }, this.simDelay)
     );
 
     return p;
   }
 
-  //utility: save the edited/new watchlist item
-  static doSaveWatchlistItem(wlist, wlItem) {
+  // save the edited/new stock
+  static doSaveStock(wlist, stock) {
     let wl = this.watchlists[this.watchlists.findIndex(w => w.id === wlist.id)];
-    let i = wl.instruments.findIndex(
-      ins => ins.instrument === wlItem.instrument
-    );
+    let i = wl.stocks.findIndex(stk => stk.code === stock.code);
     let data = null;
 
-    if (i === -1 && wl.instruments.length === 30) {
-      //stocks limit reached
-      return {
-        status: "error",
-        msg: "Can not have more than 30 stocks in a watchlist"
-      };
+    if (i === -1) {
+      // validate ticker code
+      if (
+        QuotesService.getTickers().filter(ticker => ticker.code === stock.code)
+          .length === 0
+      ) {
+        return {
+          status: "error",
+          msg: "Invalid stock code"
+        };
+      } else if (wl.stocks.length === 30) {
+        //stocks limit reached
+        return {
+          status: "error",
+          msg: "Can not have more than 30 stocks in a watchlist"
+        };
+      }
     }
 
     if (i !== -1) {
       //edit
-      Object.assign(wl.instruments[i], wlItem);
-      data = wl.instruments[i];
+      Object.assign(wl.stocks[i], stock);
+      data = wl.stocks[i];
     } else {
       //create
-      wl.instruments.push(Object.assign(new WatchlistItem(), wlItem));
-      QuoteService.register(wlItem.instrument, wlItem.exchange);
-      data = wl.instruments[wl.instruments.length - 1];
+      wl.stocks.push(Object.assign(new Stock(), stock));
+      QuotesService.register(stock.code);
+      data = wl.stocks[wl.stocks.length - 1];
     }
     localStorage.setItem("fpwatchlists", JSON.stringify(this.watchlists));
     return { status: "success", data: data };
   }
 
-  //simulate http delete of watchlist
+  // simulate http delete of watchlist
   static deleteWatchlist(wlist) {
     let p = new Promise(resolve =>
       setTimeout(() => {
@@ -140,167 +154,44 @@ export class WatchlistService {
     return p;
   }
 
-  //remove the selected watchlist
+  // remove the selected watchlist
   static doRemoveWatchlist(wlist) {
     let i = this.watchlists.findIndex(w => w.id === wlist.id);
 
     if (i !== -1) {
       this.watchlists.splice(i, 1);
-      //deregister instrument from quote service
-      if (wlist.instruments.length > 0) {
-        wlist.instruments.forEach(ins => {
-          QuoteService.deregister(ins.instrument, ins.exchange);
-        });
+      // deregister stock from quotes service
+      if (wlist.stocks.length > 0) {
+        wlist.stocks.forEach(stock => QuotesService.deregister(stock.code));
       }
+      localStorage.setItem("fpwatchlists", JSON.stringify(this.watchlists));
+      return { status: "success", data: wlist };
     }
-    localStorage.setItem("fpwatchlists", JSON.stringify(this.watchlists));
-    return { status: "success", data: wlist };
+    return { status: "success", data: null };
   }
 
   // simulate http delete of watchlist item
-  static deleteWatchlistItem(wlist, wlItem) {
+  static deleteStock(wlist, stock) {
     let p = new Promise(resolve =>
       setTimeout(() => {
-        resolve(this.doRemoveWatchlistItem(wlist, wlItem));
+        resolve(this.doRemoveStock(wlist, stock));
       }, this.simDelay)
     );
 
     return p;
   }
 
-  //remove the selected watchlist item
-  static oRemoveWatchlistItem(wlist, wlItem) {
-    let wl = this.watchlists[this.watchlists.findIndex(w => w.id === wlist.id)];
-    let i = wl.instruments.findIndex(
-      ins => ins.instrument === wlItem.instrument
-    );
-
+  // remove the selected watchlist item
+  static doRemoveStock(wlist, stock) {
+    // let wl = this.watchlists[this.watchlists.findIndex(w => w.id === wlist.id)];
+    let i = wlist.stocks.findIndex(stk => stk.code === stock.code);
     if (i !== -1) {
-      wl.instruments.splice(i, 1);
-      QuoteService.deregister(wlItem.instrument, wlItem.exchange);
+      wlist.stocks.splice(i, 1);
+      QuotesService.deregister(stock.code);
+      localStorage.setItem("fpwatchlists", JSON.stringify(this.watchlists));
+      return { status: "success", data: stock };
     }
-    localStorage.setItem("fpwatchlists", JSON.stringify(this.watchlists));
-    return { status: "success", data: wlItem };
-  }
-  // if no watchlists created, load sample watchlists
-  static getSampleWatchlists() {
-    //#1
-    this.watchlists.push(
-      Object.assign(new Watchlist(), {
-        id: 1,
-        name: "Technology",
-        description: "technology stocks",
-        owner: "sample",
-        instruments: []
-      })
-    );
-
-    this.watchlists[0].instruments.push(
-      Object.assign(new WatchlistItem(), {
-        instrument: "GOOGL",
-        exchange: "NASDAQ",
-        unitsOwned: 100,
-        avgPrice: 700
-      })
-    );
-
-    this.watchlists[0].instruments.push(
-      Object.assign(new WatchlistItem(), {
-        instrument: "MSFT",
-        exchange: "NASDAQ",
-        unitsOwned: 300,
-        avgPrice: 52
-      })
-    );
-
-    this.watchlists[0].instruments.push(
-      Object.assign(new WatchlistItem(), {
-        instrument: "AMZN",
-        exchange: "NASDAQ",
-        unitsOwned: 50,
-        avgPrice: 750
-      })
-    );
-
-    this.watchlists[0].instruments.push(
-      Object.assign(new WatchlistItem(), {
-        instrument: "AAPL",
-        exchange: "NASDAQ",
-        unitsOwned: 200,
-        avgPrice: 130
-      })
-    );
-
-    //#2
-    this.watchlists.push(
-      Object.assign(new Watchlist(), {
-        id: 2,
-        name: "Financials",
-        description: "Financial stocks",
-        owner: "sample",
-        instruments: []
-      })
-    );
-    this.watchlists[1].instruments.push(
-      Object.assign(new WatchlistItem(), {
-        instrument: "BAC",
-        exchange: "NYSE",
-        unitsOwned: 500,
-        avgPrice: 13
-      })
-    );
-    this.watchlists[1].instruments.push(
-      Object.assign(new WatchlistItem(), {
-        instrument: "WFC",
-        exchange: "NYSE",
-        unitsOwned: 200,
-        avgPrice: 46
-      })
-    );
-    this.watchlists[1].instruments.push(
-      Object.assign(new WatchlistItem(), {
-        instrument: "JPM",
-        exchange: "NYSE",
-        unitsOwned: 400,
-        avgPrice: 60
-      })
-    );
-
-    //#3
-    this.watchlists.push(
-      Object.assign(new Watchlist(), {
-        id: 3,
-        name: "Telecom",
-        description: "Telecommunications Services",
-        owner: "sample",
-        instruments: []
-      })
-    );
-    this.watchlists[2].instruments.push(
-      Object.assign(new WatchlistItem(), {
-        instrument: "T",
-        exchange: "NYSE",
-        unitsOwned: 300,
-        avgPrice: 40
-      })
-    );
-    this.watchlists[2].instruments.push(
-      Object.assign(new WatchlistItem(), {
-        instrument: "VZ",
-        exchange: "NYSE",
-        unitsOwned: 200,
-        avgPrice: 55
-      })
-    );
-    this.watchlists[2].instruments.push(
-      Object.assign(new WatchlistItem(), {
-        instrument: "VOD",
-        exchange: "NASDAQ",
-        unitsOwned: 400,
-        avgPrice: 27
-      })
-    );
+    return { status: "success", data: null };
   }
 }
-
 export default WatchlistService;
