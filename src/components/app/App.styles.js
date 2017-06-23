@@ -5,7 +5,9 @@ export const sidebarColStyle = {
   marginLeft: "0px",
   height: "100vh",
   color: "white",
-  background: "#222230"
+  background: "#222230",
+  paddingLeft: "5px",
+  paddingRight: "5px"
   // border: "2px solid red"
 };
 

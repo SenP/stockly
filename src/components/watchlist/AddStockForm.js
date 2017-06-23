@@ -12,24 +12,27 @@ import Autosuggest from "react-autosuggest";
 import "./autoSuggestStyles.css";
 
 import { Stock, QuotesService } from "../../services";
+import Message from "../common/Message";
 
-const tickers = QuotesService.getTickers();
+const msgClasses = {
+  error: "msg text-center text-danger",
+  info: "msg text-center text-info"
+};
 
-const getSuggestions = value => {
-  const inputValue = value.trim().toLowerCase();
+const getSuggestions = (value, minLength = 0, exact = false) => {
+  const inputValue = exact ? value : value.trim().toLowerCase();
   const inputLength = inputValue.length;
-  return inputLength === 0
+  return inputLength <= minLength
     ? []
-    : tickers.filter(
-        ticker =>
-          ticker.name.toLowerCase().slice(0, inputLength) === inputValue ||
-          ticker.code.toLowerCase().slice(0, inputLength) === inputValue
-      );
+    : QuotesService.searchTickers(inputValue, exact);
 };
 
 const getSuggestionValue = suggestion => suggestion.code;
 
-const renderSuggestion = ticker => `${ticker.name} (${ticker.code})`;
+const renderSuggestion = ticker =>
+  <div>
+    {ticker.name} <br /> (<em> {ticker.code} </em>)
+  </div>;
 
 export default class AddStockForm extends Component {
   static propTypes = {
@@ -40,12 +43,17 @@ export default class AddStockForm extends Component {
 
   state = {
     ...Object.assign({}, this.props.stock),
-    suggestions: []
+    suggestions: [],
+    msg: "",
+    msgClass: ""
   };
 
   onStockSelect = (event, { newValue }) => {
+    let tickers = getSuggestions(newValue, 3, true);
+    let name = tickers.length > 0 ? tickers[0].name : "";
     this.setState(() => ({
-      code: newValue
+      code: newValue,
+      name
     }));
   };
 
@@ -67,50 +75,71 @@ export default class AddStockForm extends Component {
   };
 
   submitForm = evt => {
-    evt.preventDefault();
-    this.props.submitFn(this.state);
+    this.setState(prevState => ({
+      msg: "Saving...please wait.",
+      msgClass: msgClasses.info
+    }));
+    let result = this.props.submitFn(this.state);
+    if (result.status === "error") {
+      this.setState({
+        msg: result.msg,
+        msgClass: msgClasses.error
+      });
+    } else {
+      this.setState({
+        msg: null,
+        msgClass: ""
+      });
+    }
   };
 
   render = () => {
     const formTitle = (
       <span style={{ textAlign: "center" }}>
         <h4>
-          <strong>
-            {!this.state.id ? "Add Stock" : "Edit Stock"}
-          </strong>
+          {!this.state.id ? "Add Stock" : "Edit Stock"}
         </h4>
       </span>
     );
 
-    const codeInputProps = {
+    const inputProps = {
       placeholder: "Enter stock code...",
       value: this.state.code,
-      onChange: this.onStockSelect
+      onChange: this.onStockSelect,
+      className: "form-control input-sm"
     };
 
     const renderInputComponent = inputProps =>
       <div>
-        <FormControl type="text" name="code" bsSize="small" {...inputProps} />
+        <input type="text" name="code" {...inputProps} autoFocus />
       </div>;
+
+    const Spacing = <span>&nbsp;&nbsp;&nbsp;</span>;
 
     return (
       <Panel header={formTitle} style={{ marginBottom: "5px" }}>
-        <Form inline onSubmit={this.submitForm}>
+        <Form inline>
           <FormGroup>
             <ControlLabel>Stock: </ControlLabel>
+            {" "}
             <Autosuggest
               suggestions={this.state.suggestions}
               onSuggestionsFetchRequested={this.onSuggestionsFetchRequested}
               onSuggestionsClearRequested={this.onSuggestionsClearRequested}
               getSuggestionValue={getSuggestionValue}
               renderSuggestion={renderSuggestion}
-              inputProps={codeInputProps}
-              renderInputComponent={renderInputComponent}
+              inputProps={inputProps}
+              renderInputComponent={renderInputComponent}              
             />
+            <span>
+              {" "}<em> {this.state.name} </em>{" "}
+            </span>
           </FormGroup>
+          {Spacing}
 
           <FormGroup>
-            <ControlLabel> &nbsp; Units Owned: </ControlLabel>
+            <ControlLabel>Units Owned: </ControlLabel>
+            {" "}
             <FormControl
               type="text"
               name="unitsOwned"
@@ -119,9 +148,11 @@ export default class AddStockForm extends Component {
               onChange={this.handleChange}
             />
           </FormGroup>
+          {Spacing}
 
           <FormGroup>
-            <ControlLabel> &nbsp; Buy Price: $ </ControlLabel>
+            <ControlLabel> Buy Price: $ </ControlLabel>
+            {" "}
             <FormControl
               type="text"
               name="avgPrice"
@@ -130,12 +161,14 @@ export default class AddStockForm extends Component {
               onChange={this.handleChange}
             />
           </FormGroup>
+          {Spacing}
+
           <span>
             <Button
-              type="submit"
+              type="button"
               bsStyle="success"
               bsSize="small"
-              disabled={this.state.msg}
+              onClick={this.submitForm}
               style={{ margin: "0px 5px" }}
             >
               Submit
@@ -149,19 +182,11 @@ export default class AddStockForm extends Component {
               Cancel
             </Button>
           </span>
+          <div style={{ textAlign: "center", marginTop: "10px" }}>
+            <Message msgtext={this.state.msg} msgclass={this.state.msgClass} />
+          </div>
         </Form>
       </Panel>
     );
-    // <label> Stock: </label>
-    // 	<template #customItemTemplate let-model="item">
-    // 			<h5> {{model.Name}} </h5> <h6><em>Code: {{model.Symbol}} &emsp; Exchange: {{model.Exchange}}</em></h6>
-    // 		</template>
-    // 	<input
-    // 	[(ngModel)]="editedItem.instrument"
-    // 			[typeahead]="tickers" (typeaheadOnSelect)="onStockSelect($event)" [typeaheadOptionsLimit]="7"
-    // 			[typeaheadItemTemplate]="customItemTemplate" typeaheadOptionField="Symbol"
-    // 			[typeaheadMinLength]="0"
-    // 			autocomplete="off" required> &nbsp;
-    // 	<span><em> {{ selectStkName }} / {{ editedItem.exchange }} </em> </span>
   };
 }

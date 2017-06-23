@@ -1,27 +1,18 @@
 import React, { Component } from "react";
-import PropTypes from "prop-types";
+import { instanceOf } from "prop-types";
+import { connect } from "react-redux";
+import { bindActionCreators } from "redux";
+import * as watchlistActions from "../../redux/actions/watchlistActions";
 import { Panel, Button } from "react-bootstrap";
 
-import {
-  Watchlist,
-  Stock,
-  WatchlistService,
-  QuotesService
-} from "../../services";
+import { Watchlist, Stock, WatchlistService } from "../../services";
 import StocksList from "./StocksList";
 import AddStockForm from "./AddStockForm";
 import Header from "./WatchlistHeader";
-import Message from "../common/Message";
-import validateStock from "./validateStock";
 
-const msgClasses = {
-  error: " msg text-center text-danger",
-  info: "msg text-center text-info"
-};
-
-export default class WatchlistContainer extends Component {
+export class WatchlistContainer extends Component {
   static propTypes = {
-    watchlist: PropTypes.instanceOf(Watchlist)
+    watchlist: instanceOf(Watchlist)
   };
 
   static defaultProps = {
@@ -29,32 +20,16 @@ export default class WatchlistContainer extends Component {
   };
 
   state = {
-    watchlist: this.props.watchlist,
     editedStock: null,
     isEditing: false,
     isAdding: false,
     isDeleting: false,
-    msg: "",
-    msgClass: "",
     selectStkCode: null,
     selectStkName: null
   };
 
-  componentWillReceiveProps(nextProps) {
-    this.setState({
-      watchlist: nextProps.watchlist
-    });
-  }
-
-  ngOnChanges() {
-    this.isEditing = false;
-    this.isAdding = false;
-    this.isDeleting = false;
-  }
-
   addStock = () => {
     this.setState({ editedStock: new Stock(), isAdding: true });
-    //setTimeout(() => this.editCode.nativeElement.focus(), 100);
   };
 
   editStock = stock => {
@@ -62,72 +37,45 @@ export default class WatchlistContainer extends Component {
       editedStock: Object.assign(new Stock(), stock),
       isEditing: true
     });
-    // setTimeout(() => this.editUnits.nativeElement.focus(), 100);
   };
 
   saveStock = stock => {
-    let { watchlist, isAdding } = this.state;
-    let valid = validateStock(watchlist, stock, isAdding ? "add" : "edit");
+    let { watchlist, actions } = this.props;
+    let { isAdding } = this.state;
+    let valid = WatchlistService.validateStock(watchlist, stock, isAdding);
     if (valid.status === "error") {
-      this.setState({
-        msg: valid.msg,
-        msgClass: msgClasses.error
-      });
-      return false;
-    } else {
-      this.setState(prevState => ({
-        msg: "Saving...please wait.",
-        msgClass: msgClasses.info
-      }));
-      WatchlistService.saveStock(watchlist, stock).then(res => {
-        if (res.status === "error") {
-          this.setState({
-            msg: res.msg,
-            msgClass: msgClasses.error
-          });
-          return false;
-        } else {
-          this.resetView();
-          return true;
-        }
-      });
+      return valid;
     }
+    isAdding
+      ? actions.addStock(stock, watchlist)
+      : actions.editStock(stock, watchlist);
+    this.resetView();
+    return { status: "success" };
   };
 
   deleteStock = stock => {
-    let watchlist = this.state.watchlist;
-    let delMsg = `Delete '${stock.name}(${stock.code})' from '${watchlist.name}' watchlist?`;
-
-    if (window.confirm(delMsg)) {
-      this.setState({
-        isDeleting: true,
-        msg: "Deleting...please wait.",
-        msgClass: msgClasses.info
-      });
-
-      WatchlistService.deleteStock(watchlist, stock).then(this.resetView);
-    }
+    let watchlist = this.props.watchlist;
+    this.props.actions.deleteStock(stock, watchlist);
+    this.resetView();
+    return { status: "success" };
   };
 
   resetView = () => {
     this.setState({
-      watchlist: this.props.watchlist,
       editedStock: null,
       isEditing: false,
       isAdding: false,
-      isDeleting: false,
-      msg: "",
-      msgClass: "",
-      selectStkCode: null,
-      selectStkName: null
+      isDeleting: false
     });
   };
 
   render() {
-    let isViewing =
+    const { watchlist } = this.props;
+
+    const isViewing =
       !this.state.isAdding && !this.state.isEditing && !this.state.isDeleting;
 
-    const Title = <Header watchlist={this.state.watchlist} />;
+    const Title = <Header watchlist={watchlist} />;
 
     const AddButton = (
       <div className="text-right">
@@ -141,11 +89,11 @@ export default class WatchlistContainer extends Component {
       </div>
     );
 
-    let emptylistMsg = (
+    const emptylistMsg = (
       <div className="jumbotron text-center">
         <h3> Watchlist is empty! </h3>
       </div>
-    );
+    );    
 
     return (
       <div>
@@ -156,7 +104,8 @@ export default class WatchlistContainer extends Component {
         />
 
         <div>
-          {this.state.watchlist.stocks.length === 0 &&
+          {watchlist &&
+            watchlist.stocks.length === 0 &&
             isViewing &&
             emptylistMsg}
 
@@ -170,17 +119,11 @@ export default class WatchlistContainer extends Component {
                 cancelFn={this.resetView}
               />
             </div>}
-
-          <Message
-            text={this.state.msg}
-            class={this.state.msgClass}
-            onClose={() => this.setState({ msg: "" })}
-          />
         </div>
 
         <StocksList
           isViewing={isViewing}
-          watchlist={this.state.watchlist}
+          watchlist={watchlist}
           onEdit={this.saveStock}
           onDelete={this.deleteStock}
         />
@@ -195,3 +138,17 @@ export default class WatchlistContainer extends Component {
     );
   }
 }
+
+function mapStateToProps(state, ownProps) {
+  return {
+    watchlist: state.watchlists.find(wl => wl.id === ownProps.watchlistId)
+  };
+}
+
+function mapDispatchToProps(dispatch) {
+  return {
+    actions: bindActionCreators(watchlistActions, dispatch)
+  };
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(WatchlistContainer);

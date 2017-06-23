@@ -19,12 +19,6 @@
   border-bottom-right-radius: 0;
 }
 
-.react-autosuggest__input {
-  width: 300px;
-  border: 1px solid #aaa;
-  border-radius: 4px;
-}
-
 .react-autosuggest__suggestions-list {
   margin: 0;
   padding: 0;

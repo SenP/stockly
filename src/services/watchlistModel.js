@@ -1,5 +1,6 @@
 export class Stock {
   code = "";
+  name = "";
   unitsOwned = 0;
   avgPrice = 0;
   lastPrice = 0;

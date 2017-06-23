@@ -1,0 +1,15 @@
+ .chart-title {
+   background: lightgrey;
+   line-height: 1.5em;
+   display: flex;
+   text-align: center;
+   justify-content: center;
+ }
+
+ .chart-panel {
+   padding-right: 5px;
+ }
+
+ .chart {
+   display: block;
+ }

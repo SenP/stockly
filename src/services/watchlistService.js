@@ -1,50 +1,73 @@
 import { Stock, Watchlist } from "./watchlistModel";
-import QuotesService from "./quotesService";
+import { QuotesService } from "./index";
 import SampleWatchlists from "./SampleWatchlists";
+
+function cloneWatchlist(watchlist) {
+  let newWL = Object.assign(new Watchlist(), watchlist);
+  newWL.stocks = []; //reset so we can create and assign watchlist items
+  watchlist.stocks.forEach(stock => {
+    let newStock = Object.assign(new Stock(), stock);
+    newWL.stocks.push(newStock);
+  });
+  return newWL;
+}
+
+function cloneWatchlists(baseWatchlists) {
+  let watchlists = [];
+  baseWatchlists.forEach(wl => {
+    watchlists.push(cloneWatchlist(wl));
+  });
+  return watchlists;
+}
 
 export class WatchlistService {
   static watchlists = [];
   static simDelay = 1000;
 
   static getWatchlists() {
-    // Retrieve watchlists from local storage
-    return new Promise(resolve => {
-      if (this.watchlists.length === 0) {
-        let watchlistsRaw = JSON.parse(localStorage.getItem("fpwatchlists"));
-        if (watchlistsRaw && watchlistsRaw.length > 0) {
-          watchlistsRaw.forEach(wlraw => {
-            let newWL = Object.assign(new Watchlist(), wlraw);
-            newWL.stocks = []; //reset so we can create and assign watchlist items
-            wlraw.stocks.forEach(stock => {
-              let newStock = Object.assign(new Stock(), stock);
-              newWL.stocks.push(newStock);
-            });
-            this.watchlists.push(newWL);
-          });
-        } else {
-          this.watchlists = SampleWatchlists;
-        }
+    let watchlists = [];
+    try {
+      let watchlistsRaw = JSON.parse(localStorage.getItem("fpwatchlists"));
+      if (watchlistsRaw && watchlistsRaw.length > 0) {
+        watchlists = cloneWatchlists(watchlistsRaw);
+      } else {
+        watchlists = cloneWatchlists(SampleWatchlists);
       }
-      resolve(this.watchlists);
-    });
+    } catch (e) {
+      console.log(e);
+      watchlists = [];
+    }
+    this.watchlists = watchlists; // copy for db simulation
+    return cloneWatchlists(watchlists); // return a copy as app state
   }
 
-  // Update all stocks in all watchlists with the new quotes
-  static updateQuotes(qmap) {
-    console.log("new quotes:", qmap);
-    return new Promise(resolve => {
-      this.watchlists.forEach(wl => {
-        wl.stocks.forEach(stock => {
-          let quote = qmap.get(stock.code);
-          if (quote) {
-            stock.lastPrice = quote.lastPrice || 0;
-            stock.change = quote.change || 0;
-            stock.percentChange = quote.percentChange || 0;
-          }
-        });
-      });
-      resolve(true);
-    });
+  static saveWatchlistsToStorage() {
+    localStorage.setItem("fpwatchlists", JSON.stringify(this.watchlists));
+  }
+
+  static validateWatchlist(watchlist, isAdding = false) {
+    let i = this.watchlists.findIndex(wl => wl.id === watchlist.id);
+
+    if (isAdding && i === -1 && this.watchlists.length === 10) {
+      //watchlist limit reached
+      return {
+        status: "error",
+        msg: "Can not create more than 10 watchlists"
+      };
+    }
+
+    let dupIndex = this.watchlists.findIndex(
+      wl => wl.id !== watchlist.id && wl.name === watchlist.name
+    );
+    if (dupIndex !== -1) {
+      //duplicate name found
+      return {
+        status: "error",
+        msg: "Watchlist with this name already exists"
+      };
+    }
+
+    return { status: "success" };
   }
 
   // Save a watchlist, simulate http post delay
@@ -61,66 +84,53 @@ export class WatchlistService {
     let i = this.watchlists.findIndex(wl => wl.id === wlist.id);
     let data = null;
 
-    let dupName = this.watchlists.findIndex(
-      wl => wl.id !== wlist.id && wl.name === wlist.name
-    );
-    if (dupName !== -1) {
-      //duplicate name found
-      return { status: "error", msg: "Duplicate watchlist name" };
-    }
-
-    if (i === -1 && this.watchlists.length === 10) {
-      //watchlist limit reached
-      return { status: "error", msg: "Can not create more than 10 watchlists" };
-    }
-
     if (i !== -1) {
       //Edit watchlist
-      Object.assign(this.watchlists[i], wlist);
-      data = this.watchlists[i];
+      this.watchlists[i].name = wlist.name;
+      this.watchlists[i].description = wlist.description;
+      data = cloneWatchlist(this.watchlists[i]);
     } else {
       //Create New watchlist
-      wlist.id =
+      let newWL = Object.assign(new Watchlist(), wlist);
+      newWL.id =
         this.watchlists.reduce(
           (prev, curr) => (prev.id > curr.id ? prev : curr),
           { id: 0 }
         ).id + 1;
-      wlist.stocks = [];
-      this.watchlists.push(Object.assign(new Watchlist(), wlist));
-      data = this.watchlists[this.watchlists.length - 1];
+      newWL.stocks = [];
+      this.watchlists.push(newWL);
+      data = cloneWatchlist(newWL);
     }
-    localStorage.setItem("fpwatchlists", JSON.stringify(this.watchlists));
+    this.saveWatchlistsToStorage();
     return { status: "success", data: data };
   }
 
-  // Save a stock, simulate http post delay
-  static saveStock(wlist, stock) {
-    let p = new Promise(resolve =>
-      setTimeout(() => {
-        resolve(this.doSaveStock(wlist, stock));
-      }, this.simDelay)
-    );
+  static validateStock(watchlist, stock, isAdding = false) {
+    let result = { status: "success", msg: "success" };
 
-    return p;
-  }
+    if (isAdding) {
+      //validate stock code
+      // validate length
+      if (stock.code.length < 3 || stock.code.length > 12) {
+        result.status = "error";
+        result.msg = "Stock code should be between 3 to 12 characters";
+        return result;
+      }
 
-  // save the edited/new stock
-  static doSaveStock(wlist, stock) {
-    let wl = this.watchlists[this.watchlists.findIndex(w => w.id === wlist.id)];
-    let i = wl.stocks.findIndex(stk => stk.code === stock.code);
-    let data = null;
+      // check duplicates
+      if (watchlist.stocks.findIndex(stk => stk.code === stock.code) !== -1) {
+        result.status = "error";
+        result.msg = "'" + stock.code + "' already exists in this watchlist";
+        return result;
+      }
 
-    if (i === -1) {
       // validate ticker code
-      if (
-        QuotesService.getTickers().filter(ticker => ticker.code === stock.code)
-          .length === 0
-      ) {
+      if (QuotesService.searchTickers(stock.code, true).length === 0) {
         return {
           status: "error",
           msg: "Invalid stock code"
         };
-      } else if (wl.stocks.length === 30) {
+      } else if (watchlist.stocks.length === 30) {
         //stocks limit reached
         return {
           status: "error",
@@ -129,17 +139,59 @@ export class WatchlistService {
       }
     }
 
+    // validate quantity
+    if (isNaN(stock.unitsOwned)) {
+      result.status = "error";
+      result.msg = "'Units owned' should be a number";
+      return result;
+    }
+    if (stock.unitsOwned < 1 || stock.unitsOwned > 999999999) {
+      result.status = "error";
+      result.msg = "'Units owned' should be between 1 to 1 billion";
+      return result;
+    }
+    // validate avg price
+    if (isNaN(stock.avgPrice)) {
+      result.status = "error";
+      result.msg = "'Buy price' should be a number";
+      return result;
+    }
+    if (stock.avgPrice <= 0 || stock.avgPrice >= 10000) {
+      result.status = "error";
+      result.msg = "'Buy price' should be more than 0 and less than 10000";
+      return result;
+    }
+    return result;
+  }
+
+  // Save a stock, simulate http post delay
+  static saveStock(stock, wlist) {
+    let p = new Promise(resolve =>
+      setTimeout(() => {
+        resolve(this.doSaveStock(stock, wlist));
+      }, this.simDelay)
+    );
+
+    return p;
+  }
+
+  // save the edited/new stock
+  static doSaveStock(stock, wlist) {
+    let wl = this.watchlists[this.watchlists.findIndex(w => w.id === wlist.id)];
+    let i = wl.stocks.findIndex(stk => stk.code === stock.code);
+    let data = null;
+
     if (i !== -1) {
       //edit
       Object.assign(wl.stocks[i], stock);
-      data = wl.stocks[i];
+      data = Object.assign({}, wl.stocks[i]);
     } else {
       //create
       wl.stocks.push(Object.assign(new Stock(), stock));
       QuotesService.register(stock.code);
-      data = wl.stocks[wl.stocks.length - 1];
+      data = Object.assign({}, wl.stocks[wl.stocks.length - 1]);
     }
-    localStorage.setItem("fpwatchlists", JSON.stringify(this.watchlists));
+    this.saveWatchlistsToStorage();
     return { status: "success", data: data };
   }
 
@@ -164,17 +216,17 @@ export class WatchlistService {
       if (wlist.stocks.length > 0) {
         wlist.stocks.forEach(stock => QuotesService.deregister(stock.code));
       }
-      localStorage.setItem("fpwatchlists", JSON.stringify(this.watchlists));
+      this.saveWatchlistsToStorage();
       return { status: "success", data: wlist };
     }
     return { status: "success", data: null };
   }
 
   // simulate http delete of watchlist item
-  static deleteStock(wlist, stock) {
+  static deleteStock(stock, wlist) {
     let p = new Promise(resolve =>
       setTimeout(() => {
-        resolve(this.doRemoveStock(wlist, stock));
+        resolve(this.doRemoveStock(stock, wlist));
       }, this.simDelay)
     );
 
@@ -182,13 +234,13 @@ export class WatchlistService {
   }
 
   // remove the selected watchlist item
-  static doRemoveStock(wlist, stock) {
-    // let wl = this.watchlists[this.watchlists.findIndex(w => w.id === wlist.id)];
+  static doRemoveStock(stock, wlist) {
+    let wl = this.watchlists[this.watchlists.findIndex(w => w.id === wlist.id)];
     let i = wlist.stocks.findIndex(stk => stk.code === stock.code);
     if (i !== -1) {
-      wlist.stocks.splice(i, 1);
+      wl.stocks.splice(i, 1);
       QuotesService.deregister(stock.code);
-      localStorage.setItem("fpwatchlists", JSON.stringify(this.watchlists));
+      this.saveWatchlistsToStorage();
       return { status: "success", data: stock };
     }
     return { status: "success", data: null };

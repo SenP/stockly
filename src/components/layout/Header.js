@@ -1,15 +1,17 @@
 import React from "react";
 import { Navbar } from "react-bootstrap";
 
-const Header = () => (
-  <Navbar fixedTop fluid style={navbarStyle}>
-    <Navbar.Header >
-      <h3 style={headerStyle}>
-        FinPro
-      </h3>      
-    </Navbar.Header>
-  </Navbar>
-);
+function Header() {
+  return (
+    <Navbar fixedTop fluid style={navbarStyle}>
+      <Navbar.Header>
+        <h3 style={headerStyle}>
+          FinPro
+        </h3>
+      </Navbar.Header>
+    </Navbar>
+  );
+}
 
 const navbarStyle = {
   background: "black",

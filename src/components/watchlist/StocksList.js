@@ -1,16 +1,14 @@
 import React from "react";
-// import { BrowserRouter as Router, Route } from "react-router-dom";
 import { func, bool, instanceOf } from "prop-types";
-import { Table, Button } from "react-bootstrap";
-import FontAwesome from "react-fontawesome";
+import { Table } from "react-bootstrap";
 import { Watchlist } from "../../services";
 import Stock from "./Stock";
 
 StocksList.propTypes = {
   watchlist: instanceOf(Watchlist).isRequired,
-  isViewing: bool,
   onEdit: func.isRequired,
-  onDelete: func.isRequired
+  onDelete: func.isRequired,
+  isViewing: bool
 };
 
 export default function StocksList({
@@ -31,7 +29,7 @@ export default function StocksList({
         <th className="number-field">Market Value($)</th>
         <th className="number-field">Day Change ($) </th>
         <th className="number-field">Net P/L ($) </th>
-        {isViewing && <th className="text-center"> Actions </th>}
+        <th className="text-center"> Actions </th>
       </tr>
     </thead>
   );
@@ -54,7 +52,7 @@ export default function StocksList({
           {watchlist.totalPnL}
         </strong>
       </td>
-      {isViewing && <td colSpan="2" />}
+      <td />
     </tr>;
 
   return (
@@ -62,7 +60,12 @@ export default function StocksList({
       {headerRow}
       <tbody>
         {watchlist.stocks.map(stock =>
-          <Stock key={stock.code} stock={stock} onEdit={onEdit} onDelete={onDelete}/>
+          <Stock
+            key={stock.code}
+            stock={stock}
+            onEdit={onEdit}
+            onDelete={onDelete}
+          />
         )}
         {totalsRow}
       </tbody>

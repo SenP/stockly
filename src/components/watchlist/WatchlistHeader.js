@@ -8,10 +8,10 @@ const headerStyle = {
 };
 
 Header.propTypes = {
-  watchlist: instanceOf(Watchlist).isRequired
+  watchlist: instanceOf(Watchlist)
 };
 
-export default function Header({ watchlist }) {
+export default function Header({ watchlist = { name: "", description: "" } }) {
   return (
     <span style={headerStyle}>
       <div>

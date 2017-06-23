@@ -1,13 +1,22 @@
 import React, { Component } from "react";
-import ReactDOM from "react-dom";
 import { Grid, Row, Col } from "react-bootstrap";
 import injectTapEventPlugin from "react-tap-event-plugin";
-// import { BrowserRouter as Router, Route } from "react-router-dom";
+
+// redux
+import { connect } from "react-redux";
+import { bindActionCreators } from "redux";
+import * as watchlistsActions from "../../redux/actions/watchlistsActions";
+
+// components
 import Header from "../layout/Header";
 import Sidebar from "../layout/Sidebar";
 import Content from "../layout/Content";
-import { WatchlistService, QuotesService } from "../../services";
+import Watchlists from "../watchlists";
+import { QuotesService } from "../../services";
+import DashboardButton from "../dashboard/dashboardButton";
+import ConfigInterval from "./ConfigInterval.js";
 
+// styles
 import "./App.css";
 import { sidebarColStyle, contentColStyle } from "./App.styles.js";
 
@@ -16,64 +25,90 @@ injectTapEventPlugin();
 class App extends Component {
   state = {
     selectedWatchlist: null,
-    refInterval: 60,
-    refreshQuotes: false
+    refInterval: 30
   };
 
-  componentWillMount() {
-    // Start quote service and update quotes at refInterval
-    QuotesService.init(this.state.refInterval * 1000).subscribe(qmap => {
-      this.setState({
-        refreshQuotes: false
-      });
-      WatchlistService.updateQuotes(qmap).then(() =>
-        this.setState({
-          refreshQuotes: true
-        })
-      );
-    });
+  quotesTimer;
 
-    // Load the supported tickers
-    QuotesService.getTickers();
+  componentDidMount() {
+    QuotesService.loadTickers();
+    this.updateQuotes();
   }
 
+  componentWillUnmount() {
+    clearTimeout(this.quotesTimer);
+  }
+
+  updateQuotes = () => {
+    QuotesService.refreshQuotes().then(newQuotes => {
+      if (newQuotes) {
+        this.props.actions.fetchQuotesSuccess(newQuotes);
+      }
+    });
+    this.setNextUpdate();
+  };
+
+  setNextUpdate = () => {
+    this.quotesTimer = setTimeout(
+      this.updateQuotes,
+      this.state.refInterval * 1000
+    );
+  };
+
   onSelect = wl => {
-    this.setState({ selectedWatchlist: wl });
+    this.setState(() => ({ selectedWatchlist: wl }));
   };
 
   onChangeTimer = val => {
-    this.setState({ refInterval: val });
-    QuotesService.resetTimer(this.refInterval * 1000);
+    clearTimeout(this.quotesTimer);
+    this.setState(() => ({ refInterval: val }), this.setNextUpdate);
   };
 
   render() {
+    let selectedWatchlist = this.state.selectedWatchlist;
     return (
-      // <Router>
-      (
-        <div>
-          <Grid fluid>
-            <Row>
-              <Col>
-                <Header />
-              </Col>
-            </Row>
-            <Row className="app-container">
-              <Col lg={2} md={4} className="hidden-sm hidden-xs" style={sidebarColStyle}>
-                <Sidebar onSelect={this.onSelect} />
-              </Col>
-              <Col lg={10} md={8} style={contentColStyle}>
-                <Content
-                  watchlist={this.state.selectedWatchlist}
-                  refresh={this.state.refreshQuotes}
+      <div>
+        <Grid fluid>
+          <Row>
+            <Col>
+              <Header />
+            </Col>
+          </Row>
+          <Row className="app-container">
+            <Col
+              lg={2}
+              md={4}
+              className="hidden-sm hidden-xs"
+              style={sidebarColStyle}
+            >
+              <Sidebar onSelect={this.onSelect} selected={selectedWatchlist}>
+                <DashboardButton onClick={this.onSelect} />
+                <Watchlists
+                  onChangeSelection={this.onSelect}
+                  selected={this.state.selectedWatchlist}
                 />
-              </Col>
-            </Row>
-          </Grid>
-        </div>
-      )
-      // </Router>
+                <ConfigInterval
+                  interval={this.state.refInterval}
+                  onChange={this.onChangeTimer}
+                />
+              </Sidebar>
+            </Col>
+            <Col lg={10} md={8} style={contentColStyle}>
+              <Content
+                watchlistId={selectedWatchlist && selectedWatchlist.id}
+              />
+            </Col>
+          </Row>
+        </Grid>
+      </div>
     );
   }
 }
 
-export default App;
+function mapDispatchToProps(dispatch) {
+  return {
+    actions: bindActionCreators(watchlistsActions, dispatch)
+  };
+}
+
+export default connect(null, mapDispatchToProps)(App);

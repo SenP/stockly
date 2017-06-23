@@ -1,7 +1,14 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
-import { ButtonToolbar, Button } from "react-bootstrap";
-import {Watchlist} from '../../services';
+import {
+  ButtonToolbar,
+  Button,
+  Form,
+  FormGroup,
+  FormControl,
+  ControlLabel
+} from "react-bootstrap";
+import { Watchlist } from "../../services";
 
 export default class WatchlistForm extends Component {
   static propTypes = {
@@ -11,19 +18,19 @@ export default class WatchlistForm extends Component {
   };
 
   static defaultProps = {
-    watchlist: { id: null, name: "", description: ""}
-  }; 
+    watchlist: { id: null, name: "", description: "" }
+  };
 
-  state = Object.assign({}, this.props.watchlist);    
-  
+  state = Object.assign({}, this.props.watchlist);
+
   handleChange = evt => {
     this.setState({
-      [evt.target.name]: evt.target.value
+      [evt.target.name]: evt.target.value.trim()
     });
   };
 
   submitForm = evt => {
-    evt.preventDefault();    
+    evt.preventDefault();
     this.props.submitFn(this.state);
   };
 
@@ -31,41 +38,50 @@ export default class WatchlistForm extends Component {
     const formStyle = {
       background: "#222230",
       border: "0px",
-      padding: "5px"
+      padding: "0px"
     };
+
+  const formTitle = (
+      <span style={{ textAlign: "center" }}>
+        <h4>          
+            {!this.state.id ? "Create Watchlist" : "Edit Watchlist"}          
+        </h4>        
+      </span>
+    );
 
     return (
       <div style={formStyle}>
-        <form onSubmit={this.submitForm} className="form">
-          <div className="form-group">
-            <label> Name: </label>
-            <input
+        {formTitle}
+        <Form onSubmit={this.submitForm}>
+          <FormGroup>
+            <ControlLabel> Name: </ControlLabel>
+            <FormControl
               type="text"
               name="name"
-              className="form-control input-sm"
+              bsSize="small"
               value={this.state.name}
               onChange={this.handleChange}
-              maxLength="15"
-              required
+              maxLength="15"                     
+              autoFocus
             />
-          </div>
-          <div className="form-group">
-            <label> Description: </label>
-            <input
+          </FormGroup>
+          <FormGroup>
+            <ControlLabel> Description: </ControlLabel>
+            <FormControl
               type="textarea"
               name="description"
-              className="form-control input-sm"
+              bsSize="small"
               value={this.state.description}
               onChange={this.handleChange}
               maxLength="50"
             />
-          </div>
+          </FormGroup>
           <ButtonToolbar>
             <Button
               type="submit"
               bsStyle="success"
               bsSize="small"
-              disabled={this.state.msg}
+              disabled={!this.state.name.trim()}
             >
               Submit
             </Button>
@@ -78,7 +94,7 @@ export default class WatchlistForm extends Component {
               Cancel
             </Button>
           </ButtonToolbar>
-        </form>
+        </Form>
       </div>
     );
   };

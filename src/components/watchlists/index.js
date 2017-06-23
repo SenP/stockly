@@ -1,8 +1,11 @@
 import React, { Component } from "react";
-import PropTypes from "prop-types";
+import { connect } from "react-redux";
+import { bindActionCreators } from "redux";
+import { arrayOf, func, instanceOf } from "prop-types";
 import { Panel } from "react-bootstrap";
 
 import { Watchlist, WatchlistService, QuotesService } from "../../services";
+import * as watchlistsActions from "../../redux/actions/watchlistsActions";
 import WatchlistForm from "./WatchlistForm";
 import Header from "./WatchlistsHeader";
 import Watchlists from "./Watchlists";
@@ -13,16 +16,20 @@ const msgClasses = {
   info: "msg text-info"
 };
 
-export default class WatchlistsContainer extends Component {
+export class WatchlistsContainer extends Component {
   static propTypes = {
-    onChangeSelection: PropTypes.func.isRequired
+    watchlists: arrayOf(instanceOf(Watchlist)),
+    selected: instanceOf(Watchlist),
+    onChangeSelection: func
   };
 
-  static defaultProps = {};
+  static defaultProps = {
+    watchlists: [],
+    selected: null,
+    onChangeSelection: () => {}
+  };
 
   state = {
-    watchlists: [],
-    selectedWatchlist: null,
     editedWatchlist: null,
     isEditing: false,
     isAdding: false,
@@ -31,64 +38,49 @@ export default class WatchlistsContainer extends Component {
     msgClass: ""
   };
 
-  componentWillMount() {
-    WatchlistService.getWatchlists().then(watchlists => {
-      if (watchlists && watchlists.length > 0) {
-        this.setState(() => ({ watchlists }));
-        this.onChangeSelection(watchlists[0]);
-        watchlists.forEach(wl => {
-          wl.stocks.forEach(stock => {
-            QuotesService.register(stock.code);
-          });
-        });
-      }
+  componentDidMount() {
+    this.props.watchlists.forEach(wl => {
+      wl.stocks.forEach(stock => {
+        QuotesService.register(stock.code);
+      });
     });
   }
 
-  onChangeSelection = wl => {
-    this.setState({ selectedWatchlist: wl });
-    this.props.onChangeSelection(wl);
-  };
-
   addWatchlist = () => {
     this.setState({ editedWatchlist: new Watchlist(), isAdding: true });
-    // setTimeout(() => this.editName.nativeElement.focus(), 100);
   };
 
   editWatchlist = () => {
     this.setState({
-      editedWatchlist: Object.assign(
-        new Watchlist(),
-        this.state.selectedWatchlist
-      ),
+      editedWatchlist: Object.assign(new Watchlist(), this.props.selected),
       isEditing: true
     });
-    // setTimeout(() => this.editName.nativeElement.focus(), 100);
   };
 
   saveWatchlist = wl => {
-    this.setState(prevState => ({
+    let { isAdding } = this.state;
+    this.setState(() => ({
       msg: "Saving...please wait.",
       msgClass: msgClasses.info
-      // editedWatchlist: Object.assign({}, prevState.editedWatchlist, wl)
     }));
-    WatchlistService.saveWatchlist(wl).then(res => {
-      if (res.status === "error") {
-        this.setState({
-          msg: res.msg,
-          msgClass: msgClasses.error
-        });
-      } else {
-        this.resetView();
-        this.onChangeSelection(res.data);
-      }
-    });
+    let valid = WatchlistService.validateWatchlist(wl, isAdding);
+    if (valid.status === "error") {
+      this.setState(() => ({
+        msg: valid.msg,
+        msgClass: msgClasses.error
+      }));
+      return valid;
+    }
+    isAdding
+      ? this.props.actions.createWatchlist(wl)
+      : this.props.actions.editWatchlist(wl);
+    this.resetView();
+    return { status: "success" };
   };
 
   deleteWatchlist = () => {
-    let watchlists = this.state.watchlists;
-    let selectedWL = this.state.selectedWatchlist;
-    let delMsg = "Delete " + this.state.selectedWatchlist.name + " watchlist?";
+    let { watchlists, selected } = this.props;
+    let delMsg = "Delete " + this.props.selected.name + " watchlist?";
 
     if (window.confirm(delMsg)) {
       this.setState({
@@ -96,19 +88,22 @@ export default class WatchlistsContainer extends Component {
         msg: "Deleting...please wait.",
         msgClass: msgClasses.info
       });
-      let delidx = watchlists.findIndex(wl => wl.id === selectedWL.id);
-      WatchlistService.deleteWatchlist(selectedWL).then(() => {
-        this.resetView();
-        //reset selected watchlist
-        if (watchlists.length === 0) {
-          // last watchlist deleted
-          this.onChangeSelection(null); //return to dashboard
-        } else {
-          //select new last wl if last wl is deleted or next wl if any other wl is deleted
-          let newidx = delidx === watchlists.length ? delidx - 1 : delidx;
-          this.onChangeSelection(watchlists[newidx]);
-        }
-      });
+
+      //reset selected watchlist
+      let newSelected;
+      if (watchlists.length === 1) {
+        // last watchlist deleted
+        newSelected = null; //return to dashboard
+      } else {
+        let delidx = watchlists.findIndex(wl => wl.id === selected.id);
+        //select new last wl if last wl is deleted or next wl if any other wl is deleted
+        newSelected = delidx === watchlists.length - 1
+          ? watchlists[delidx - 1]
+          : watchlists[delidx + 1];
+      }
+      this.props.onChangeSelection(newSelected);
+      this.props.actions.deleteWatchlist(selected);
+      this.resetView();
     }
   };
 
@@ -124,12 +119,13 @@ export default class WatchlistsContainer extends Component {
   };
 
   render() {
-    console.log("rendering...", this.state);
-    let isViewState =
-      !this.state.isAdding && !this.state.isEditing && !this.state.isDeleting;
+    let { editedWatchlist, isAdding, isDeleting, isEditing } = this.state;
+    let watchlists = this.props.watchlists;
+    let isViewState = !isAdding && !isEditing && !isDeleting;
     let Title = (
       <Header
-        showButtons={isViewState}
+        showAdd={isViewState}
+        showEdit={!!this.props.selected && isViewState}
         onAdd={this.addWatchlist}
         onEdit={this.editWatchlist}
         onDelete={this.deleteWatchlist}
@@ -143,47 +139,54 @@ export default class WatchlistsContainer extends Component {
           padding: "5px"
         }}
       >
-        <h4> No Watchlists available! </h4>
-        <p>
-          {" "}
-          Click the
-          {" "}
-          <i className="fa fa-plus btn btn-success btn-xs" />
-          {" "}
-          button above to create a new watchlist.
-        </p>
+        <h5> No Watchlists available! </h5>
       </div>
     );
 
     return (
       <Panel header={Title} bsStyle="primary" className="panel-watchlists">
 
-        {this.state.watchlists.length === 0 && isViewState && emptylistMsg}
+        {watchlists.length === 0 && isViewState && emptylistMsg}
 
-        {(this.state.isAdding || this.state.isEditing) &&
-          <div>
-            <WatchlistForm
-              watchlist={this.state.editedWatchlist}
-              submitFn={this.saveWatchlist}
-              cancelFn={this.resetView}
-            />
-          </div>}
+        {(isAdding || isEditing) &&
+          <WatchlistForm
+            watchlist={editedWatchlist}
+            submitFn={this.saveWatchlist}
+            cancelFn={this.resetView}
+          />}
 
-        <Message
-          text={this.state.msg}
-          class={this.state.msgClass}
-          style={{ background: "#222230" }}
-          onClose={() => this.setState({ msg: "" })}
-        />
+        <div>
+          <Message
+            msgtext={this.state.msg}
+            msgclass={this.state.msgClass}
+            msgstyle={{ background: "#222230", display: "block" }}
+          />
+        </div>
 
-        <Watchlists
-          hidden={!isViewState}
-          items={this.state.watchlists}
-          selectedItem={this.state.selectedWatchlist}
-          onClick={this.onChangeSelection}
-        />
+        {isViewState &&
+          <Watchlists
+            items={watchlists}
+            selectedItem={this.props.selected}
+            onClick={this.props.onChangeSelection}
+          />}
 
       </Panel>
     );
   }
 }
+
+function mapStateToProps(state, ownProps) {
+  return {
+    watchlists: state.watchlists || []
+  };
+}
+
+function mapDispatchToProps(dispatch) {
+  return {
+    actions: bindActionCreators(watchlistsActions, dispatch)
+  };
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(
+  WatchlistsContainer
+);

@@ -1,13 +1,18 @@
 import React from "react";
+import { string, object } from "prop-types";
 
-const Message = props =>
-  !!props.text &&
-  <div className={props.class} style={props.style}>
-    {props.text} 
-    {/*{props.closable &&
-      <button type="button" onClick={props.onClose}>
-        <span>×</span>
-      </button>}*/}
-  </div>;
+Message.propTypes = {
+  msgtext: string,
+  msgclass: string,
+  msgstyle: object
+};
 
+function Message({ msgtext, msgclass, msgstyle }) {
+  return (
+    !!msgtext &&
+    <span className={msgclass} style={msgstyle}>
+      {msgtext}
+    </span>
+  );
+}
 export default Message;

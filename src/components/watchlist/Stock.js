@@ -3,7 +3,7 @@ import { Button } from "react-bootstrap";
 import FontAwesome from "react-fontawesome";
 import { instanceOf, func } from "prop-types";
 import { Stock as StockModel } from "../../services";
-import EditStockForm from "./EditStockForm";
+import StockForm from "./StockForm";
 
 export default class Stock extends Component {
   static propTypes = {
@@ -20,22 +20,30 @@ export default class Stock extends Component {
 
   onEditSubmit = stk => {
     let res = this.props.onEdit(stk);
-    console.log('saved', res);
-    if (res) {
+    if (res.status === "success") {
       this.setState({ editing: false });
     }
+    return res;
   };
 
-  onDeleteClick = () => {
+  onDeleteClick = stk => {
     this.setState({ deleting: true });
   };
 
-  onEditCancel = () => {
-    this.setState({ editing: false });
+  onDeleteSubmit = stk => {
+    let res = this.props.onDelete(stk);
+    if (res.status === "success") {
+      this.setState({ deleting: false });
+    }
+    return res;
+  };
+
+  onCancel = () => {
+    this.setState({ editing: false, deleting: false });
   };
 
   render() {
-    let { stock, onEdit, onDelete } = this.props;
+    let { stock } = this.props;
     let { editing, deleting } = this.state;
     let view = (
       <tr>
@@ -77,7 +85,7 @@ export default class Stock extends Component {
             <Button
               bsSize="xsmall"
               bsStyle="danger"
-              onClick={this.onDeleteClick}
+              onClick={() => this.onDeleteClick(stock)}
             >
               <FontAwesome name="trash-o" />
             </Button>
@@ -88,12 +96,12 @@ export default class Stock extends Component {
 
     return (
       (!editing && !deleting && view) ||
-      (editing &&
-        <EditStockForm
-          stock={stock}
-          submitFn={this.onEditSubmit}
-          cancelFn={this.onEditCancel}
-        />)
+      <StockForm
+        stock={stock}
+        isEditing={editing}
+        submitFn={editing ? this.onEditSubmit : this.onDeleteSubmit}
+        cancelFn={this.onCancel}
+      />
     );
   }
 }
