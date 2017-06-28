@@ -1,8 +1,12 @@
 import React from "react";
 import { func, bool, instanceOf } from "prop-types";
 import { Table } from "react-bootstrap";
+import FontAwesome from "react-fontawesome";
+
 import { Watchlist } from "../../services";
 import Stock from "./Stock";
+import Colored from "../common/Colored";
+import formatCash from "../../utils/formatCash";
 
 StocksList.propTypes = {
   watchlist: instanceOf(Watchlist).isRequired,
@@ -17,18 +21,19 @@ export default function StocksList({
   onDelete,
   isViewing = true
 }) {
+  const Dollar = <FontAwesome name="usd" />;
   const headerRow = (
     <thead>
       <tr className="active">
         <th>Stock Code </th>
         <th className="number-field">Units Owned </th>
-        <th className="number-field">Buy Price ($) </th>
-        <th className="number-field">Last Traded Price ($) </th>
-        <th className="number-field">Change ($) </th>
+        <th className="number-field">Buy Price ({Dollar}) </th>
+        <th className="number-field">Last Traded Price ({Dollar}) </th>
+        <th className="number-field">Change ({Dollar}) </th>
         <th className="number-field">Change (%) </th>
-        <th className="number-field">Market Value($)</th>
-        <th className="number-field">Day Change ($) </th>
-        <th className="number-field">Net P/L ($) </th>
+        <th className="number-field">Market Value ({Dollar})</th>
+        <th className="number-field">Day Change ({Dollar}) </th>
+        <th className="number-field">Net P/L ({Dollar}) </th>
         <th className="text-center"> Actions </th>
       </tr>
     </thead>
@@ -40,16 +45,30 @@ export default function StocksList({
       <td><strong>Totals </strong></td>
       <td colSpan="5" />
       <td className="number-field">
-        <strong> {watchlist.totalMarketValue}</strong>
-      </td>
-      <td className="number-field">
         <strong>
-          {watchlist.totalDayChange}
+          {formatCash(parseFloat(watchlist.totalMarketValue, 10), {
+            minimumFractionDigits: 2
+          })}
         </strong>
       </td>
       <td className="number-field">
         <strong>
-          {watchlist.totalPnL}
+          <Colored
+            value={formatCash(parseFloat(watchlist.totalDayChange, 10), {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2
+            })}
+            />
+        </strong>        
+      </td>
+      <td className="number-field">        
+        <strong>
+          <Colored
+            value={formatCash(parseFloat(watchlist.totalPnL, 10), {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2
+            })}
+            />
         </strong>
       </td>
       <td />

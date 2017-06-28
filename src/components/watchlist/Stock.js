@@ -2,8 +2,11 @@ import React, { Component } from "react";
 import { Button } from "react-bootstrap";
 import FontAwesome from "react-fontawesome";
 import { instanceOf, func } from "prop-types";
+
 import { Stock as StockModel } from "../../services";
 import StockForm from "./StockForm";
+import Colored from "../common/Colored";
+import formatCash from "../../utils/formatCash";
 
 export default class Stock extends Component {
   static propTypes = {
@@ -57,21 +60,47 @@ export default class Stock extends Component {
         <td className="number-field">
           {parseFloat(stock.lastPrice).toFixed(2)}
         </td>
+
         <td className="number-field">
-          {parseFloat(stock.change).toFixed(2)}
+          <Colored
+            value={formatCash(parseFloat(stock.change, 10), {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2
+            })}
+          />
         </td>
+
         <td className="number-field">
-          {parseFloat(stock.percentChange).toFixed(2)}
+          <Colored
+            value={formatCash(parseFloat(stock.percentChange, 10), {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2
+            })}
+          />
         </td>
+
         <td className="number-field">
           {parseFloat(stock.marketValue).toFixed(2)}
         </td>
+
         <td className="number-field">
-          {parseFloat(stock.dayChange).toFixed(2)}
+          <Colored
+            value={formatCash(parseFloat(stock.dayChange, 10), {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2
+            })}            
+          />
         </td>
+
         <td className="number-field">
-          {parseFloat(stock.netPnL).toFixed(2)}
+          <Colored
+            value={formatCash(parseFloat(stock.netPnL, 10), {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2
+            })}            
+          />
         </td>
+
         <td>
           <span className="center-block">
             <Button

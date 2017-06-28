@@ -66,6 +66,16 @@ class App extends Component {
 
   render() {
     let selectedWatchlist = this.state.selectedWatchlist;
+    let selectedWatchlistId;
+
+    if (selectedWatchlist) {
+      selectedWatchlist = selectedWatchlist.id
+        ? this.props.watchlists.find(wl => wl.id === selectedWatchlist.id)
+        : this.props.watchlists[this.props.watchlists.length - 1];
+      selectedWatchlistId = selectedWatchlist.id;
+    } else {
+      selectedWatchlistId = null;
+    }
     return (
       <div>
         <Grid fluid>
@@ -81,11 +91,11 @@ class App extends Component {
               className="hidden-sm hidden-xs"
               style={sidebarColStyle}
             >
-              <Sidebar onSelect={this.onSelect} selected={selectedWatchlist}>
+              <Sidebar>
                 <DashboardButton onClick={this.onSelect} />
                 <Watchlists
                   onChangeSelection={this.onSelect}
-                  selected={this.state.selectedWatchlist}
+                  selected={selectedWatchlist}
                 />
                 <ConfigInterval
                   interval={this.state.refInterval}
@@ -94,9 +104,7 @@ class App extends Component {
               </Sidebar>
             </Col>
             <Col lg={10} md={8} style={contentColStyle}>
-              <Content
-                watchlistId={selectedWatchlist && selectedWatchlist.id}
-              />
+              <Content watchlistId={selectedWatchlistId} />
             </Col>
           </Row>
         </Grid>
@@ -105,10 +113,16 @@ class App extends Component {
   }
 }
 
+function mapStateToProps(state, ownProps) {
+  return {
+    watchlists: state.watchlists || []
+  };
+}
+
 function mapDispatchToProps(dispatch) {
   return {
     actions: bindActionCreators(watchlistsActions, dispatch)
   };
 }
 
-export default connect(null, mapDispatchToProps)(App);
+export default connect(mapStateToProps, mapDispatchToProps)(App);

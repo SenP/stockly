@@ -88,7 +88,7 @@ export class WatchlistService {
       //Edit watchlist
       this.watchlists[i].name = wlist.name;
       this.watchlists[i].description = wlist.description;
-      data = cloneWatchlist(this.watchlists[i]);
+      data = cloneWatchlist(wlist);
     } else {
       //Create New watchlist
       let newWL = Object.assign(new Watchlist(), wlist);

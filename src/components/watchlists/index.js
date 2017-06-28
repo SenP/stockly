@@ -75,6 +75,7 @@ export class WatchlistsContainer extends Component {
       ? this.props.actions.createWatchlist(wl)
       : this.props.actions.editWatchlist(wl);
     this.resetView();
+    this.props.onChangeSelection(wl);
     return { status: "success" };
   };
 
