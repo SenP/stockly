@@ -3,8 +3,8 @@ import { Stock, WatchlistService } from "../../services";
 
 export default function stockReducer(state = {}, action) {
   switch (action.type) {
-    case types.ADD_STOCK:
-    case types.EDIT_STOCK:
+    case types.ADD_STOCK_SUCCESS:
+    case types.EDIT_STOCK_SUCCESS:
       WatchlistService.doSaveStock(action.stock, action.watchlist);
       return Object.assign(new Stock(), action.stock);
 

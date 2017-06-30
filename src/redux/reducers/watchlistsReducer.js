@@ -5,22 +5,22 @@ import watchlistReducer from "./watchlistReducer";
 
 export default function(state = initialState.watchlists, action) {
   switch (action.type) {
-    case types.LOAD_WATCHLISTS:
-      return WatchlistService.getWatchlists();
+    case types.LOAD_WATCHLISTS_SUCCESS:
+      return action.watchlists;
 
     case types.FETCH_QUOTES_SUCCESS:
       return state.map(wl => watchlistReducer(wl, action));
 
-    case types.CREATE_WATCHLIST:
+    case types.CREATE_WATCHLIST_SUCCESS:
       return [...state, watchlistReducer(undefined, action)];
 
-    case types.EDIT_WATCHLIST:
-    case types.ADD_STOCK:
-    case types.EDIT_STOCK:
-    case types.DELETE_STOCK:
+    case types.EDIT_WATCHLIST_SUCCESS:
+    case types.ADD_STOCK_SUCCESS:
+    case types.EDIT_STOCK_SUCCESS:
+    case types.DELETE_STOCK_SUCCESS:
       return editWatchlist(state, action);
 
-    case types.DELETE_WATCHLIST:
+    case types.DELETE_WATCHLIST_SUCCESS:
       return deleteWatchlist(state, action);
 
     default:

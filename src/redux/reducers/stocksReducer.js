@@ -4,13 +4,13 @@ import { WatchlistService } from "../../services";
 
 export default function stocksReducer(state = [], action) {
   switch (action.type) {
-    case types.ADD_STOCK:
+    case types.ADD_STOCK_SUCCESS:
       return [...state, stockReducer(undefined, action)];
 
-    case types.EDIT_STOCK:
+    case types.EDIT_STOCK_SUCCESS:
       return editStock(state, action);
 
-    case types.DELETE_STOCK:
+    case types.DELETE_STOCK_SUCCESS:
       return deleteStock(state, action);
 
     case types.FETCH_QUOTES_SUCCESS:

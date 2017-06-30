@@ -22,7 +22,7 @@ function cloneWatchlists(baseWatchlists) {
 
 export class WatchlistService {
   static watchlists = [];
-  static simDelay = 1000;
+  static simDelay = 2000;
 
   static getWatchlists() {
     let watchlists = [];

@@ -6,12 +6,34 @@ export function loadWatchlists() {
   };
 }
 
+export function loadWatchlistsSuccess(watchlists) {
+  return {
+    type: actions.LOAD_WATCHLISTS_SUCCESS,
+    watchlists
+  };
+}
+
 export function createWatchlist(watchlist) {
   return {
     type: actions.CREATE_WATCHLIST,
     watchlist
   };
 }
+
+export function createWatchlistSuccess(watchlist) {
+  return {
+    type: actions.CREATE_WATCHLIST_SUCCESS,
+    watchlist
+  };
+}
+
+export function createWatchlistError(watchlist) {
+  return {
+    type: actions.CREATE_WATCHLIST_ERROR,
+    watchlist
+  };
+}
+
 
 export function editWatchlist(watchlist) {
   return {
