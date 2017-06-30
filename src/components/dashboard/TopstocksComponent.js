@@ -40,11 +40,7 @@ export default class TopstocksComponent extends Component {
   filterStocks = () => {
     let { stocks } = this.props;
     let { numItems, sliceMode, orderBy } = this.state;
-    let filteredStocks = transformMap(stocks, orderBy, numItems, sliceMode);
-
-    if (sliceMode === "bottom") {
-      filteredStocks.reverse();
-    }
+    let filteredStocks = transformMap(stocks, orderBy, numItems, sliceMode);   
 
     this.setState({ filteredStocks });
   };
@@ -72,8 +68,8 @@ export default class TopstocksComponent extends Component {
               value={sliceMode}
               onChange={this.onChange}
             >
-              <option value="top">Top</option>
-              <option value="bottom">Bottom</option>
+              <option value="top">Best</option>
+              <option value="bottom">Worst</option>
             </FormControl>
           </FormGroup>
           <FormGroup>

@@ -22,16 +22,20 @@ export class QuotesService {
   }
 
   // Refresh the quotes map with latest quotes from Google Finance API
-  static refreshQuotes() {
-    if (this.quotesMap.size > 0) {
-      let stockcodes = "";
+  static refreshQuotes(stock) {
+    let stockcodes = "";
 
+    if (stock) {
+      stockcodes = stock.code.split(":").reverse().join(":");
+    } else if (this.quotesMap.size > 0) {
       // create stock codes list, each stock code is in format 'exchange:stockcode'
       this.quotesMap.forEach((value, key) => {
-        let [code, exchange] = key.split(":");
-        stockcodes += exchange + ":" + code + ",";
+        let stockcode = key.split(":").reverse().join(":");
+        stockcodes = `${stockcode},${stockcodes}`;
       });
+    }
 
+    if (stockcodes !== "") {
       let gUrl = `${this.base_url}?client=ig&q=${stockcodes}&format=json`;
 
       return new Promise((resolve, reject) => {

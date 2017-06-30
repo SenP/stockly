@@ -24,5 +24,6 @@ export default function transformMap(
   });
   return mode === "top"
     ? outputArr.slice(0, itemsCount)
-    : outputArr.slice(-itemsCount);
+    : outputArr.slice(-itemsCount).reverse();
 }
+

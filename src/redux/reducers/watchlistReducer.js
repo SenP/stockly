@@ -8,11 +8,7 @@ export default function watchlistReducer(state = {}, action) {
     case types.EDIT_WATCHLIST:
       return WatchlistService.doSaveWatchlist(action.watchlist).data;
 
-    case types.FETCH_QUOTES_SUCCESS:
-      return Object.assign(new WatchlistModel(), state, {
-        stocks: stocksReducer(state.stocks, action)
-      });
-
+    case types.FETCH_QUOTES_SUCCESS:    
     case types.ADD_STOCK:
     case types.EDIT_STOCK:
     case types.DELETE_STOCK:

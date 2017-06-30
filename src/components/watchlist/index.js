@@ -3,9 +3,15 @@ import { instanceOf } from "prop-types";
 import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
 import * as watchlistActions from "../../redux/actions/watchlistActions";
+import * as watchlistsActions from "../../redux/actions/watchlistsActions";
 import { Panel, Button } from "react-bootstrap";
 
-import { Watchlist, Stock, WatchlistService } from "../../services";
+import {
+  Watchlist,
+  Stock,
+  WatchlistService,
+  QuotesService
+} from "../../services";
 import StocksList from "./StocksList";
 import AddStockForm from "./AddStockForm";
 import Header from "./WatchlistHeader";
@@ -46,9 +52,18 @@ export class WatchlistContainer extends Component {
     if (valid.status === "error") {
       return valid;
     }
-    isAdding
-      ? actions.addStock(stock, watchlist)
-      : actions.editStock(stock, watchlist);
+    if (isAdding) {
+      actions.addStock(stock, watchlist);
+      // TODO: move this to saga
+      QuotesService.refreshQuotes(stock).then(newQuote => {
+        if (newQuote) {
+          this.props.actions.fetchQuotesSuccess(newQuote);
+        }
+      });
+    } else {
+      actions.editStock(stock, watchlist);
+    }
+
     this.resetView();
     return { status: "success" };
   };
@@ -93,7 +108,7 @@ export class WatchlistContainer extends Component {
       <div className="jumbotron text-center">
         <h3> Watchlist is empty! </h3>
       </div>
-    );    
+    );
 
     return (
       <div>
@@ -128,11 +143,8 @@ export class WatchlistContainer extends Component {
           onDelete={this.deleteStock}
         />
 
-        <div>
-          <span className="pull-right">
-            <br />
-            <small> Price data from Google Finance and may be delayed. </small>
-          </span>
+        <div className="pull-right">
+          <small> Price data from Google Finance and may be delayed. </small>
         </div>
       </div>
     );
@@ -147,7 +159,10 @@ function mapStateToProps(state, ownProps) {
 
 function mapDispatchToProps(dispatch) {
   return {
-    actions: bindActionCreators(watchlistActions, dispatch)
+    actions: {
+      ...bindActionCreators(watchlistActions, dispatch),
+      ...bindActionCreators(watchlistsActions, dispatch)
+    }
   };
 }
 
