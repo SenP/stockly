@@ -1,9 +1,10 @@
 import { combineReducers } from "redux";
 import watchlistsReducer from "./watchlistsReducer";
-//import watchlist from './watchlistReducer';
+import watchlistOpReducer from './watchlistOpReducer';
 
 const rootReducer = combineReducers({
-  watchlists: watchlistsReducer
+  watchlists: watchlistsReducer,
+  watchlistAsyncOp: watchlistOpReducer
 });
 
 export default rootReducer;

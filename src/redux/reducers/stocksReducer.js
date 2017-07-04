@@ -4,11 +4,8 @@ import { WatchlistService } from "../../services";
 
 export default function stocksReducer(state = [], action) {
   switch (action.type) {
-    case types.ADD_STOCK_SUCCESS:
-      return [...state, stockReducer(undefined, action)];
-
-    case types.EDIT_STOCK_SUCCESS:
-      return editStock(state, action);
+    case types.SAVE_STOCK_SUCCESS:
+      return saveStock(state, action);
 
     case types.DELETE_STOCK_SUCCESS:
       return deleteStock(state, action);
@@ -21,16 +18,18 @@ export default function stocksReducer(state = [], action) {
   }
 }
 
-function editStock(state, action) {
+function saveStock(state, action) {
   let i = state.findIndex(stock => stock.code === action.stock.code);
   if (i !== -1) {
+    // EDIT
     return [
       ...state.slice(0, i),
       stockReducer(...state.slice(i, i + 1), action),
       ...state.slice(i + 1)
     ];
   } else {
-    return state;
+    // CREATE
+    return [...state, stockReducer(undefined, action)];
   }
 }
 

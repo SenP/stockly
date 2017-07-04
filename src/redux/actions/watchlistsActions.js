@@ -20,24 +20,16 @@ export function createWatchlist(watchlist) {
   };
 }
 
-export function createWatchlistSuccess(watchlist) {
-  return {
-    type: actions.CREATE_WATCHLIST_SUCCESS,
-    watchlist
-  };
-}
-
-export function createWatchlistError(watchlist) {
-  return {
-    type: actions.CREATE_WATCHLIST_ERROR,
-    watchlist
-  };
-}
-
-
 export function editWatchlist(watchlist) {
   return {
     type: actions.EDIT_WATCHLIST,
+    watchlist
+  };
+}
+
+export function saveWatchlistSuccess(watchlist) {
+  return {
+    type: actions.SAVE_WATCHLIST_SUCCESS,
     watchlist
   };
 }
@@ -49,9 +41,23 @@ export function deleteWatchlist(watchlist) {
   };
 }
 
+export function deleteWatchlistSuccess(watchlist) {
+  return {
+    type: actions.DELETE_WATCHLIST_SUCCESS,
+    watchlist
+  };
+}
+
 export function fetchQuotesSuccess(quotes) {
   return {
     type: actions.FETCH_QUOTES_SUCCESS,
     quotes
   };
 }
+
+export function resetOpStatus() {
+  return {
+    type: actions.RESET_WATCHLIST_OP_STATUS
+  };
+}
+

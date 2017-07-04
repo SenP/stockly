@@ -1,3 +1,5 @@
 export default {
-  watchlists: [] 
+  watchlists: [],
+  watchlistAsyncOp: { watchlist: null, op: null, status: null, error: null }
+  // stocksAsyncOp: []
 };

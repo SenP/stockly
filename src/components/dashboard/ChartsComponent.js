@@ -1,8 +1,7 @@
 import React, { Component } from "react";
 import { object } from "prop-types";
 import { Panel, Row, Col } from "react-bootstrap";
-
-import Chart from "./ChartComponent";
+import ReactHighcharts from "react-highcharts";
 
 export default class ChartsContainer extends Component {
   static propTypes = {
@@ -13,31 +12,25 @@ export default class ChartsContainer extends Component {
     chartData: {}
   };
 
-  state = {};
-
-  // Chart components
-  daychangeChart;
-  marketvalueChart;
-  pnlChart;
-
-  // Chart option objects
-  optionsDaychangeChart;
-  optionsPnLChart;
-  optionsMarketValueChart;
-  chartData;
-
-  componentWillMount() {
-    this.setChartOptions();
-  }
-
-  update = (idx, newValues) => {
-    this.daychangeChart.updateData(idx, newValues.totalDayChange);
-    this.marketvalueChart.updateData(idx, newValues.totalMarketValue);
-    this.pnlChart.updateData(idx, newValues.totalPnL);
+  state = {
+    chartData: this.props.chartData
   };
 
-  setChartOptions() {
-    let chartData = this.props.chartData;
+  configDaychangeChart;
+  configPnLChart;
+  configMarketValueChart;
+
+  componentWillReceiveProps(nextProps) {
+    this.setState(
+      () => ({
+        chartData: nextProps.chartData
+      }),
+      this.setChartOptions
+    );
+  }
+
+  setChartOptions = () => {
+    let chartData = this.state.chartData;
 
     let tooltipFn = txt =>
       "<strong>{x}</strong><br/> " + txt + "<b>$ {point.y}</b>";
@@ -66,7 +59,7 @@ export default class ChartsContainer extends Component {
       }
     };
 
-    this.optionsPnLChart = Object.assign({}, optionsBaseChart, {
+    this.configPnLChart = Object.assign({}, optionsBaseChart, {
       chart: {
         type: "column",
         style: chartStyle
@@ -82,7 +75,7 @@ export default class ChartsContainer extends Component {
       ]
     });
 
-    this.optionsDaychangeChart = Object.assign({}, optionsBaseChart, {
+    this.configDaychangeChart = Object.assign({}, optionsBaseChart, {
       chart: {
         type: "column",
         style: chartStyle
@@ -98,7 +91,7 @@ export default class ChartsContainer extends Component {
       ]
     });
 
-    this.optionsMarketValueChart = Object.assign({}, optionsBaseChart, {
+    this.configMarketValueChart = Object.assign({}, optionsBaseChart, {
       chart: {
         type: "pie",
         style: chartStyle
@@ -124,9 +117,10 @@ export default class ChartsContainer extends Component {
         }
       ]
     });
-  }
+  };
 
   render() {
+    this.setChartOptions();
     return (
       <Row>
         {/*---Market Values Pie Chart---*/}
@@ -137,10 +131,7 @@ export default class ChartsContainer extends Component {
             </h5>
           </div>
           <Panel className="chart-panel">
-            <Chart
-              ref={chart => (this.marketvalueChart = chart)}
-              config={this.optionsMarketValueChart}
-            />
+            <ReactHighcharts config={this.configMarketValueChart} />
           </Panel>
         </Col>
         {/*--- Net P/L Bar Chart ---*/}
@@ -151,10 +142,7 @@ export default class ChartsContainer extends Component {
             </h5>
           </div>
           <Panel className="chart-panel">
-            <Chart
-              ref={chart => (this.pnlChart = chart)}
-              config={this.optionsPnLChart}
-            />
+            <ReactHighcharts config={this.configPnLChart} />
           </Panel>
         </Col>
         {/*--- Day Change Bar Chart ---*/}
@@ -165,10 +153,7 @@ export default class ChartsContainer extends Component {
             </h5>
           </div>
           <Panel className="chart-panel">
-            <Chart
-              ref={chart => (this.daychangeChart = chart)}
-              config={this.optionsDaychangeChart}
-            />
+            <ReactHighcharts config={this.configDaychangeChart} />
           </Panel>
         </Col>
       </Row>

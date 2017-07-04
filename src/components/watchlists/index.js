@@ -46,6 +46,23 @@ export class WatchlistsContainer extends Component {
     });
   }
 
+  componentWillReceiveProps(newProps) {
+    let { watchlist, op, status, error } = newProps.watchlistAsyncOp;
+    if (status === "complete") {
+      if (error) {
+        this.setState(() => ({
+          msg: error,
+          msgClass: msgClasses.error
+        }));
+      } else {
+        this.resetView();
+        if (op !== "DELETE") {
+          this.props.onChangeSelection(watchlist);
+        }
+      }
+    }
+  }
+
   addWatchlist = () => {
     this.setState({ editedWatchlist: new Watchlist(), isAdding: true });
   };
@@ -69,14 +86,11 @@ export class WatchlistsContainer extends Component {
         msg: valid.msg,
         msgClass: msgClasses.error
       }));
-      return valid;
+      return;
     }
     isAdding
       ? this.props.actions.createWatchlist(wl)
       : this.props.actions.editWatchlist(wl);
-    this.resetView();
-    this.props.onChangeSelection(wl);
-    return { status: "success" };
   };
 
   deleteWatchlist = () => {
@@ -98,25 +112,26 @@ export class WatchlistsContainer extends Component {
       } else {
         let delidx = watchlists.findIndex(wl => wl.id === selected.id);
         //select new last wl if last wl is deleted or next wl if any other wl is deleted
-        newSelected = delidx === watchlists.length - 1
-          ? watchlists[delidx - 1]
-          : watchlists[delidx + 1];
+        newSelected =
+          delidx === watchlists.length - 1
+            ? watchlists[delidx - 1]
+            : watchlists[delidx + 1];
       }
-      this.props.onChangeSelection(newSelected);
       this.props.actions.deleteWatchlist(selected);
-      this.resetView();
+      this.props.onChangeSelection(newSelected);
     }
   };
 
   resetView = () => {
-    this.setState({
+    this.setState(() => ({
       editedWatchlist: null,
       isEditing: false,
       isAdding: false,
       isDeleting: false,
       msg: "",
       msgClass: ""
-    });
+    }));
+    this.props.actions.resetOpStatus();
   };
 
   render() {
@@ -146,7 +161,6 @@ export class WatchlistsContainer extends Component {
 
     return (
       <Panel header={Title} bsStyle="primary" className="panel-watchlists">
-
         {watchlists.length === 0 && isViewState && emptylistMsg}
 
         {(isAdding || isEditing) &&
@@ -170,7 +184,6 @@ export class WatchlistsContainer extends Component {
             selectedItem={this.props.selected}
             onClick={this.props.onChangeSelection}
           />}
-
       </Panel>
     );
   }
@@ -178,7 +191,8 @@ export class WatchlistsContainer extends Component {
 
 function mapStateToProps(state, ownProps) {
   return {
-    watchlists: state.watchlists || []
+    watchlists: state.watchlists || [],
+    watchlistAsyncOp: state.watchlistAsyncOp
   };
 }
 
