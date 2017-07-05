@@ -1,8 +1,9 @@
-import { call, put } from "redux-saga/effects";
+import { call, put, takeEvery } from "redux-saga/effects";
 import { WatchlistService } from "../../services";
 import * as watchlistsActions from "../actions/watchlistsActions";
+import * as actionTypes from "../actions/actionTypes";
 
-export function* loadWatchlists() {
+function* loadWatchlists() {
   try {
     const watchlists = yield call([
       WatchlistService,
@@ -15,7 +16,7 @@ export function* loadWatchlists() {
   }
 }
 
-export function* saveWatchlist(action) {
+function* saveWatchlist(action) {
   yield put({ type: "START_ASYNC_OP_WATCHLIST", op: "SAVE", watchlist: action.watchlist });
   try {
     const watchlist = yield call(
@@ -39,7 +40,7 @@ export function* saveWatchlist(action) {
   }
 }
 
-export function* deleteWatchlist(action) {
+function* deleteWatchlist(action) {
   yield put({ type: "START_ASYNC_OP_WATCHLIST", op: "DELETE", watchlist: action.watchlist });
   try {
     const watchlist = yield call(
@@ -62,3 +63,11 @@ export function* deleteWatchlist(action) {
     });
   }
 }
+
+export default [
+    takeEvery(actionTypes.LOAD_WATCHLISTS, loadWatchlists),
+    takeEvery(actionTypes.CREATE_WATCHLIST, saveWatchlist),
+    takeEvery(actionTypes.EDIT_WATCHLIST, saveWatchlist),
+    takeEvery(actionTypes.DELETE_WATCHLIST, deleteWatchlist)
+  ];
+

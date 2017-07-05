@@ -1,26 +1,18 @@
 import React from "react";
-import { func, bool, instanceOf } from "prop-types";
+import { instanceOf } from "prop-types";
 import { Table } from "react-bootstrap";
 import FontAwesome from "react-fontawesome";
 
 import { Watchlist } from "../../services";
-import Stock from "./Stock";
+import StockRow from "./StockRow";
 import Colored from "../common/Colored";
 import formatCash from "../../utils/formatCash";
 
 StocksList.propTypes = {
-  watchlist: instanceOf(Watchlist).isRequired,
-  onEdit: func.isRequired,
-  onDelete: func.isRequired,
-  isViewing: bool
+  watchlist: instanceOf(Watchlist).isRequired
 };
 
-export default function StocksList({
-  watchlist,
-  onEdit,
-  onDelete,
-  isViewing = true
-}) {
+export default function StocksList({ watchlist }) {
   const Dollar = <FontAwesome name="usd" />;
   const CashField = ({ value }) => {
     return (
@@ -93,12 +85,7 @@ export default function StocksList({
       {headerRow}
       <tbody>
         {watchlist.stocks.map(stock =>
-          <Stock
-            key={stock.code}
-            stock={stock}
-            onEdit={onEdit}
-            onDelete={onDelete}
-          />
+          <StockRow key={stock.code} stock={stock} watchlist={watchlist} />
         )}
         {totalsRow}
       </tbody>

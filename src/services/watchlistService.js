@@ -188,7 +188,6 @@ export class WatchlistService {
     } else {
       //create
       wl.stocks.push(Object.assign(new Stock(), stock));
-      QuotesService.register(stock.code);
       data = Object.assign({}, wl.stocks[wl.stocks.length - 1]);
     }
     this.saveWatchlistsToStorage();
@@ -239,7 +238,6 @@ export class WatchlistService {
     let i = wlist.stocks.findIndex(stk => stk.code === stock.code);
     if (i !== -1) {
       wl.stocks.splice(i, 1);
-      QuotesService.deregister(stock.code);
       this.saveWatchlistsToStorage();
       return { status: "success", data: stock };
     }

@@ -1,6 +1,5 @@
 import * as types from "../actions/actionTypes.js";
 import stockReducer from "./stockReducer";
-import { WatchlistService } from "../../services";
 
 export default function stocksReducer(state = [], action) {
   switch (action.type) {
@@ -34,7 +33,6 @@ function saveStock(state, action) {
 }
 
 function deleteStock(state, action) {
-  WatchlistService.doRemoveStock(action.stock, action.watchlist);
   let i = state.findIndex(stock => stock.code === action.stock.code);
   if (i !== -1) {
     return [...state.slice(0, i), ...state.slice(i + 1)];

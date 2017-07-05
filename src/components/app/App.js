@@ -5,7 +5,7 @@ import injectTapEventPlugin from "react-tap-event-plugin";
 // redux
 import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
-import * as watchlistsActions from "../../redux/actions/watchlistsActions";
+import * as quotesActions from "../../redux/actions/quotesActions";
 
 // components
 import Header from "../layout/Header";
@@ -13,7 +13,7 @@ import Sidebar from "../layout/Sidebar";
 import Content from "../layout/Content";
 import Watchlists from "../watchlists";
 import { QuotesService } from "../../services";
-import DashboardButton from "../dashboard/dashboardButton";
+import DashboardButton from "../dashboard/DashboardButton";
 import ConfigInterval from "./ConfigInterval.js";
 
 // styles
@@ -39,12 +39,8 @@ class App extends Component {
     clearTimeout(this.quotesTimer);
   }
 
-  updateQuotes = () => {
-    QuotesService.refreshQuotes().then(newQuotes => {
-      if (newQuotes) {
-        this.props.actions.fetchQuotesSuccess(newQuotes);
-      }
-    });
+  updateQuotes = () => {    
+    this.props.actions.fetchQuotes();
     this.setNextUpdate();
   };
 
@@ -59,9 +55,9 @@ class App extends Component {
     this.setState(() => ({ selectedWatchlist: wl }));
   };
 
-  onChangeTimer = val => {
+  onChangeTimer = refInterval => {
     clearTimeout(this.quotesTimer);
-    this.setState(() => ({ refInterval: val }), this.setNextUpdate);
+    this.setState(() => ({ refInterval }), this.setNextUpdate);
   };
 
   render() {
@@ -121,7 +117,7 @@ function mapStateToProps(state, ownProps) {
 
 function mapDispatchToProps(dispatch) {
   return {
-    actions: bindActionCreators(watchlistsActions, dispatch)
+    actions: bindActionCreators(quotesActions, dispatch)
   };
 }
 

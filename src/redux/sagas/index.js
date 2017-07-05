@@ -1,12 +1,8 @@
-import { takeEvery, all } from "redux-saga/effects";
-import * as actions from "../actions/actionTypes";
-import * as watchlistsSagas from "./watchlistsSagas";
+import { all } from "redux-saga/effects";
+import watchlistsSagas from "./watchlistsSagas";
+import watchlistSagas from "./watchlistSagas";
+import quotesSagas from "./quotesSagas";
 
 export default function* rootSaga() {
-  yield all([
-    takeEvery(actions.LOAD_WATCHLISTS, watchlistsSagas.loadWatchlists),
-    takeEvery(actions.CREATE_WATCHLIST, watchlistsSagas.saveWatchlist),
-    takeEvery(actions.EDIT_WATCHLIST, watchlistsSagas.saveWatchlist),
-    takeEvery(actions.DELETE_WATCHLIST, watchlistsSagas.deleteWatchlist)
-  ]);
+  yield all([...watchlistsSagas, ...watchlistSagas, ...quotesSagas]);
 }

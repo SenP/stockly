@@ -1,6 +1,5 @@
 import * as types from "../actions/actionTypes.js";
 import initialState from "../initialState";
-import { WatchlistService } from "../../services";
 import watchlistReducer from "./watchlistReducer";
 
 export default function(state = initialState.watchlists, action) {
@@ -40,7 +39,6 @@ function saveWatchlist(state, action) {
 }
 
 function deleteWatchlist(state, action) {
-  WatchlistService.doRemoveWatchlist(action.watchlist);
   let i = state.findIndex(w => w.id === action.watchlist.id);
   if (i !== -1) {
     return [...state.slice(0, i), ...state.slice(i + 1)];

@@ -48,13 +48,6 @@ export function deleteWatchlistSuccess(watchlist) {
   };
 }
 
-export function fetchQuotesSuccess(quotes) {
-  return {
-    type: actions.FETCH_QUOTES_SUCCESS,
-    quotes
-  };
-}
-
 export function resetOpStatus() {
   return {
     type: actions.RESET_WATCHLIST_OP_STATUS

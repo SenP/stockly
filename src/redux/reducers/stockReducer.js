@@ -1,10 +1,9 @@
 import * as types from "../actions/actionTypes.js";
-import { Stock, WatchlistService } from "../../services";
+import { Stock } from "../../services";
 
 export default function stockReducer(state = {}, action) {
   switch (action.type) {
-    case types.SAVE_STOCK_SUCCESS:
-      WatchlistService.doSaveStock(action.stock, action.watchlist);
+    case types.SAVE_STOCK_SUCCESS:      
       return Object.assign(new Stock(), action.stock);
 
     case types.FETCH_QUOTES_SUCCESS:

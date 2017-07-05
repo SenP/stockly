@@ -16,6 +16,15 @@ export function editStock(stock, watchlist) {
   };
 }
 
+export function saveStockSuccess(stock, watchlist) {
+  return {
+    type: actionTypes.SAVE_STOCK_SUCCESS,
+    watchlist,
+    stock
+  };
+}
+
+
 export function deleteStock(stock, watchlist) {
   return {
     type: actionTypes.DELETE_STOCK,
@@ -23,3 +32,20 @@ export function deleteStock(stock, watchlist) {
     stock
   };
 }
+
+export function deleteStockSuccess(stock, watchlist) {
+  return {
+    type: actionTypes.DELETE_STOCK_SUCCESS,
+    watchlist,
+    stock
+  };
+}
+
+export function removeOpStatus(stock, watchlist) {
+  return {
+    type: actionTypes.REMOVE_STOCK_OP_STATUS,
+    stock,
+    watchlist
+  };
+}
+
