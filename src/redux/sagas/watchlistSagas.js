@@ -9,16 +9,16 @@ function* saveStock(action) {
   yield put({ type: "START_ASYNC_OP_STOCK", op: "SAVE", stock, watchlist });
   try {
     const { status, data: newStock } = yield call(
-      [WatchlistService, WatchlistService.saveStock],
+      [WatchlistService, "saveStock"],
       stock,
       watchlist
     );
     if (status === "success") {
       yield put(watchlistActions.saveStockSuccess(newStock, watchlist));
-      yield call([QuotesService, QuotesService.register], newStock.code);
+      QuotesService.register(newStock.code);
       yield put(quotesActions.fetchQuotes(newStock));
       yield put({
-        type: "END_ASYNC_OP_STOCK",
+        type: "END_ASYNC_OP_STOCK_SUCCESS",
         op: "SAVE",
         stock: newStock,
         watchlist,
@@ -29,7 +29,7 @@ function* saveStock(action) {
     }
   } catch (error) {
     yield put({
-      type: "END_ASYNC_OP_STOCK",
+      type: "END_ASYNC_OP_STOCK_ERROR",
       op: "SAVE",
       stock,
       watchlist,
@@ -42,27 +42,23 @@ function* deleteStock(action) {
   let { stock, watchlist } = action;
   yield put({ type: "START_ASYNC_OP_STOCK", op: "DELETE", stock, watchlist });
   try {
-    const { status } = yield call(
-      [WatchlistService, WatchlistService.deleteStock],
-      stock,
-      watchlist
-    );
-    if (status === "success") {
+    const res = yield call([WatchlistService, "deleteStock"], stock, watchlist);
+    if (res.status === "success") {
       yield put(watchlistActions.deleteStockSuccess(stock, watchlist));
-      yield call([QuotesService, QuotesService.deregister], stock.code);
+      QuotesService.deregister(stock.code);
       yield put({
-        type: "END_ASYNC_OP_STOCK",
+        type: "END_ASYNC_OP_STOCK_SUCCESS",
         op: "DELETE",
         stock,
         watchlist,
         error: null
       });
     } else {
-      throw status;
+      throw res.status;
     }
   } catch (error) {
     yield put({
-      type: "END_ASYNC_OP_STOCK",
+      type: "END_ASYNC_OP_STOCK_ERROR",
       op: "DELETE",
       stock,
       watchlist,

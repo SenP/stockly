@@ -1,16 +1,19 @@
 import React, { Component } from "react";
-import { instanceOf, bool, func } from "prop-types";
-import { Button, FormControl } from "react-bootstrap";
-import FontAwesome from "react-fontawesome";
+import { instanceOf, func } from "prop-types";
+import { connect } from "react-redux";
+import { bindActionCreators } from "redux";
+import { Button } from "react-bootstrap";
 
-import { Stock, Watchlist, WatchlistService } from "../../services";
+import { Stock, Watchlist } from "../../services";
+import * as watchlistActions from "../../redux/actions/watchlistActions";
+import Message from "../common/Message";
 
 const msgClasses = {
   error: "msg text-center text-danger",
   info: "msg text-center text-info"
 };
 
-export default class StockForm extends Component {
+class DeleteStockForm extends Component {
   static propTypes = {
     stock: instanceOf(Stock).isRequired,
     watchlist: instanceOf(Watchlist).isRequired,
@@ -18,39 +21,37 @@ export default class StockForm extends Component {
   };
 
   state = {
-    stock: Object.assign({}, this.props.stock),
-    msg: "",
-    msgClass: ""
+    msg: `  Delete '${this.props.stock.name}' ?  `,
+    msgClass: msgClasses.error
   };
 
-  handleChange = evt => {
-    let { name: fieldName, value } = evt.target;
-    this.setState(prevState => ({
-      stock: Object.assign(new Stock(), prevState.stock, { [fieldName]: value })
-    }));
-  };
+  componentWillReceiveProps({ stock, watchlist, stocksAsyncOp, actions }) {
+    let [asyncOp] = stocksAsyncOp.filter(
+      stockOp =>
+        stockOp.stock.code === stock.code &&
+        stockOp.watchlist.id === watchlist.id &&
+        stockOp.op === "DELETE"
+    );
+    if (asyncOp && asyncOp.error) {
+      this.setState(() => ({
+        msg: asyncOp.error,
+        msgClass: msgClasses.error
+      }));
+    }
+  }
 
   submitForm = evt => {
-    let { watchlist, actions } = this.props;
-    let { stock } = this.state;
+    let { stock, watchlist } = this.props;
     this.setState(() => ({
-      msg: "Saving...please wait.",
+      msg: `Deleting ${stock.name}...please wait.`,
       msgClass: msgClasses.info
     }));
-    let valid = WatchlistService.validateStock(watchlist, stock, true);
-    if (valid.status === "error") {
-      this.setState({
-        msg: valid.msg,
-        msgClass: msgClasses.error
-      });
-      return;
-    }
-    actions.editStock(stock, watchlist);    
+    this.props.actions.deleteStock(stock, watchlist);
   };
 
-  resetForm = () => {
+  closeForm = () => {
     this.setState(() => ({
-      stock: Object.assign({}, this.props.stock),
+      stock: { ...this.props.stock },
       msg: "",
       msgClass: ""
     }));
@@ -58,60 +59,16 @@ export default class StockForm extends Component {
   };
 
   render = () => {
-    let { stock, isEditing } = this.props;
+    let { stock } = this.props;
 
-    const editStockForm = (
+    return (
       <tr>
         <td>
           {stock.code}
         </td>
-        <td className="number-field">
-          <FormControl
-            type="text"
-            name="unitsOwned"
-            bsSize="small"
-            value={this.state.unitsOwned}
-            onChange={this.handleChange}
-            autoFocus
-          />
-        </td>
-        <td className="number-field">
-          <FormControl
-            type="text"
-            name="avgPrice"
-            bsSize="small"
-            value={this.state.avgPrice}
-            onChange={this.handleChange}
-          />
-        </td>
-        <td colSpan="7">
-          <span className="center-block">
-            <Button
-              bsSize="small"
-              bsStyle="success"
-              style={{ marginRight: "10px" }}
-              onClick={this.submitForm}
-            >
-              <FontAwesome name="check" />
-            </Button>
-            <Button bsSize="small" bsStyle="danger" onClick={this.cancelForm}>
-              <FontAwesome name="close" />
-            </Button>
-          </span>
-        </td>
-      </tr>
-    );
-
-    const deleteStockForm = (
-      <tr>
-        <td>
-          {stock.code}
-        </td>
-        <td colSpan="8" style={{ textAlign: "right" }}>
-          <span className="text-danger">
-            <strong>
-              {`Delete '${stock.name}' ?  `}{" "}
-            </strong>
+        <td colSpan="8" style={{ textAlign: "center" }}>
+          <span style={{ textAlign: "center", marginTop: "10px" }}>
+            <Message msgtext={this.state.msg} msgclass={this.state.msgClass} />
           </span>
         </td>
         <td>
@@ -122,16 +79,28 @@ export default class StockForm extends Component {
               style={{ marginRight: "10px" }}
               onClick={this.submitForm}
             >
-              {" "}Yes
+              Yes
             </Button>
-            <Button bsSize="xsmall" bsStyle="default" onClick={this.cancelForm}>
+            <Button bsSize="xsmall" bsStyle="default" onClick={this.closeForm}>
               No
             </Button>
           </span>
         </td>
       </tr>
     );
-
-    return (isEditing && editStockForm) || deleteStockForm;
   };
 }
+
+function mapStateToProps(state, ownProps) {
+  return {
+    stocksAsyncOp: state.stocksAsyncOp
+  };
+}
+
+function mapDispatchToProps(dispatch) {
+  return {
+    actions: bindActionCreators(watchlistActions, dispatch)
+  };
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(DeleteStockForm);

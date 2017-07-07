@@ -54,10 +54,18 @@ class AddStockForm extends Component {
     msgClass: ""
   };
 
-  componentWillReceiveProps(newProps) {
+  componentWillUnmount() {
+    console.log("removing op status");
+    this.props.actions.removeOpStatus(this.state.stock, this.props.watchlist);
+  }
+
+  componentWillReceiveProps({ watchlist, stocksAsyncOp }) {
     let { stock } = this.state;
-    let watchlist = newProps.watchlist;
-    let [asyncOp] = newProps.stocksAsyncOp.filter(
+    if (this.props.watchlist.id !== watchlist.id) {
+      this.resetForm();
+      return;
+    }
+    let [asyncOp] = stocksAsyncOp.filter(
       stockOp =>
         stockOp.stock.code === stock.code &&
         stockOp.watchlist.id === watchlist.id &&
@@ -95,10 +103,9 @@ class AddStockForm extends Component {
     this.setState({ suggestions: [] });
   };
 
-  handleChange = evt => {
-    let { name: fieldName, value } = evt.target;
+  handleChange = ({ target }) => {
     this.setState(prevState => ({
-      stock: Object.assign(new Stock(), prevState.stock, { [fieldName]: value })
+      stock: { ...prevState.stock, [target.name]: target.value }
     }));
   };
 
@@ -121,7 +128,7 @@ class AddStockForm extends Component {
       });
       return;
     }
-    actions.addStock(stock, watchlist);    
+    actions.addStock(stock, watchlist);
   };
 
   resetForm = () => {

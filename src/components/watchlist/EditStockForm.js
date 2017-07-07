@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { instanceOf, bool, func } from "prop-types";
+import { instanceOf, func } from "prop-types";
 import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
 import { Button, FormControl } from "react-bootstrap";
@@ -22,37 +22,28 @@ class EditStockForm extends Component {
   };
 
   state = {
-    stock: Object.assign({}, this.props.stock),
+    stock: { ...this.props.stock },
     watchlist: this.props.watchlist,
     msg: "",
     msgClass: ""
   };
 
-  componentWillReceiveProps(newProps) {
-    let { stock, watchlist } = this.state;    
-    let [asyncOp] = newProps.stocksAsyncOp.filter(
-      stockOp =>
-        stockOp.stock.code === stock.code &&
-        stockOp.watchlist.id === watchlist.id &&
-        stockOp.op === "SAVE"
-    );
-    if (asyncOp && asyncOp.status === "complete") {
-      if (asyncOp.error) {
-        this.setState(() => ({
-          msg: asyncOp.error,
-          msgClass: msgClasses.error
-        }));
-      } else {
-        this.props.actions.removeOpStatus(stock, watchlist);
-        this.resetForm();
-      }
+  componentWillReceiveProps({ stockAsyncOp, actions, stock:newStock }) {
+    console.log('new stock:', newStock);
+    if (stockAsyncOp && stockAsyncOp.error) {
+      this.setState(() => ({
+        msg: stockAsyncOp.error,
+        msgClass: msgClasses.error
+      }));
+    }
+    if (newStock.unitsOwned === this.state.stock.unitsOwned) {
+      this.closeForm();
     }
   }
 
-  handleChange = evt => {
-    let { name: fieldName, value } = evt.target;
+  handleChange = ({ target }) => {
     this.setState(prevState => ({
-      stock: Object.assign(new Stock(), prevState.stock, { [fieldName]: value })
+      stock: { ...prevState.stock, [target.name]: target.value }
     }));
   };
 
@@ -73,14 +64,22 @@ class EditStockForm extends Component {
     this.props.actions.editStock(stock, watchlist);
   };
 
-  resetForm = () => {
+  closeForm = () => {
+    let { stock, watchlist, actions, onClose } = this.props;
     this.setState(() => ({
-      stock: Object.assign({}, this.props.stock),
+      stock: { ...stock },
       msg: "",
       msgClass: ""
     }));
-    this.props.onClose();
+    actions.removeOpStatus(stock, watchlist);
+    onClose();
   };
+
+  componentWillUnmount() {
+    console.log("unmounting edit stock form...");
+    let { stock, watchlist, actions } = this.props;
+    actions.removeOpStatus(stock, watchlist);
+  }
 
   render = () => {
     let { stock, msg, msgClass } = this.state;
@@ -119,12 +118,12 @@ class EditStockForm extends Component {
             >
               <FontAwesome name="check" />
             </Button>
-            <Button bsSize="small" bsStyle="danger" onClick={this.resetForm}>
+            <Button bsSize="small" bsStyle="danger" onClick={this.closeForm}>
               <FontAwesome name="close" />
             </Button>
-          </span>
-          <span style={{ textAlign: "center", marginTop: "10px" }}>
-            <Message msgtext={msg} msgclass={msgClass} />
+            <span style={{ textAlign: "center", marginTop: "10px" }}>
+              <Message msgtext={msg} msgclass={msgClass} />
+            </span>
           </span>
         </td>
       </tr>
@@ -133,8 +132,17 @@ class EditStockForm extends Component {
 }
 
 function mapStateToProps(state, ownProps) {
+  console.log(state);
+  let stockAsyncOp = state.stocksAsyncOp
+    ? state.stocksAsyncOp.filter(
+        stockOp =>
+          stockOp.stock.code === ownProps.stock.code &&
+          stockOp.watchlist.id === ownProps.watchlist.id &&
+          stockOp.op === "SAVE"
+      )[0]
+    : null;
   return {
-    stocksAsyncOp: state.stocksAsyncOp
+    stockAsyncOp
   };
 }
 

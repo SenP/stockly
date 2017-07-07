@@ -19,7 +19,7 @@ export default function StocksOpReducer(
         }
       ];
 
-    case types.END_ASYNC_OP_STOCK: {
+    case types.END_ASYNC_OP_STOCK_ERROR: {
       let idx = state.findIndex(
         stockOp =>
           stockOp.stock.code === stock.code &&
@@ -40,7 +40,29 @@ export default function StocksOpReducer(
       ];
     }
 
-    case types.REMOVE_STOCK_OP_STATUS: {
+    case types.END_ASYNC_OP_STOCK_SUCCESS: {
+       let idx = state.findIndex(
+        stockOp =>
+          stockOp.stock.code === stock.code &&
+          stockOp.watchlist.id === watchlist.id &&
+          stockOp.op === op
+      );
+
+      return [
+        ...state.slice(0, idx),
+        {
+          stock,
+          watchlist,
+          op,
+          status: "complete",
+          error: null
+        },
+        ...state.slice(idx + 1)
+      ];
+    }
+
+    case types.REMOVE_ASYNC_OP_STOCK:
+     {
       let idx = state.findIndex(
         stockOp =>
           stockOp.stock.code === stock.code &&

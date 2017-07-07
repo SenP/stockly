@@ -57,7 +57,7 @@ export class WatchlistContainer extends Component {
         <StocksList watchlist={watchlist} />
 
         <div className="pull-right">
-          <small> Price data from Google Finance and may be delayed. </small>
+          <small> Price data from Google Finance (delayed). </small>
         </div>
       </div>
     );

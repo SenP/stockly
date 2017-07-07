@@ -23,7 +23,6 @@ export class QuotesService {
 
   // Refresh the quotes map with latest quotes from Google Finance API
   static refreshQuotes(stock) {
-    console.log("stock:", stock);
     let stockcodes = "";
 
     if (stock) {
@@ -60,7 +59,6 @@ export class QuotesService {
 
   // Update the quotes map with the new quote values from API (called from refreshQuotes method)
   static updateQuotesMap(newquotes) {
-    console.log(newquotes);
     newquotes.forEach(newquote => {
       let quote = this.quotesMap.get(newquote.t + ":" + newquote.e);
       if (quote) {
@@ -98,4 +96,3 @@ export class QuotesService {
   }
 }
 
-// export default QuotesService;

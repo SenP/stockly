@@ -88,7 +88,7 @@ export class WatchlistService {
       //Edit watchlist
       this.watchlists[i].name = wlist.name;
       this.watchlists[i].description = wlist.description;
-      data = cloneWatchlist(wlist);
+      data = cloneWatchlist(this.watchlists[i]);
     } else {
       //Create New watchlist
       let newWL = Object.assign(new Watchlist(), wlist);
@@ -109,21 +109,18 @@ export class WatchlistService {
     let result = { status: "success", msg: "success" };
 
     if (isAdding) {
-      //validate stock code
-      // validate length
+      // validate stock code
       if (stock.code.length < 3 || stock.code.length > 12) {
         result.status = "error";
         result.msg = "Stock code should be between 3 to 12 characters";
         return result;
       }
-
       // check duplicates
       if (watchlist.stocks.findIndex(stk => stk.code === stock.code) !== -1) {
         result.status = "error";
         result.msg = "'" + stock.code + "' already exists in this watchlist";
         return result;
       }
-
       // validate ticker code
       if (QuotesService.searchTickers(stock.code, true).length === 0) {
         return {
@@ -138,7 +135,6 @@ export class WatchlistService {
         };
       }
     }
-
     // validate quantity
     if (isNaN(stock.unitsOwned)) {
       result.status = "error";
@@ -164,7 +160,6 @@ export class WatchlistService {
     return result;
   }
 
-  // Save a stock, simulate http post delay
   static saveStock(stock, wlist) {
     let p = new Promise(resolve =>
       setTimeout(() => {
@@ -175,26 +170,28 @@ export class WatchlistService {
     return p;
   }
 
-  // save the edited/new stock
   static doSaveStock(stock, wlist) {
-    let wl = this.watchlists[this.watchlists.findIndex(w => w.id === wlist.id)];
+    let wlIdx = this.watchlists.findIndex(w => w.id === wlist.id);
+    if (wlIdx === -1) {
+      return { status: "Watchlist does not exist", data: null };
+    }
+    let wl = this.watchlists[wlIdx];
     let i = wl.stocks.findIndex(stk => stk.code === stock.code);
     let data = null;
 
     if (i !== -1) {
       //edit
       Object.assign(wl.stocks[i], stock);
-      data = Object.assign({}, wl.stocks[i]);
+      data = { ...wl.stocks[i] };
     } else {
       //create
       wl.stocks.push(Object.assign(new Stock(), stock));
-      data = Object.assign({}, wl.stocks[wl.stocks.length - 1]);
+      data = { ...wl.stocks[wl.stocks.length - 1] };
     }
     this.saveWatchlistsToStorage();
     return { status: "success", data: data };
   }
 
-  // simulate http delete of watchlist
   static deleteWatchlist(wlist) {
     let p = new Promise(resolve =>
       setTimeout(() => {
@@ -205,23 +202,17 @@ export class WatchlistService {
     return p;
   }
 
-  // remove the selected watchlist
   static doRemoveWatchlist(wlist) {
     let i = this.watchlists.findIndex(w => w.id === wlist.id);
 
     if (i !== -1) {
       this.watchlists.splice(i, 1);
-      // deregister stock from quotes service
-      if (wlist.stocks.length > 0) {
-        wlist.stocks.forEach(stock => QuotesService.deregister(stock.code));
-      }
       this.saveWatchlistsToStorage();
       return { status: "success", data: wlist };
     }
     return { status: "success", data: null };
   }
 
-  // simulate http delete of watchlist item
   static deleteStock(stock, wlist) {
     let p = new Promise(resolve =>
       setTimeout(() => {
@@ -232,9 +223,12 @@ export class WatchlistService {
     return p;
   }
 
-  // remove the selected watchlist item
   static doRemoveStock(stock, wlist) {
-    let wl = this.watchlists[this.watchlists.findIndex(w => w.id === wlist.id)];
+    let wlIdx = this.watchlists.findIndex(w => w.id === wlist.id);
+    if (wlIdx === -1) {
+      return { status: "success", data: null };
+    }
+    let wl = this.watchlists[wlIdx];
     let i = wlist.stocks.findIndex(stk => stk.code === stock.code);
     if (i !== -1) {
       wl.stocks.splice(i, 1);

@@ -43,7 +43,7 @@ export function deleteStockSuccess(stock, watchlist) {
 
 export function removeOpStatus(stock, watchlist) {
   return {
-    type: actionTypes.REMOVE_STOCK_OP_STATUS,
+    type: actionTypes.REMOVE_ASYNC_OP_STOCK,
     stock,
     watchlist
   };

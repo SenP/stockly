@@ -4,6 +4,7 @@ import { instanceOf } from "prop-types";
 import { Stock, Watchlist } from "../../services";
 import StockView from "./StockView";
 import EditStockForm from "./EditStockForm";
+import DeleteStockForm from "./DeleteStockForm";
 
 export default class StockRow extends Component {
   static propTypes = {
@@ -20,11 +21,11 @@ export default class StockRow extends Component {
 
   componentWillReceiveProps(newProps) {
     this.setState(() => ({
-         stock: newProps.stock,
-         watchlist: newProps.watchlist
-       }));
+      stock: newProps.stock,
+      watchlist: newProps.watchlist
+    }));
   }
-  
+
   onEditClick = () => {
     this.setState({
       editing: true
@@ -52,6 +53,12 @@ export default class StockRow extends Component {
         />) ||
       (editing &&
         <EditStockForm
+          stock={stock}
+          watchlist={watchlist}
+          onClose={this.onCancel}
+        />) ||
+      (deleting &&
+        <DeleteStockForm
           stock={stock}
           watchlist={watchlist}
           onClose={this.onCancel}
