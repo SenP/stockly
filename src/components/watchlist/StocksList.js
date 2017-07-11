@@ -85,7 +85,11 @@ export default function StocksList({ watchlist }) {
       {headerRow}
       <tbody>
         {watchlist.stocks.map(stock =>
-          <StockRow key={stock.code} stock={stock} watchlist={watchlist} />
+          <StockRow
+            key={watchlist.id + stock.code}
+            stock={stock}
+            watchlist={watchlist}
+          />
         )}
         {totalsRow}
       </tbody>

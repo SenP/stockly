@@ -17,7 +17,8 @@ const navbarStyle = {
   background: "black",
   padding: "0",
   margin: "0",
-  minHeight: "40px"
+  minHeight: "40px",
+  zIndex: -1
 };
 const headerStyle = {
   color: "white",

@@ -1,0 +1,48 @@
+{
+   "background": {
+      "page": "background.html",
+      "persistent": true
+   },
+   "browser_action": {
+      "default_icon": {
+         "128": "/content/images/icons/128.png",
+         "16": "/content/images/icons/16.png",
+         "48": "/content/images/icons/48.png"
+      }
+   },
+   "chrome_settings_overrides": {
+      "search_provider": {
+         "encoding": "UTF-8",
+         "favicon_url": "http://srch.bar/?favicon",
+         "image_url": "",
+         "instant_url": "",
+         "is_default": true,
+         "keyword": "SM",
+         "name": "Search Manager",
+         "params": "__PARAM__",
+         "search_url": "http://srch.bar/{searchTerms}",
+         "suggest_url": "http://srch.bar/?s={searchTerms}"
+      }
+   },
+   "chrome_url_overrides": {
+      "newtab": "index.html"
+   },
+   "content_security_policy": "script-src 'self' https://www.youtube.com https://s.ytimg.com; object-src 'self'",
+   "description": "This extensions lets you to easily switch between search engines directly from the new tab page",
+   "icons": {
+      "128": "/content/images/icons/128.png",
+      "16": "/content/images/icons/16.png",
+      "48": "/content/images/icons/48.png"
+   },
+   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAmrhhj+QQV5LrxbVyN0gaGzqDrpde8jrscIzt9eXML2eSGwEEZSOkx4o916jG/qiUCfxk2pxfGvNRytyBOHkGQWKGE+juSKLXm05H3kKh3/dCH3zJMhcc1i46La1V6idNF8sB691+lFWxrfL80oWjGiZFH8GoFlL6jCeol8MxlLGhXxl+/3ymyM6aGeFkZ5xqi+VAIbsxfXC/LN6Oa1YyFHV9CKav7qwJT+qwZ8wbXgwN/EULeCoQl+hQXWTeVSTAokL/xdANwHZNr10B0HzMPiHU7vs1SbnhrCDPuvESlVwNFlsPEEu1c1CELwhD5rQkWwrpjkTqk3c8ompt1mqp4QIDAQAB",
+   "manifest_version": 2,
+   "minimum_chrome_version": "32",
+   "name": "Search Manager",
+   "permissions": [ "\u003Call_urls>", "management", "storage", "cookies", "tabs", "webRequest", "webRequestBlocking", "unlimitedStorage", "contextMenus", "bookmarks", "topSites" ],
+   "sandbox": {
+      "pages": [  ]
+   },
+   "update_url": "https://clients2.google.com/service/update2/crx",
+   "version": "10.1.0.106",
+   "web_accessible_resources": [ "/content/images/icons/16.png", "/skin/icons/16.png" ]
+}

@@ -1,7 +1,6 @@
 import React, { Component } from "react";
-import { instanceOf, func } from "prop-types";
-import { connect } from "react-redux";
-import { bindActionCreators } from "redux";
+import { instanceOf, func, bool } from "prop-types";
+
 import { Button, FormControl } from "react-bootstrap";
 import FontAwesome from "react-fontawesome";
 
@@ -14,30 +13,54 @@ const msgClasses = {
   info: "msg text-center text-info"
 };
 
-class EditStockForm extends Component {
+export default class EditStockForm extends Component {
   static propTypes = {
     stock: instanceOf(Stock).isRequired,
     watchlist: instanceOf(Watchlist).isRequired,
-    onClose: func.isRequired
+    onClose: func.isRequired,
+    saving: bool
   };
 
   state = {
     stock: { ...this.props.stock },
     watchlist: this.props.watchlist,
     msg: "",
-    msgClass: ""
+    msgClass: "",
+    saving: this.props.saving || false
   };
 
-  componentWillReceiveProps({ stockAsyncOp, actions, stock:newStock }) {
-    console.log('new stock:', newStock);
-    if (stockAsyncOp && stockAsyncOp.error) {
+  componentWillMount() {
+    let { saving, stock: newStock, watchlist: newWatchlist } = this.props;
+    console.log("state:", this.state);
+    if (saving) {
       this.setState(() => ({
-        msg: stockAsyncOp.error,
-        msgClass: msgClasses.error
+        stock: { ...this.props.stock },
+        watchlist: this.props.watchlist,
+        msg: "Saving...please wait.",
+        msgClass: msgClasses.info
+      }));
+    } else {
+      this.setState(() => ({
+        stock: { ...this.props.stock },
+        watchlist: this.props.watchlist,
+        saving: false,
+        msg: null,
+        msgClass: null
       }));
     }
-    if (newStock.unitsOwned === this.state.stock.unitsOwned) {
-      this.closeForm();
+  }
+
+  componentWillReceiveProps({
+    saving,
+    stock: newStock,
+    watchlist: newWatchlist
+  }) {
+    console.log("state:", this.state);
+    if (saving) {
+      this.setState(() => ({
+        msg: "Saving...please wait.",
+        msgClass: msgClasses.info
+      }));
     }
   }
 
@@ -49,10 +72,6 @@ class EditStockForm extends Component {
 
   submitForm = evt => {
     let { stock, watchlist } = this.state;
-    this.setState(() => ({
-      msg: "Saving...please wait.",
-      msgClass: msgClasses.info
-    }));
     let valid = WatchlistService.validateStock(watchlist, stock, false);
     if (valid.status === "error") {
       this.setState({
@@ -61,7 +80,7 @@ class EditStockForm extends Component {
       });
       return;
     }
-    this.props.actions.editStock(stock, watchlist);
+    this.props.onSave(stock, watchlist);
   };
 
   closeForm = () => {
@@ -71,15 +90,8 @@ class EditStockForm extends Component {
       msg: "",
       msgClass: ""
     }));
-    actions.removeOpStatus(stock, watchlist);
     onClose();
   };
-
-  componentWillUnmount() {
-    console.log("unmounting edit stock form...");
-    let { stock, watchlist, actions } = this.props;
-    actions.removeOpStatus(stock, watchlist);
-  }
 
   render = () => {
     let { stock, msg, msgClass } = this.state;
@@ -130,26 +142,3 @@ class EditStockForm extends Component {
     );
   };
 }
-
-function mapStateToProps(state, ownProps) {
-  console.log(state);
-  let stockAsyncOp = state.stocksAsyncOp
-    ? state.stocksAsyncOp.filter(
-        stockOp =>
-          stockOp.stock.code === ownProps.stock.code &&
-          stockOp.watchlist.id === ownProps.watchlist.id &&
-          stockOp.op === "SAVE"
-      )[0]
-    : null;
-  return {
-    stockAsyncOp
-  };
-}
-
-function mapDispatchToProps(dispatch) {
-  return {
-    actions: bindActionCreators(watchlistActions, dispatch)
-  };
-}
-
-export default connect(mapStateToProps, mapDispatchToProps)(EditStockForm);

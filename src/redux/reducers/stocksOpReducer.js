@@ -1,5 +1,6 @@
 import * as types from "../actions/actionTypes.js";
 import initialState from "../initialState";
+import { toast } from "react-toastify";
 
 export default function StocksOpReducer(
   state = initialState.stocksAsyncOp,
@@ -26,7 +27,9 @@ export default function StocksOpReducer(
           stockOp.watchlist.id === watchlist.id &&
           stockOp.op === op
       );
-
+      toast.error(
+        `Failed to save stock '${stock.code}' on watchlist '${watchlist.name}'`
+      );
       return [
         ...state.slice(0, idx),
         {
@@ -41,28 +44,19 @@ export default function StocksOpReducer(
     }
 
     case types.END_ASYNC_OP_STOCK_SUCCESS: {
-       let idx = state.findIndex(
+      let idx = state.findIndex(
         stockOp =>
           stockOp.stock.code === stock.code &&
           stockOp.watchlist.id === watchlist.id &&
           stockOp.op === op
       );
-
-      return [
-        ...state.slice(0, idx),
-        {
-          stock,
-          watchlist,
-          op,
-          status: "complete",
-          error: null
-        },
-        ...state.slice(idx + 1)
-      ];
+      toast.success(
+        `Saved stock '${stock.code}' on watchlist '${watchlist.name}'`
+      );
+      return [...state.slice(0, idx), ...state.slice(idx + 1)];
     }
 
-    case types.REMOVE_ASYNC_OP_STOCK:
-     {
+    case types.REMOVE_ASYNC_OP_STOCK: {
       let idx = state.findIndex(
         stockOp =>
           stockOp.stock.code === stock.code &&

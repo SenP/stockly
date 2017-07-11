@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { Grid, Row, Col } from "react-bootstrap";
 import injectTapEventPlugin from "react-tap-event-plugin";
+import { ToastContainer } from 'react-toastify';
 
 // redux
 import { connect } from "react-redux";
@@ -15,17 +16,19 @@ import Watchlists from "../watchlists";
 import { QuotesService } from "../../services";
 import DashboardButton from "../dashboard/DashboardButton";
 import ConfigInterval from "./ConfigInterval.js";
+import Toastr from "./Toastr";
 
 // styles
 import "./App.css";
 import { sidebarColStyle, contentColStyle } from "./App.styles.js";
+import 'react-toastify/dist/ReactToastify.min.css'; 
 
 injectTapEventPlugin();
 
 class App extends Component {
   state = {
     selectedWatchlist: null,
-    refInterval: 30
+    refInterval: 300
   };
 
   quotesTimer;
@@ -104,7 +107,9 @@ class App extends Component {
             </Col>
           </Row>
         </Grid>
+        <ToastContainer />        
       </div>
+      
     );
   }
 }

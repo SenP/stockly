@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        #wrap {
+            display: flex;
+            align-items: center;
+            flex-direction: column;
+        }
+
+
+
+        body {
+            background-color: #eeeeee;
+            margin: 3px;
+        }
+
+        *:focus {
+            outline: none;
+        }
+
+        .selected {
+            color: #333333;
+        }
+
+        .Combined-Shape {
+            width: 258px;
+            background-color: #ffffff;
+            box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2);
+        }
+
+        .Search-Engine {
+            width: 136px;
+            height: 16px;
+            font-family: neue, sans-serif;
+            font-size: 14px;
+            font-weight: bold;
+            font-style: normal;
+            font-stretch: normal;
+            line-height: normal;
+            letter-spacing: normal;
+            color: rgba(0, 0, 0, 0.55);
+            display: inline-block;
+            cursor: default;
+        }
+
+        .searchEnginesDropDown {
+            width: 87px;
+            height: 25px;
+            background-color: #fcfcfc;
+            border: solid 1px #dedede;
+            display: inline-block;
+            cursor: pointer;
+        }
+
+        .submit {
+            width: 114px;
+            height: 28px;
+            margin-left: 43px;
+            display: inline-block;
+            line-height: 28px;
+            font-family: neue, sans-serif;
+            font-size: 11px;
+            font-weight: normal;
+            font-style: normal;
+            font-stretch: normal;
+            letter-spacing: 0.5px;
+            text-align: center;
+            color: #ffffff;
+            background-color: #267cd2;
+            cursor: pointer;
+        }
+
+        .uninstall {
+            width: 77px;
+            height: 12px;
+            font-family: neue, sans-serif;
+            font-size: 11px;
+            font-weight: normal;
+            font-style: normal;
+            font-stretch: normal;
+            line-height: normal;
+            letter-spacing: 0.5px;
+            color: #5587ab;
+            display: inline-block;
+            cursor: pointer;
+        }
+
+        .innerBox {
+            margin: 10px;
+        }
+
+        .bottomBox {
+            margin-top: 30px;
+        }
+
+        .dropdownOptions {
+            font-family: neue, sans-serif;
+            font-size: 12px;
+            font-weight: normal;
+            font-style: normal;
+            font-stretch: normal;
+            line-height: normal;
+            letter-spacing: normal;
+            color: rgba(0, 0, 0, 0.55);
+        }
+
+    </style>
+</head>
+<body>
+<div id="wrap">
+    <div class="Combined-Shape">
+        <div id="innerBox" class="innerBox">
+            <div id="searchEnginesWrapper">
+                <div class="Search-Engine">Search Engine</div>
+                <select class="searchEnginesDropDown dropdownOptions" id="searchEnginesDropDown"></select>
+            </div>
+            <div id="bottomBox" class="bottomBox">
+                <div class="uninstall" id="uninstall">UNINSTALL</div>
+                <div class="submit" id="submit">SAVE CHANGES</div>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript" src="popupTab2.js"></script>
+</div>
+</body>
+</html>

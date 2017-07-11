@@ -1,0 +1,19 @@
+{
+   "background": {
+      "page": "background.html"
+   },
+   "browser_action": {
+      "default_icon": "images/ico_wallet.png"
+   },
+   "content_scripts": [  ],
+   "description": "Automatically fills your logins online while keeping them completely secured.",
+   "icons": {
+      "128": "images/bd128.png"
+   },
+   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAlIUH9SRNhpTzo4X1GUOqqmVznnX69q6CegyIZEwQbbHJMTWvwY7rIbNcV9QNjWVH7vaBRFWVmAJ6MGOo1LgPAStVptpbvaHLFAzpyX/RE+9b9eLT6R7gQP2lJz1ZdsMNIrB0/7GbWRD+QOBhTo6SUhRzJUk1KHvka9MiMO04mb0dIsb6+DiDo9WREtE+MVp/UQ8Gqy12DsiMyC0zTVteP1AYc1kIog9YFg2g5/eYRwRjCTMu+b1LE7iYDJ9SB+LFOKYYofBoCnSqECKACnq4LxXAlXqrDuCAdzqRD6GmFDoqObYrtjWYO2zTKfNNnudiY8iZuxp/tlB6hmTsLhgOgwIDAQAB",
+   "manifest_version": 2,
+   "name": "Bitdefender Wallet",
+   "permissions": [ "tabs", "webNavigation", "nativeMessaging", "\u003Call_urls>" ],
+   "update_url": "http://clients2.google.com/service/update2/crx",
+   "version": "21.1.9"
+}
