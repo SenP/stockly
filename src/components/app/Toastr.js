@@ -1,42 +1,34 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
-import { toast } from "react-toastify";
+import { AddToast } from "../../utils/Toaster";
 
 class Toastr extends Component {
   state = {
-    messages: this.props.messages
+    toasts: this.props.toasts
   };
 
   componentWillReceiveProps(newProps) {
-    console.log("new messages:", newProps);
+    console.log("toasts:", newProps);
     this.setState(() => ({
-      messages: newProps.messages
-    }));    
+      toasts: newProps.toasts
+    }));
   }
+
   render() {
-    this.state.messages.map(msg => {
-      toast(msg.status);
-    });
+    console.log("toasts...", this.state);
+    this.state.toasts.map(toast => AddToast(toast));
     return null;
   }
 }
 
 function mapStateToProps(state, ownProps) {
   return {
-    messages: state.stocksAsyncOp.map(op => {
-      return {
-        status: op.status,
-        error: op.error
-      };
-    })
+    toasts: state.toasts.map(({ msg, msgtype }) => ({
+      msg,
+      msgtype
+    }))
   };
 }
-
-// function mapDispatchToProps(dispatch) {
-//   return {
-//     actions: bindActionCreators(watchlistActions, dispatch)
-//   };
-// }
 
 export default connect(mapStateToProps, null)(Toastr);

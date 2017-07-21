@@ -16,7 +16,6 @@ import Watchlists from "../watchlists";
 import { QuotesService } from "../../services";
 import DashboardButton from "../dashboard/DashboardButton";
 import ConfigInterval from "./ConfigInterval.js";
-import Toastr from "./Toastr";
 
 // styles
 import "./App.css";
@@ -107,7 +106,7 @@ class App extends Component {
             </Col>
           </Row>
         </Grid>
-        <ToastContainer />        
+        <ToastContainer />
       </div>
       
     );

@@ -8,7 +8,7 @@ import { Panel } from "react-bootstrap";
 
 import { Watchlist as WatchlistModel } from "../../services";
 import StocksList from "./StocksList";
-import AddStockForm from "./AddStockForm";
+import AddStockPanel from "./AddStockPanel";
 import Header from "./WatchlistHeader";
 
 export class WatchlistContainer extends Component {
@@ -33,7 +33,13 @@ export class WatchlistContainer extends Component {
   render() {
     const { watchlist } = this.state;
 
-    const Title = <Header watchlist={watchlist} />;
+    const TitlePanel = (
+      <Panel
+        header={<Header watchlist={watchlist} />}
+        bsStyle="primary"
+        className="panel-watchlist text-center"
+      />
+    );
 
     const emptylistMsg = (
       <div className="jumbotron text-center">
@@ -43,15 +49,10 @@ export class WatchlistContainer extends Component {
 
     return (
       <div>
-        <Panel
-          header={Title}
-          bsStyle="primary"
-          className="panel-watchlist text-center"
-        />
-
+        {TitlePanel}
         <div>
           {watchlist && watchlist.stocks.length === 0 && emptylistMsg}
-          <AddStockForm watchlist={watchlist} />
+          <AddStockPanel watchlist={watchlist} />
         </div>
 
         <StocksList watchlist={watchlist} />

@@ -34,9 +34,5 @@ function saveStock(state, action) {
 
 function deleteStock(state, action) {
   let i = state.findIndex(stock => stock.code === action.stock.code);
-  if (i !== -1) {
-    return [...state.slice(0, i), ...state.slice(i + 1)];
-  } else {
-    return state;
-  }
+  return i === -1 ? state : [...state.slice(0, i), ...state.slice(i + 1)];
 }

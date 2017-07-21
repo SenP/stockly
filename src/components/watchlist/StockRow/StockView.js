@@ -3,9 +3,9 @@ import { instanceOf, func } from "prop-types";
 import { Button } from "react-bootstrap";
 import FontAwesome from "react-fontawesome";
 
-import { Stock as StockModel } from "../../services";
-import Colored from "../common/Colored";
-import formatCash from "../../utils/formatCash";
+import { Stock as StockModel } from "../../../services";
+import Colored from "../../common/Colored";
+import formatCash from "../../../utils/formatCash";
 
 StockView.propTypes = {
   stock: instanceOf(StockModel).isRequired,

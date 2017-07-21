@@ -1,12 +1,10 @@
 import React, { Component } from "react";
-import { instanceOf, func, bool } from "prop-types";
-
+import { instanceOf, func, bool, string } from "prop-types";
 import { Button, FormControl } from "react-bootstrap";
 import FontAwesome from "react-fontawesome";
 
-import { Stock, Watchlist, WatchlistService } from "../../services";
-import * as watchlistActions from "../../redux/actions/watchlistActions";
-import Message from "../common/Message";
+import { Stock, Watchlist, WatchlistService } from "../../../services";
+import Message from "../../common/Message";
 
 const msgClasses = {
   error: "msg text-center text-danger",
@@ -17,56 +15,47 @@ export default class EditStockForm extends Component {
   static propTypes = {
     stock: instanceOf(Stock).isRequired,
     watchlist: instanceOf(Watchlist).isRequired,
+    onSave: func.isRequired,
     onClose: func.isRequired,
-    saving: bool
+    saving: bool,
+    error: string
   };
 
   state = {
-    stock: { ...this.props.stock },
+    stock: Object.assign(new Stock(), this.props.stock),
     watchlist: this.props.watchlist,
     msg: "",
     msgClass: "",
-    saving: this.props.saving || false
+    saving: false
   };
 
   componentWillMount() {
-    let { saving, stock: newStock, watchlist: newWatchlist } = this.props;
-    console.log("state:", this.state);
-    if (saving) {
-      this.setState(() => ({
-        stock: { ...this.props.stock },
-        watchlist: this.props.watchlist,
-        msg: "Saving...please wait.",
-        msgClass: msgClasses.info
-      }));
-    } else {
-      this.setState(() => ({
-        stock: { ...this.props.stock },
-        watchlist: this.props.watchlist,
-        saving: false,
-        msg: null,
-        msgClass: null
-      }));
-    }
+    let { saving, stock, watchlist, error = null } = this.props;
+    let msg = saving ? "Saving...please wait." : error;
+    let msgClass = saving ? msgClasses.info : msgClasses.error;
+
+    this.setState(() => ({
+      stock: Object.assign(new Stock(), stock),
+      watchlist,
+      msg,
+      msgClass,
+      saving
+    }));
   }
 
-  componentWillReceiveProps({
-    saving,
-    stock: newStock,
-    watchlist: newWatchlist
-  }) {
-    console.log("state:", this.state);
-    if (saving) {
-      this.setState(() => ({
-        msg: "Saving...please wait.",
-        msgClass: msgClasses.info
-      }));
-    }
+  componentWillReceiveProps({ saving = false, error = null }) {
+    this.setState(() => ({
+      msg: saving ? "Saving...please wait." : error,
+      msgClass: saving ? msgClasses.info : msgClasses.error,
+      saving
+    }));
   }
 
   handleChange = ({ target }) => {
     this.setState(prevState => ({
-      stock: { ...prevState.stock, [target.name]: target.value }
+      stock: Object.assign(new Stock(), prevState.stock, {
+        [target.name]: target.value
+      })
     }));
   };
 
@@ -84,9 +73,9 @@ export default class EditStockForm extends Component {
   };
 
   closeForm = () => {
-    let { stock, watchlist, actions, onClose } = this.props;
+    let { stock, onClose } = this.props;
     this.setState(() => ({
-      stock: { ...stock },
+      stock: Object.assign(new Stock(), stock),
       msg: "",
       msgClass: ""
     }));
@@ -94,7 +83,7 @@ export default class EditStockForm extends Component {
   };
 
   render = () => {
-    let { stock, msg, msgClass } = this.state;
+    let { stock, msg, msgClass, saving } = this.state;
 
     return (
       <tr>
@@ -127,12 +116,20 @@ export default class EditStockForm extends Component {
               bsStyle="success"
               style={{ marginRight: "10px" }}
               onClick={this.submitForm}
+              disabled={saving}
             >
               <FontAwesome name="check" />
             </Button>
-            <Button bsSize="small" bsStyle="danger" onClick={this.closeForm}>
+
+            <Button
+              bsSize="small"
+              bsStyle="danger"
+              onClick={this.closeForm}
+              disabled={saving}
+            >
               <FontAwesome name="close" />
             </Button>
+
             <span style={{ textAlign: "center", marginTop: "10px" }}>
               <Message msgtext={msg} msgclass={msgClass} />
             </span>

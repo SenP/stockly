@@ -171,6 +171,10 @@ export class WatchlistService {
   }
 
   static doSaveStock(stock, wlist) {
+    if (
+      stock.unitsOwned === "55" //REMOVE
+    )
+      return { status: "error in qty", data: null };
     let wlIdx = this.watchlists.findIndex(w => w.id === wlist.id);
     if (wlIdx === -1) {
       return { status: "Watchlist does not exist", data: null };
@@ -182,11 +186,11 @@ export class WatchlistService {
     if (i !== -1) {
       //edit
       Object.assign(wl.stocks[i], stock);
-      data = { ...wl.stocks[i] };
+      data = Object.assign(new Stock(), wl.stocks[i]);
     } else {
       //create
       wl.stocks.push(Object.assign(new Stock(), stock));
-      data = { ...wl.stocks[wl.stocks.length - 1] };
+      data = Object.assign(new Stock(), wl.stocks[wl.stocks.length - 1]);
     }
     this.saveWatchlistsToStorage();
     return { status: "success", data: data };
@@ -224,6 +228,10 @@ export class WatchlistService {
   }
 
   static doRemoveStock(stock, wlist) {
+    if (
+      stock.unitsOwned === "55" //REMOVE
+    )
+      return { status: "delete error in qty", data: null };
     let wlIdx = this.watchlists.findIndex(w => w.id === wlist.id);
     if (wlIdx === -1) {
       return { status: "success", data: null };

@@ -40,9 +40,5 @@ function saveWatchlist(state, action) {
 
 function deleteWatchlist(state, action) {
   let i = state.findIndex(w => w.id === action.watchlist.id);
-  if (i !== -1) {
-    return [...state.slice(0, i), ...state.slice(i + 1)];
-  } else {
-    return state;
-  }
+  return i === -1 ? state : [...state.slice(0, i), ...state.slice(i + 1)];
 }
