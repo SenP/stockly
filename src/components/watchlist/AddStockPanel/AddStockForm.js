@@ -36,11 +36,12 @@ const renderSuggestion = ticker =>
 export default class AddStockForm extends Component {
   static propTypes = {
     stock: instanceOf(Stock),
+    saving: bool,
+    error: string,
+    onChange: func.isRequired,
     onValidate: func.isRequired,
     onSave: func.isRequired,
-    onClose: func.isRequired,
-    saving: bool,
-    error: string
+    onClose: func.isRequired
   };
 
   state = {
@@ -63,24 +64,37 @@ export default class AddStockForm extends Component {
     let { saving, stock, error = null } = props;
     let msg = saving ? "Saving...please wait." : error;
     let msgClass = saving ? msgClasses.info : msgClasses.error;
+    let tickers = getSuggestions(stock.code, 3, true);
+    let name = tickers.length > 0 ? tickers[0].name : "";
 
     this.setState(() => ({
-      stock: Object.assign(new Stock(), stock),
+      stock: Object.assign(new Stock(), stock, { name }),
       msg,
       msgClass,
       saving
     }));
   };
 
+  handleChange = ({ target }) => {
+    this.setState(
+      prevState => ({
+        stock: Object.assign(new Stock(), prevState.stock, {
+          [target.name]: target.value
+        })
+      }),
+      () => this.props.onChange(this.state.stock)
+    );
+  };
+
   onStockSelect = (event, { newValue }) => {
-    let tickers = getSuggestions(newValue, 3, true);
-    let name = tickers.length > 0 ? tickers[0].name : "";
-    this.setState(prevState => ({
-      stock: Object.assign(new Stock(), prevState.stock, {
-        code: newValue,
-        name
-      })
-    }));
+    this.setState(
+      prevState => ({
+        stock: Object.assign(new Stock(), prevState.stock, {
+          code: newValue
+        })
+      }),
+      () => this.props.onChange(this.state.stock)
+    );
   };
 
   onSuggestionsFetchRequested = ({ value }) => {
@@ -89,14 +103,6 @@ export default class AddStockForm extends Component {
 
   onSuggestionsClearRequested = () => {
     this.setState({ suggestions: [] });
-  };
-
-  handleChange = ({ target }) => {
-    this.setState(prevState => ({
-      stock: Object.assign(new Stock(), prevState.stock, {
-        [target.name]: target.value
-      })
-    }));
   };
 
   submitForm = evt => {

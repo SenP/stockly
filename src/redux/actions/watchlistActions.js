@@ -58,7 +58,16 @@ export function startStockOp(stock, watchlist, op) {
   };
 }
 
-export function endStockOpSuccess(stock, watchlist, op) {    
+export function updateAddStockOp(watchlist, stock) {
+  return {
+    type: actionTypes.UPDATE_ASYNC_OP_STOCK,
+    watchlist,
+    stock,
+    op: "ADD"
+  };
+}
+
+export function endStockOpSuccess(stock, watchlist, op) {
   return {
     type: actionTypes.END_ASYNC_OP_STOCK_SUCCESS,
     stock,
@@ -68,7 +77,7 @@ export function endStockOpSuccess(stock, watchlist, op) {
   };
 }
 
-export function endStockOpError(stock, watchlist, op, error = null) {  
+export function endStockOpError(stock, watchlist, op, error = null) {
   return {
     type: actionTypes.END_ASYNC_OP_STOCK_ERROR,
     stock,
@@ -86,4 +95,3 @@ export function removeStockOp(stock, watchlist, op) {
     op
   };
 }
-

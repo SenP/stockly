@@ -14,9 +14,10 @@ function* removeToast({ stock, watchlist, op }) {
   }
 }
 
-function* saveStock({ stock, watchlist }) {
-  yield call(removeToast, { stock, watchlist, op: "EDIT" });
-  yield put(watchlistActions.startStockOp(stock, watchlist, "EDIT"));
+function* saveStock({ type, stock, watchlist }) {
+  let op = type === actionTypes.ADD_STOCK ? "ADD" : "EDIT";
+  yield call(removeToast, { stock, watchlist, op });
+  yield put(watchlistActions.startStockOp(stock, watchlist, op));
   try {
     const { status, data: newStock } = yield call(
       [WatchlistService, "saveStock"],
@@ -28,13 +29,13 @@ function* saveStock({ stock, watchlist }) {
       yield call([QuotesService, "register"], newStock.code);
       yield put(quotesActions.fetchQuotes(newStock));
       yield put(
-        watchlistActions.endStockOpSuccess(newStock, watchlist, "EDIT")
+        watchlistActions.endStockOpSuccess(newStock, watchlist, op)
       );
       yield put(
         toastsActions.addToast(
           stock,
           watchlist,
-          "EDIT",
+          op,
           `Saved stock '${stock.code}' on watchlist '${watchlist.name}'`,
           "success"
         )
@@ -44,13 +45,13 @@ function* saveStock({ stock, watchlist }) {
     }
   } catch (error) {
     yield put(
-      watchlistActions.endStockOpError(stock, watchlist, "EDIT", error)
+      watchlistActions.endStockOpError(stock, watchlist, op, error)
     );
     yield put(
       toastsActions.addToast(
         stock,
         watchlist,
-        "EDIT",
+        op,
         `Failed to save stock '${stock.code}' on watchlist '${watchlist.name}'`,
         "error"
       )
@@ -59,19 +60,20 @@ function* saveStock({ stock, watchlist }) {
 }
 
 function* deleteStock({ stock, watchlist }) {
-  yield call(removeToast, { stock, watchlist, op: "DELETE" });
-  yield put(watchlistActions.startStockOp(stock, watchlist, "DELETE"));
+  let op = "DELETE";
+  yield call(removeToast, { stock, watchlist, op });
+  yield put(watchlistActions.startStockOp(stock, watchlist, op));
   try {
     const res = yield call([WatchlistService, "deleteStock"], stock, watchlist);
     if (res.status === "success") {
       yield put(watchlistActions.deleteStockSuccess(stock, watchlist));
       yield call([QuotesService, "deregister"], stock.code);
-      yield put(watchlistActions.endStockOpSuccess(stock, watchlist, "DELETE"));
+      yield put(watchlistActions.endStockOpSuccess(stock, watchlist, op));
       yield put(
         toastsActions.addToast(
           stock,
           watchlist,
-          "DELETE",
+          op,
           `Deleted stock '${stock.code}' on watchlist '${watchlist.name}'`,
           "success"
         )
@@ -81,13 +83,13 @@ function* deleteStock({ stock, watchlist }) {
     }
   } catch (error) {
     yield put(
-      watchlistActions.endStockOpError(stock, watchlist, "DELETE", error)
+      watchlistActions.endStockOpError(stock, watchlist, op, error)
     );
     yield put(
       toastsActions.addToast(
         stock,
         watchlist,
-        "DELETE",
+        op,
         `Failed to delete stock '${stock.code}' on watchlist '${watchlist.name}'`,
         "error"
       )

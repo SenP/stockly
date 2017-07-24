@@ -9,7 +9,6 @@ import { bindActionCreators } from "redux";
 import * as quotesActions from "../../redux/actions/quotesActions";
 
 // components
-import Header from "../layout/Header";
 import Sidebar from "../layout/Sidebar";
 import Content from "../layout/Content";
 import Watchlists from "../watchlists";
@@ -77,11 +76,6 @@ class App extends Component {
     return (
       <div>
         <Grid fluid>
-          <Row>
-            <Col>
-              <Header />
-            </Col>
-          </Row>
           <Row className="app-container">
             <Col
               lg={2}

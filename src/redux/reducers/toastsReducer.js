@@ -2,18 +2,20 @@ import * as types from "../actions/actionTypes.js";
 import initialState from "../initialState";
 
 export default function ToastsReducer(state = initialState.toasts, action) {
-  let { stock, watchlist, op, id } = action;
+  let { stock, watchlist, op, id, msgtype } = action;
   switch (action.type) {
     case types.ADD_TOAST:
-      return [
-        ...state,
-        {
-          stock,
-          watchlist,
-          op,
-          id
-        }
-      ];
+      return msgtype === "error"
+        ? [
+            ...state,
+            {
+              stock,
+              watchlist,
+              op,
+              id
+            }
+          ]
+        : state;
 
     case types.REMOVE_TOAST: {
       let idx = state.findIndex(toast => toast.id === id);

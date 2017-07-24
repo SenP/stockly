@@ -1,6 +1,8 @@
 import * as types from "../actions/actionTypes.js";
 import initialState from "../initialState";
 import getStockOpIndex from "../selectors/getStockOpIndex";
+import getAddStockOp from "../selectors/getAddStockOp";
+import { Stock } from "../../services";
 
 export default function StocksOpReducer(
   state = initialState.stocksAsyncOp,
@@ -33,6 +35,22 @@ export default function StocksOpReducer(
               status: "pending",
               error: null
             },
+            ...state.slice(idx + 1)
+          ];
+    }
+
+    case types.UPDATE_ASYNC_OP_STOCK: {
+      let stockOp = getAddStockOp(state, watchlist);
+      let idx = state.findIndex(
+        stockOp => stockOp.watchlist.id === watchlist.id && stockOp.op === op
+      );
+      return !stockOp
+        ? state
+        : [
+            ...state.slice(0, idx),
+            Object.assign({}, stockOp, {
+              stock: Object.assign(new Stock(), stock)
+            }),
             ...state.slice(idx + 1)
           ];
     }

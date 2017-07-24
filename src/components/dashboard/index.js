@@ -5,7 +5,7 @@ import { Row, Col } from "react-bootstrap";
 
 import { Watchlist } from "../../services";
 import Charts from "./ChartsComponent";
-import Topstocks from "./TopstocksComponent";
+import StocksTable from "./StocksTable";
 import Summary from "./Summary";
 
 import "./styles.css";
@@ -105,21 +105,21 @@ class DashboardContainer extends Component {
 
         <Row>
           <Col md={4}>
-            <Topstocks
+            <StocksTable
               stocks={this.state.stocksMap}
               title="Stocks by Market Value"
               orderBy="marketValue"
             />
           </Col>
           <Col md={4}>
-            <Topstocks
+            <StocksTable
               stocks={this.state.stocksMap}
               title="Stocks by Net P/L"
               orderBy="netPnL"
             />
           </Col>
           <Col md={4}>
-            <Topstocks
+            <StocksTable
               stocks={this.state.stocksMap}
               title="Stocks by Day Change"
               orderBy="dayChange"

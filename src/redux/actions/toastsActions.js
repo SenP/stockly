@@ -8,6 +8,7 @@ export function addToast(stock, watchlist, op, msg, msgtype) {
     stock,
     watchlist,
     op,
+    msgtype,
     id
   };
 }

@@ -7,7 +7,7 @@ import transformMap from "../../utils/transformMap";
 import Colored from "../common/Colored";
 import formatCash from "../../utils/formatCash";
 
-export default class TopstocksComponent extends Component {
+export default class StocksTable extends Component {
   static propTypes = {
     stocks: instanceOf(Map),
     title: string,

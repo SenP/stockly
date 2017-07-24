@@ -54,7 +54,7 @@ export default class EditStockForm extends Component {
   handleChange = ({ target }) => {
     this.setState(prevState => ({
       stock: Object.assign(new Stock(), prevState.stock, {
-        [target.name]: target.value
+        [target.name]: target.value.trim()
       })
     }));
   };
@@ -97,6 +97,7 @@ export default class EditStockForm extends Component {
             bsSize="small"
             value={stock.unitsOwned}
             onChange={this.handleChange}
+            maxLength={9}
             autoFocus
           />
         </td>
@@ -107,6 +108,7 @@ export default class EditStockForm extends Component {
             bsSize="small"
             value={stock.avgPrice}
             onChange={this.handleChange}
+            maxLength={8}
           />
         </td>
         <td colSpan="7">

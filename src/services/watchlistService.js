@@ -141,11 +141,16 @@ export class WatchlistService {
       result.msg = "'Units owned' should be a number";
       return result;
     }
-    if (stock.unitsOwned < 1 || stock.unitsOwned > 999999999) {
+    if (
+      stock.unitsOwned != parseInt(stock.unitsOwned, 10) ||
+      stock.unitsOwned < 1 ||
+      stock.unitsOwned > 999999999
+    ) {
       result.status = "error";
-      result.msg = "'Units owned' should be between 1 to 1 billion";
+      result.msg = "'Units owned' should be an integer between 1 to 1 billion";
       return result;
     }
+
     // validate avg price
     if (isNaN(stock.avgPrice)) {
       result.status = "error";
