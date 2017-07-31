@@ -1,7 +1,7 @@
 import * as types from "../actions/actionTypes.js";
 import initialState from "../initialState";
 import getStockOpIndex from "../selectors/getStockOpIndex";
-import getAddStockOp from "../selectors/getAddStockOp";
+import getStockOp from "../selectors/getStockOp";
 import { Stock } from "../../services";
 
 export default function StocksOpReducer(
@@ -40,7 +40,8 @@ export default function StocksOpReducer(
     }
 
     case types.UPDATE_ASYNC_OP_STOCK: {
-      let stockOp = getAddStockOp(state, watchlist);
+      // TODO: modify for EDIT op
+      let stockOp = getStockOp(state, stock, watchlist, op);
       let idx = state.findIndex(
         stockOp => stockOp.watchlist.id === watchlist.id && stockOp.op === op
       );

@@ -7,14 +7,14 @@ export class QuotesService {
   static quotesMap = new Map();
   static tickers = []; // List of all supported tickers in NASDAQ, NYSE and ASX exchanges
 
-  static register(stockCode) {
-    if (!this.quotesMap.get(stockCode)) {
-      this.quotesMap.set(stockCode, new Quote());
+  static register(stock) {
+    if (!this.quotesMap.get(stock.code)) {
+      this.quotesMap.set(stock.code, new Quote());
     }
   }
 
-  static deregister(stockCode) {
-    this.quotesMap.delete(stockCode);
+  static deregister(stock) {
+    this.quotesMap.delete(stock.code);
   }
 
   static reset() {

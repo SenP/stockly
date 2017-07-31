@@ -2,8 +2,9 @@ import React, { Component } from "react";
 import { instanceOf, object } from "prop-types";
 import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
+import selectStockOp from "../../../redux/selectors/selectStockOp";
 
-import { Stock, Watchlist } from "../../../services";
+import { Stock, Watchlist, WatchlistService } from "../../../services";
 import StockView from "./StockView";
 import EditStockForm from "./EditStockForm";
 import DeleteStockForm from "./DeleteStockForm";
@@ -32,13 +33,13 @@ class StockRow extends Component {
 
   componentWillReceiveProps(newProps) {
     this.setCompState(newProps);
-  } 
+  }
 
   resetOpStatus = () => {
     let { stock, watchlist } = this.state;
-    let { removeStockOp } = this.props.actions;
-    removeStockOp(stock, watchlist, "EDIT");
-    removeStockOp(stock, watchlist, "DELETE");
+    let { removeAsyncOp } = this.props.actions;
+    removeAsyncOp(stock, watchlist, "EDIT");
+    removeAsyncOp(stock, watchlist, "DELETE");
   };
 
   setCompState = props => {
@@ -78,12 +79,25 @@ class StockRow extends Component {
       () => ({
         editing: true
       }),
-      () => this.props.actions.initStockOp(stock, watchlist, "EDIT")
+      () => this.props.actions.initAsyncOp(stock, watchlist, "EDIT")
     );
   };
 
-  onSave = (stock, watchlist) => {
-    this.props.actions.editStock(stock, watchlist);
+  onSave = stock => {
+    this.setState(
+      () => ({
+        editedStock: stock
+      }),
+      () => this.props.actions.editStock(stock, this.state.watchlist)
+    );
+  };
+
+  handleChange = editedStock => {
+    this.props.actions.updateAsyncOp(this.state.watchlist, editedStock, "EDIT");
+  };
+
+  onValidate = stock => {
+    return WatchlistService.validateStock(this.state.watchlist, stock, false);
   };
 
   onDeleteClick = stk => {
@@ -92,7 +106,7 @@ class StockRow extends Component {
       () => ({
         deleting: true
       }),
-      () => this.props.actions.initStockOp(stock, watchlist, "DELETE")
+      () => this.props.actions.initAsyncOp(stock, watchlist, "DELETE")
     );
   };
 
@@ -135,6 +149,8 @@ class StockRow extends Component {
           watchlist={watchlist}
           saving={saving}
           error={error}
+          onChange={this.handleChange}
+          onValidate={this.onValidate}
           onSave={this.onSave}
           onClose={this.onCancel}
         />) ||
@@ -151,16 +167,10 @@ class StockRow extends Component {
 }
 
 function mapStateToProps(state, ownProps) {
-  let stockAsyncOp = state.stocksAsyncOp
-    ? state.stocksAsyncOp.filter(
-        stockOp =>
-          stockOp.stock.code === ownProps.stock.code &&
-          stockOp.watchlist.id === ownProps.watchlist.id &&
-          (stockOp.op === "EDIT" || stockOp.op === "DELETE")
-      )[0]
-    : null;
   return {
-    stockAsyncOp
+    stockAsyncOp:
+      selectStockOp(state, ownProps.stock, ownProps.watchlist, "EDIT") ||
+      selectStockOp(state, ownProps.stock, ownProps.watchlist, "DELETE")
   };
 }
 

@@ -1,11 +1,17 @@
 import React from "react";
 import { Button } from "react-bootstrap";
+import FontAwesome from "react-fontawesome";
 
 function dashboardButton({ onClick }) {
   return (
-    <div style={{ margin: "10px" }}>
+    <div style={{ margin: "10px 0px" }}>
       <Button bsStyle="success" block onClick={() => onClick()}>
-        Dashboard
+        <span className="pull-left">
+          <FontAwesome name="bar-chart" size="lg" />
+          <span style={{ margin: "20px", fontSize: "1.8rem" }}>
+            Dashboard
+          </span>
+        </span>
       </Button>
     </div>
   );

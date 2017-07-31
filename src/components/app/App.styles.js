@@ -10,10 +10,14 @@ export const sidebarColStyle = {
   paddingRight: "5px"
 };
 
+export const sidebarSpacingStyle = {
+  marginTop: "50px"
+};
+
 export const contentColStyle = {
   position: "absolute",
   top: "5px",
   left: "310px",
   minWidth: "400px",
-  maxWidth: "1600px",
+  maxWidth: "1600px"
 };

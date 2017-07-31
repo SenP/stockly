@@ -79,7 +79,7 @@ export default class AddStockForm extends Component {
     this.setState(
       prevState => ({
         stock: Object.assign(new Stock(), prevState.stock, {
-          [target.name]: target.value
+          [target.name]: target.value.trim()
         })
       }),
       () => this.props.onChange(this.state.stock)
@@ -107,7 +107,7 @@ export default class AddStockForm extends Component {
 
   submitForm = evt => {
     let { stock } = this.state;
-    let valid = this.props.onValidate(stock, true);
+    let valid = this.props.onValidate(stock);
     if (valid.status === "error") {
       this.setState({
         msg: valid.msg,

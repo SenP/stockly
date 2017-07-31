@@ -1,9 +1,12 @@
 import React, { Component } from "react";
-import { instanceOf } from "prop-types";
+import { number, instanceOf } from "prop-types";
+// redux
 import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
 import * as watchlistActions from "../../redux/actions/watchlistActions";
 import * as watchlistsActions from "../../redux/actions/watchlistsActions";
+import selectWatchlistById from "../../redux/selectors/selectWatchlistById";
+
 import { Panel } from "react-bootstrap";
 
 import { Watchlist as WatchlistModel } from "../../services";
@@ -13,11 +16,13 @@ import Header from "./WatchlistHeader";
 
 export class WatchlistContainer extends Component {
   static propTypes = {
-    watchlist: instanceOf(WatchlistModel)
+    watchlist: instanceOf(WatchlistModel),
+    watchlistId: number
   };
 
   static defaultProps = {
-    watchlist: null
+    watchlist: null,
+    watchlistId: null
   };
 
   state = {
@@ -67,16 +72,16 @@ export class WatchlistContainer extends Component {
 
 function mapStateToProps(state, ownProps) {
   return {
-    watchlist: state.watchlists.find(wl => wl.id === ownProps.watchlistId)
+    watchlist: selectWatchlistById(state, ownProps.watchlistId)
   };
 }
 
 function mapDispatchToProps(dispatch) {
   return {
-    actions: {
-      ...bindActionCreators(watchlistActions, dispatch),
-      ...bindActionCreators(watchlistsActions, dispatch)
-    }
+    actions: bindActionCreators(
+      { ...watchlistsActions, ...watchlistActions },
+      dispatch
+    )
   };
 }
 

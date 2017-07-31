@@ -17,11 +17,11 @@ Header.propTypes = {
 
 function Header({ showAdd, showEdit, onAdd, onEdit, onDelete }) {
   return (
-    <span style={headerStyle}>
-      <span>
+    <div style={headerStyle}>
+      <span className="pull-left">
         <FontAwesome name="eye" />
-        &nbsp; Watchlists &nbsp;
       </span>
+      <span style={{margin: "0px 20px"}}>Watchlists</span>
       <ButtonToolbar className="pull-right">
         {showAdd &&
           <Button bsSize="xsmall" bsStyle="success" onClick={onAdd}>
@@ -36,7 +36,7 @@ function Header({ showAdd, showEdit, onAdd, onEdit, onDelete }) {
             <FontAwesome name="trash-o" />
           </Button>}
       </ButtonToolbar>
-    </span>
+    </div>
   );
 }
 

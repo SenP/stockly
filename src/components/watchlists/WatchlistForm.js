@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import PropTypes from "prop-types";
+import { instanceOf, bool, string, func } from "prop-types";
 import {
   ButtonToolbar,
   Button,
@@ -8,30 +8,89 @@ import {
   FormControl,
   ControlLabel
 } from "react-bootstrap";
-import { Watchlist } from "../../services";
+import { Watchlist, WatchlistService } from "../../services";
+import Message from "../common/Message";
+
+const msgClasses = {
+  error: "msg text-center text-danger",
+  info: "msg text-center text-info"
+};
 
 export default class WatchlistForm extends Component {
   static propTypes = {
-    watchlist: PropTypes.instanceOf(Watchlist).isRequired,
-    submitFn: PropTypes.func.isRequired,
-    cancelFn: PropTypes.func.isRequired
+    watchlist: instanceOf(Watchlist).isRequired,
+    saving: bool,
+    error: string,
+    onSave: func.isRequired,
+    onClose: func.isRequired
   };
 
   static defaultProps = {
-    watchlist: { id: null, name: "", description: "" }
+    watchlist: { id: null, name: "", description: "" },
+    saving: false,
+    error: null,
+    onSave: () => {},
+    onClose: () => {}
   };
 
-  state = Object.assign({}, this.props.watchlist);
+  state = {
+    watchlist: this.props.watchlist,
+    msg: "",
+    msgClass: "",
+    saving: false,
+    error: null
+  };
 
-  handleChange = evt => {
-    this.setState({
-      [evt.target.name]: evt.target.value.trim()
-    });
+  componentWillMount() {
+    let { saving, watchlist, error = null } = this.props;
+    let msg = saving ? "Saving...please wait." : error;
+    let msgClass = saving ? msgClasses.info : msgClasses.error;
+
+    this.setState(() => ({
+      watchlist,
+      msg,
+      msgClass,
+      saving
+    }));
+  }
+
+  componentWillReceiveProps({ saving = false, error = null }) {
+    this.setState(() => ({
+      msg: saving ? "Saving...please wait." : error,
+      msgClass: saving ? msgClasses.info : msgClasses.error,
+      saving
+    }));
+  }
+
+  handleChange = ({ target }) => {
+    this.setState(prevState => ({
+      watchlist: Object.assign(new Watchlist(), prevState.watchlist, {
+        [target.name]: target.value.trim()
+      })
+    }));
   };
 
   submitForm = evt => {
-    evt.preventDefault();
-    this.props.submitFn(this.state);
+    let { watchlist } = this.state;
+    let valid = WatchlistService.validateWatchlist(watchlist);
+    if (valid.status === "error") {
+      this.setState({
+        msg: valid.msg,
+        msgClass: msgClasses.error
+      });
+      return;
+    }
+    this.props.onSave(watchlist);
+  };
+
+  closeForm = () => {
+    let { watchlist, onClose } = this.props;
+    this.setState(() => ({
+      watchlist,
+      msg: "",
+      msgClass: ""
+    }));
+    onClose();
   };
 
   render = () => {
@@ -41,13 +100,15 @@ export default class WatchlistForm extends Component {
       padding: "0px"
     };
 
-  const formTitle = (
+    const formTitle = (
       <span style={{ textAlign: "center" }}>
-        <h4>          
-            {!this.state.id ? "Create Watchlist" : "Edit Watchlist"}          
-        </h4>        
+        <h4>
+          {!this.state.id ? "Create Watchlist" : "Edit Watchlist"}
+        </h4>
       </span>
     );
+
+    let { watchlist, msg, msgClass, saving } = this.state;
 
     return (
       <div style={formStyle}>
@@ -59,9 +120,9 @@ export default class WatchlistForm extends Component {
               type="text"
               name="name"
               bsSize="small"
-              value={this.state.name}
+              value={watchlist.name}
               onChange={this.handleChange}
-              maxLength="15"                     
+              maxLength={15}
               autoFocus
             />
           </FormGroup>
@@ -71,30 +132,33 @@ export default class WatchlistForm extends Component {
               type="textarea"
               name="description"
               bsSize="small"
-              value={this.state.description}
+              value={watchlist.description}
               onChange={this.handleChange}
-              maxLength="50"
+              maxLength={50}
             />
           </FormGroup>
           <ButtonToolbar>
             <Button
-              type="submit"
               bsStyle="success"
               bsSize="small"
-              disabled={!this.state.name.trim()}
+              onClick={this.submitForm}
+              disabled={saving}
             >
               Submit
             </Button>
             <Button
-              type="button"
               bsStyle="danger"
               bsSize="small"
-              onClick={this.props.cancelFn}
+              onClick={this.closeForm}
+              disabled={saving}
             >
               Cancel
             </Button>
           </ButtonToolbar>
         </Form>
+        <span style={{ textAlign: "center", marginTop: "10px" }}>
+          <Message msgtext={msg} msgclass={msgClass} />
+        </span>
       </div>
     );
   };

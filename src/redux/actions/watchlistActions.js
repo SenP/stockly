@@ -40,7 +40,7 @@ export function deleteStockSuccess(stock, watchlist) {
   };
 }
 
-export function initStockOp(stock, watchlist, op) {
+export function initAsyncOp(stock, watchlist, op) {
   return {
     type: actionTypes.INIT_ASYNC_OP_STOCK,
     watchlist,
@@ -49,7 +49,7 @@ export function initStockOp(stock, watchlist, op) {
   };
 }
 
-export function startStockOp(stock, watchlist, op) {
+export function startAsyncOp(stock, watchlist, op) {
   return {
     type: actionTypes.START_ASYNC_OP_STOCK,
     watchlist,
@@ -58,16 +58,16 @@ export function startStockOp(stock, watchlist, op) {
   };
 }
 
-export function updateAddStockOp(watchlist, stock) {
+export function updateAsyncOp(watchlist, stock, op) {
   return {
     type: actionTypes.UPDATE_ASYNC_OP_STOCK,
     watchlist,
     stock,
-    op: "ADD"
+    op
   };
 }
 
-export function endStockOpSuccess(stock, watchlist, op) {
+export function endAsyncOpSuccess(stock, watchlist, op) {
   return {
     type: actionTypes.END_ASYNC_OP_STOCK_SUCCESS,
     stock,
@@ -77,7 +77,7 @@ export function endStockOpSuccess(stock, watchlist, op) {
   };
 }
 
-export function endStockOpError(stock, watchlist, op, error = null) {
+export function endAsyncOpError(stock, watchlist, op, error = null) {
   return {
     type: actionTypes.END_ASYNC_OP_STOCK_ERROR,
     stock,
@@ -87,7 +87,7 @@ export function endStockOpError(stock, watchlist, op, error = null) {
   };
 }
 
-export function removeStockOp(stock, watchlist, op) {
+export function removeAsyncOp(stock, watchlist, op) {
   return {
     type: actionTypes.REMOVE_ASYNC_OP_STOCK,
     stock,

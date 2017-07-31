@@ -4,7 +4,6 @@ import { composeWithDevTools } from "redux-devtools-extension";
 import rootReducer from "./reducers";
 import reduxImmutableStateInvariant from "redux-immutable-state-invariant";
 import initialState from "./initialState";
-import { loadWatchlists } from "./actions/watchlistsActions";
 import rootSaga from './sagas';
 
 const sagaMiddleware = createSagaMiddleware();
@@ -17,9 +16,7 @@ export default function configureStore() {
     composeWithDevTools(applyMiddleware(...middlewares))
   );
 
-  sagaMiddleware.run(rootSaga);
-
-  store.dispatch(loadWatchlists());
+  sagaMiddleware.run(rootSaga);  
 
   return store;
 }

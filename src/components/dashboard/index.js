@@ -1,7 +1,9 @@
 import React, { Component } from "react";
-import { connect } from "react-redux";
 import { arrayOf, instanceOf } from "prop-types";
 import { Row, Col } from "react-bootstrap";
+// redux
+import { connect } from "react-redux";
+import selectWatchlists from "../../redux/selectors/selectWatchlists";
 
 import { Watchlist } from "../../services";
 import Charts from "./ChartsComponent";
@@ -133,7 +135,7 @@ class DashboardContainer extends Component {
 
 function mapStateToProps(state, ownProps) {
   return {
-    watchlists: state.watchlists || []
+    watchlists: selectWatchlists(state) || []
   };
 }
 

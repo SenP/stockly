@@ -3,7 +3,7 @@ import { instanceOf, func, bool, string } from "prop-types";
 import { Button, FormControl } from "react-bootstrap";
 import FontAwesome from "react-fontawesome";
 
-import { Stock, Watchlist, WatchlistService } from "../../../services";
+import { Stock, Watchlist } from "../../../services";
 import Message from "../../common/Message";
 
 const msgClasses = {
@@ -15,10 +15,19 @@ export default class EditStockForm extends Component {
   static propTypes = {
     stock: instanceOf(Stock).isRequired,
     watchlist: instanceOf(Watchlist).isRequired,
+    onChange: func.isRequired,
+    onValidate: func.isRequired,
     onSave: func.isRequired,
     onClose: func.isRequired,
     saving: bool,
     error: string
+  };
+
+  static defaultProps = {
+    saving: false,
+    error: null,
+    onSave: () => {},
+    onClose: () => {}
   };
 
   state = {
@@ -52,16 +61,19 @@ export default class EditStockForm extends Component {
   }
 
   handleChange = ({ target }) => {
-    this.setState(prevState => ({
-      stock: Object.assign(new Stock(), prevState.stock, {
-        [target.name]: target.value.trim()
-      })
-    }));
+    this.setState(
+      prevState => ({
+        stock: Object.assign(new Stock(), prevState.stock, {
+          [target.name]: target.value.trim()
+        })
+      }),
+      () => this.props.onChange(this.state.stock)
+    );
   };
 
   submitForm = evt => {
-    let { stock, watchlist } = this.state;
-    let valid = WatchlistService.validateStock(watchlist, stock, false);
+    let { stock } = this.state;
+    let valid = this.props.onValidate(stock);
     if (valid.status === "error") {
       this.setState({
         msg: valid.msg,
@@ -69,7 +81,7 @@ export default class EditStockForm extends Component {
       });
       return;
     }
-    this.props.onSave(stock, watchlist);
+    this.props.onSave(stock);
   };
 
   closeForm = () => {

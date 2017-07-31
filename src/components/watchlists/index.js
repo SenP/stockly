@@ -1,150 +1,147 @@
 import React, { Component } from "react";
+import { arrayOf, func, instanceOf, object } from "prop-types";
+import { Panel } from "react-bootstrap";
+// redux
 import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
-import { arrayOf, func, instanceOf } from "prop-types";
-import { Panel } from "react-bootstrap";
+import selectWatchlists from "../../redux/selectors/selectWatchlists";
 
-import { Watchlist, WatchlistService, QuotesService } from "../../services";
+import { Watchlist } from "../../services";
 import * as watchlistsActions from "../../redux/actions/watchlistsActions";
 import WatchlistForm from "./WatchlistForm";
+import DeleteWatchlistForm from "./DeleteWatchlistForm";
 import Header from "./WatchlistsHeader";
 import Watchlists from "./Watchlists";
 import Message from "../common/Message";
 
-const msgClasses = {
-  error: "msg text-danger",
-  info: "msg text-info"
-};
-
-export class WatchlistsContainer extends Component {
+class WatchlistsContainer extends Component {
   static propTypes = {
     watchlists: arrayOf(instanceOf(Watchlist)),
     selected: instanceOf(Watchlist),
-    onChangeSelection: func
+    onChangeSelection: func,
+    asyncOp: object
   };
 
   static defaultProps = {
     watchlists: [],
     selected: null,
-    onChangeSelection: () => {}
+    onChangeSelection: () => {},
+    asyncOp: null
   };
 
   state = {
     editedWatchlist: null,
-    isEditing: false,
-    isAdding: false,
-    isDeleting: false,
-    msg: "",
-    msgClass: ""
+    editing: false,
+    adding: false,
+    deleting: false,
+    saving: false,
+    error: null
   };
 
   componentDidMount() {
-    this.props.watchlists.forEach(wl => {
-      wl.stocks.forEach(stock => {
-        QuotesService.register(stock.code);
-      });
-    });
+    this.setCompState(this.props);
   }
 
   componentWillReceiveProps(newProps) {
-    let { watchlist, op, status, error } = newProps.watchlistAsyncOp;
-    if (status === "complete") {
-      if (error) {
-        this.setState(() => ({
-          msg: error,
-          msgClass: msgClasses.error
-        }));
-      } else {
-        this.resetView();
-        if (op !== "DELETE") {
-          this.props.onChangeSelection(watchlist);
-        }
-      }
-    }
+    this.setCompState(newProps);
   }
 
-  addWatchlist = () => {
-    this.setState({ editedWatchlist: new Watchlist(), isAdding: true });
-  };
-
-  editWatchlist = () => {
-    this.setState({
-      editedWatchlist: Object.assign(new Watchlist(), this.props.selected),
-      isEditing: true
-    });
-  };
-
-  saveWatchlist = wl => {
-    let { isAdding } = this.state;
-    this.setState(() => ({
-      msg: "Saving...please wait.",
-      msgClass: msgClasses.info
-    }));
-    let valid = WatchlistService.validateWatchlist(wl, isAdding);
-    if (valid.status === "error") {
+  setCompState = props => {
+    let { asyncOp, selected } = props;
+    if (asyncOp) {
+      let { op, status, error } = asyncOp;
+      let editedWatchlist = asyncOp.watchlist;
+      let saving = status === "pending" ? true : false;
       this.setState(() => ({
-        msg: valid.msg,
-        msgClass: msgClasses.error
+        editedWatchlist,
+        adding: op === "CREATE",
+        editing: op === "EDIT",
+        deleting: op === "DELETE",
+        saving,
+        error
       }));
-      return;
+    } else {
+      this.setState(prevState => {
+        return {
+          editedWatchlist: selected,
+          adding: false,
+          editing: false,
+          deleting: false,
+          saving: false,
+          error: null
+        };
+      });      
     }
-    isAdding
+  };
+
+  onAddClick = () => {
+    this.setState(
+      () => ({
+        adding: true,
+        editedWatchlist: new Watchlist()
+      }),
+      () => this.props.actions.initAsyncOp(this.state.editedWatchlist, "CREATE")
+    );
+  };
+
+  onEditClick = () => {
+    this.setState(
+      () => ({
+        editing: true,
+        editedWatchlist: Object.assign(new Watchlist(), this.props.selected)
+      }),
+      () => this.props.actions.initAsyncOp(this.state.editedWatchlist, "EDIT")
+    );
+  };
+
+  onDeleteClick = () => {
+    this.setState(
+      () => ({
+        deleting: true
+      }),
+      () => this.props.actions.initAsyncOp(this.state.editedWatchlist, "DELETE")
+    );
+  };
+
+  onSave = wl => {
+    this.state.adding
       ? this.props.actions.createWatchlist(wl)
       : this.props.actions.editWatchlist(wl);
   };
 
-  deleteWatchlist = () => {
-    let { watchlists, selected } = this.props;
-    let delMsg = "Delete " + this.props.selected.name + " watchlist?";
-
-    if (window.confirm(delMsg)) {
-      this.setState({
-        isDeleting: true,
-        msg: "Deleting...please wait.",
-        msgClass: msgClasses.info
-      });
-
-      //reset selected watchlist
-      let newSelected;
-      if (watchlists.length === 1) {
-        // last watchlist deleted
-        newSelected = null; //return to dashboard
-      } else {
-        let delidx = watchlists.findIndex(wl => wl.id === selected.id);
-        //select new last wl if last wl is deleted or next wl if any other wl is deleted
-        newSelected =
-          delidx === watchlists.length - 1
-            ? watchlists[delidx - 1]
-            : watchlists[delidx + 1];
-      }
-      this.props.actions.deleteWatchlist(selected);
-      this.props.onChangeSelection(newSelected);
-    }
+  onDelete = () => {    
+    this.props.actions.deleteWatchlist(this.state.editedWatchlist);    
+    this.props.onChangeSelection(null);    
   };
 
-  resetView = () => {
-    this.setState(() => ({
-      editedWatchlist: null,
-      isEditing: false,
-      isAdding: false,
-      isDeleting: false,
-      msg: "",
-      msgClass: ""
-    }));
-    this.props.actions.resetOpStatus();
+  onCancel = () => {
+    this.setState({
+      editing: false,
+      deleting: false,
+      saving: false,
+      error: null
+    });
+    this.props.actions.resetAsyncOp();
   };
 
   render() {
-    let { editedWatchlist, isAdding, isDeleting, isEditing } = this.state;
+    let {
+      editedWatchlist,
+      adding,
+      editing,
+      deleting,
+      saving,
+      error
+    } = this.state;
     let watchlists = this.props.watchlists;
-    let isViewState = !isAdding && !isEditing && !isDeleting;
+    let isViewState = !adding && !editing && !deleting;
     let Title = (
       <Header
         showAdd={isViewState}
         showEdit={!!this.props.selected && isViewState}
-        onAdd={this.addWatchlist}
-        onEdit={this.editWatchlist}
-        onDelete={this.deleteWatchlist}
+        onAdd={this.onAddClick}
+        onEdit={this.onEditClick}
+        onDelete={this.onDeleteClick}
       />
     );
     let emptylistMsg = (
@@ -163,11 +160,28 @@ export class WatchlistsContainer extends Component {
       <Panel header={Title} bsStyle="primary" className="panel-watchlists">
         {watchlists.length === 0 && isViewState && emptylistMsg}
 
-        {(isAdding || isEditing) &&
+        {isViewState &&
+          <Watchlists
+            items={watchlists}
+            selectedItem={this.props.selected}
+            onClick={this.props.onChangeSelection}
+          />}
+
+        {(adding || editing) &&
           <WatchlistForm
             watchlist={editedWatchlist}
-            submitFn={this.saveWatchlist}
-            cancelFn={this.resetView}
+            saving={saving}
+            error={error}
+            onSave={this.onSave}
+            onClose={this.onCancel}
+          />}
+
+        {deleting &&
+          <DeleteWatchlistForm
+            watchlist={editedWatchlist}
+            saving={saving}
+            onDelete={this.onDelete}
+            onClose={this.onCancel}
           />}
 
         <div>
@@ -177,22 +191,15 @@ export class WatchlistsContainer extends Component {
             msgstyle={{ background: "#222230", display: "block" }}
           />
         </div>
-
-        {isViewState &&
-          <Watchlists
-            items={watchlists}
-            selectedItem={this.props.selected}
-            onClick={this.props.onChangeSelection}
-          />}
       </Panel>
     );
   }
 }
 
-function mapStateToProps(state, ownProps) {
+function mapStateToProps(state) {
   return {
-    watchlists: state.watchlists || [],
-    watchlistAsyncOp: state.watchlistAsyncOp
+    watchlists: selectWatchlists(state) || [],
+    asyncOp: state.watchlistAsyncOp
   };
 }
 

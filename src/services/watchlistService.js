@@ -4,7 +4,7 @@ import SampleWatchlists from "./SampleWatchlists";
 
 function cloneWatchlist(watchlist) {
   let newWL = Object.assign(new Watchlist(), watchlist);
-  newWL.stocks = []; //reset so we can create and assign watchlist items
+  newWL.stocks = []; //reset and create & assign watchlist items
   watchlist.stocks.forEach(stock => {
     let newStock = Object.assign(new Stock(), stock);
     newWL.stocks.push(newStock);
@@ -22,7 +22,7 @@ function cloneWatchlists(baseWatchlists) {
 
 export class WatchlistService {
   static watchlists = [];
-  static simDelay = 2000;
+  static simDelay = 1000;
 
   static getWatchlists() {
     let watchlists = [];
@@ -45,11 +45,10 @@ export class WatchlistService {
     localStorage.setItem("fpwatchlists", JSON.stringify(this.watchlists));
   }
 
-  static validateWatchlist(watchlist, isAdding = false) {
+  static validateWatchlist(watchlist) {
     let i = this.watchlists.findIndex(wl => wl.id === watchlist.id);
 
-    if (isAdding && i === -1 && this.watchlists.length === 10) {
-      //watchlist limit reached
+    if (watchlist.id === null && i === -1 && this.watchlists.length === 10) {
       return {
         status: "error",
         msg: "Can not create more than 10 watchlists"
@@ -60,7 +59,6 @@ export class WatchlistService {
       wl => wl.id !== watchlist.id && wl.name === watchlist.name
     );
     if (dupIndex !== -1) {
-      //duplicate name found
       return {
         status: "error",
         msg: "Watchlist with this name already exists"
@@ -81,6 +79,12 @@ export class WatchlistService {
 
   // save the edited/new watchlist
   static doSaveWatchlist(wlist) {
+    // Simulate error
+    // if (
+    //   wlist.name === "test55"  
+    // )
+    //   return { status: "error in name", data: null };
+    // end simulate error
     let i = this.watchlists.findIndex(wl => wl.id === wlist.id);
     let data = null;
 
@@ -142,7 +146,7 @@ export class WatchlistService {
       return result;
     }
     if (
-      stock.unitsOwned != parseInt(stock.unitsOwned, 10) ||
+      parseFloat(stock.unitsOwned) !== parseInt(stock.unitsOwned, 10) ||
       stock.unitsOwned < 1 ||
       stock.unitsOwned > 999999999
     ) {
@@ -176,10 +180,12 @@ export class WatchlistService {
   }
 
   static doSaveStock(stock, wlist) {
-    if (
-      stock.unitsOwned === "55" //REMOVE
-    )
-      return { status: "error in qty", data: null };
+    // Simulate error
+    // if (
+    //   stock.unitsOwned === "55"  
+    // )
+    //   return { status: "error in qty", data: null };
+    // end simulate error
     let wlIdx = this.watchlists.findIndex(w => w.id === wlist.id);
     if (wlIdx === -1) {
       return { status: "Watchlist does not exist", data: null };
@@ -212,6 +218,12 @@ export class WatchlistService {
   }
 
   static doRemoveWatchlist(wlist) {
+    // Simulate error
+    // if (
+    //   wlist.name === "test55"  
+    // )
+    //   return { status: "error in name", data: null };
+    // end simulate error
     let i = this.watchlists.findIndex(w => w.id === wlist.id);
 
     if (i !== -1) {
@@ -233,10 +245,10 @@ export class WatchlistService {
   }
 
   static doRemoveStock(stock, wlist) {
-    if (
-      stock.unitsOwned === "55" //REMOVE
-    )
-      return { status: "delete error in qty", data: null };
+    // if (
+    //   stock.unitsOwned === "55" //REMOVE
+    // )
+    //   return { status: "delete error in qty", data: null };
     let wlIdx = this.watchlists.findIndex(w => w.id === wlist.id);
     if (wlIdx === -1) {
       return { status: "success", data: null };

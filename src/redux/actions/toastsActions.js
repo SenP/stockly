@@ -1,20 +1,15 @@
 import * as actionTypes from "./actionTypes";
-import { AddToast, RemoveToast } from "../../utils/Toaster";
 
-export function addToast(stock, watchlist, op, msg, msgtype) {  
-  let id = AddToast(msg, msgtype);
+export function addToast(key, msg, msgtype, id) {    
   return {
     type: actionTypes.ADD_TOAST,
-    stock,
-    watchlist,
-    op,
+    key,
     msgtype,
     id
   };
 }
 
-export function removeToast(id) {  
-  RemoveToast(id);
+export function removeToast(id) {    
   return {
     type: actionTypes.REMOVE_TOAST,
     id

@@ -2,16 +2,14 @@ import * as types from "../actions/actionTypes.js";
 import initialState from "../initialState";
 
 export default function ToastsReducer(state = initialState.toasts, action) {
-  let { stock, watchlist, op, id, msgtype } = action;
+  let { key, id, msgtype } = action;
   switch (action.type) {
     case types.ADD_TOAST:
       return msgtype === "error"
         ? [
             ...state,
             {
-              stock,
-              watchlist,
-              op,
+              key,
               id
             }
           ]

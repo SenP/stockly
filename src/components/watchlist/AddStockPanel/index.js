@@ -1,10 +1,10 @@
 import React, { Component } from "react";
 import { instanceOf, object } from "prop-types";
 import { Button } from "react-bootstrap";
+// redux
 import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
-import getStockOps from "../../../redux/selectors/getStockOps";
-import getAddStockOp from "../../../redux/selectors/getAddStockOp";
+import selectStockOp from "../../../redux/selectors/selectStockOp";
 
 import { Stock, Watchlist, WatchlistService } from "../../../services";
 import * as watchlistActions from "../../../redux/actions/watchlistActions";
@@ -34,8 +34,8 @@ class AddStockPanel extends Component {
 
   resetOpStatus = () => {
     let { newStock, watchlist } = this.state;
-    let { removeStockOp } = this.props.actions;
-    removeStockOp(newStock, watchlist, "ADD");
+    let { removeAsyncOp } = this.props.actions;
+    removeAsyncOp(newStock, watchlist, "ADD");
   };
 
   setCompState = props => {
@@ -68,7 +68,7 @@ class AddStockPanel extends Component {
         adding: true
       }),
       () =>
-        this.props.actions.initStockOp(new Stock(), this.state.watchlist, "ADD")
+        this.props.actions.initAsyncOp(new Stock(), this.state.watchlist, "ADD")
     );
   };
 
@@ -81,16 +81,12 @@ class AddStockPanel extends Component {
     );
   };
 
-  onValidate = (stock, isAdding) => {
-    return WatchlistService.validateStock(
-      this.state.watchlist,
-      stock,
-      isAdding
-    );
+  onValidate = stock => {
+    return WatchlistService.validateStock(this.state.watchlist, stock, true);
   };
 
   handleChange = newStock => {
-    this.props.actions.updateAddStockOp(this.state.watchlist, newStock);
+    this.props.actions.updateAsyncOp(this.state.watchlist, newStock, "ADD");
   };
 
   onCancel = () => {
@@ -138,7 +134,7 @@ class AddStockPanel extends Component {
 
 function mapStateToProps(state, ownProps) {
   return {
-    addStockOp: getAddStockOp(getStockOps(state), ownProps.watchlist)
+    addStockOp: selectStockOp(state, null, ownProps.watchlist, "ADD")
   };
 }
 

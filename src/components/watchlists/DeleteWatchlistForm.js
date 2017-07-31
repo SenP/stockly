@@ -2,17 +2,16 @@ import React, { Component } from "react";
 import { instanceOf, func, bool } from "prop-types";
 import { Button } from "react-bootstrap";
 
-import { Stock, Watchlist } from "../../../services";
-import Message from "../../common/Message";
+import { Watchlist } from "../../services";
+import Message from "../common/Message";
 
 const msgClasses = {
   error: "msg text-center text-danger",
   info: "msg text-center text-info"
 };
 
-export default class DeleteStockForm extends Component {
+export default class DeleteWatchlistForm extends Component {
   static propTypes = {
-    stock: instanceOf(Stock).isRequired,
     watchlist: instanceOf(Watchlist).isRequired,
     onDelete: func.isRequired,
     onClose: func.isRequired,
@@ -33,10 +32,10 @@ export default class DeleteStockForm extends Component {
     this.setCompState(newProps);
   }
 
-  setCompState = ({ saving, stock }) => {
+  setCompState = ({ saving, watchlist }) => {
     let msg = saving
-      ? `Deleting ${stock.name}...please wait.`
-      : `  Delete '${stock.name}' ?  `;
+      ? `Deleting ${watchlist.name}...please wait.`
+      : `  Delete '${watchlist.name}' watchlist?  `;
     this.setState(() => ({
       msg,
       msgClass: saving ? msgClasses.info : msgClasses.error,
@@ -45,55 +44,48 @@ export default class DeleteStockForm extends Component {
   };
 
   submitForm = evt => {
-    let { stock, watchlist, onDelete } = this.props;
-    onDelete(stock, watchlist);
+    let { watchlist, onDelete } = this.props;
+    onDelete(watchlist);
   };
 
   closeForm = () => {
-    let { stock, onClose } = this.props;
     this.setState(() => ({
-      stock: Object.assign(new Stock(), stock),
       msg: "",
-      msgClass: ""
+      msgClass: "",
+      saving: false
     }));
-    onClose();
+    this.props.onClose();
   };
 
   render = () => {
-    let { stock, saving } = this.props;
+    let { saving } = this.props;
 
     return (
-      <tr>
-        <td>
-          {stock.code}
-        </td>
-        <td colSpan="8" style={{ textAlign: "center" }}>
-          <span style={{ textAlign: "center", marginTop: "10px" }}>
-            <Message msgtext={this.state.msg} msgclass={this.state.msgClass} />
-          </span>
-        </td>
-        <td>
-          <span>
+      <div>
+        <div className="text-center" style={{ margin: "10px" }}>
+          <Message msgtext={this.state.msg} msgclass={this.state.msgClass} />
+        </div>
+        <div className="text-center">
             <Button
-              bsSize="xsmall"
               bsStyle="danger"
-              style={{ marginRight: "10px" }}
+              bsSize="xsmall"
+              style={{ marginLeft: "5px" }}
               onClick={this.submitForm}
               disabled={saving}
             >
               Yes
             </Button>
             <Button
-              bsSize="xsmall"
               bsStyle="default"
+              bsSize="xsmall"
+              style={{ marginLeft: "5px" }}
               onClick={this.closeForm}
               disabled={saving}
             >
               No
             </Button>
-          </span>
-        </td>
-      </tr>
+        </div>
+      </div>
     );
   };
 }

@@ -48,9 +48,50 @@ export function deleteWatchlistSuccess(watchlist) {
   };
 }
 
-export function resetOpStatus() {
+export function initAsyncOp(watchlist, op) {
   return {
-    type: actions.RESET_WATCHLIST_OP_STATUS
+    type: actions.INIT_ASYNC_OP_WATCHLIST,
+    watchlist,
+    op
   };
 }
 
+export function startAsyncOp(watchlist, op) {
+  return {
+    type: actions.START_ASYNC_OP_WATCHLIST,
+    watchlist,
+    op
+  };
+}
+
+export function updateAsyncOp(watchlist, op) {
+  return {
+    type: actions.UPDATE_ASYNC_OP_WATCHLIST,
+    watchlist,
+    op
+  };
+}
+
+export function endAsyncOpSuccess(watchlist, op) {
+  return {
+    type: actions.END_ASYNC_OP_WATCHLIST_SUCCESS,
+    watchlist,
+    op,
+    error: null
+  };
+}
+
+export function endAsyncOpError(watchlist, op, error = null) {
+  return {
+    type: actions.END_ASYNC_OP_WATCHLIST_ERROR,
+    watchlist,
+    op,
+    error
+  };
+}
+
+export function resetAsyncOp() {
+  return {
+    type: actions.RESET_ASYNC_OP_WATCHLIST
+  };
+}
