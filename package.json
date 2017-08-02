@@ -12,7 +12,6 @@
     "@types/react-tap-event-plugin": "0.0.30",
     "@types/redux": "^3.6.0",
     "@types/redux-devtools-extension": "^2.13.2",
-    "axios": "^0.16.1",
     "highcharts": "^5.0.12",
     "jsonp": "^0.2.1",
     "prop-types": "^15.5.10",
@@ -27,8 +26,7 @@
     "react-toastify": "^1.7.0",
     "redux": "^3.6.0",
     "redux-devtools-extension": "^2.13.2",
-    "redux-immutable-state-invariant": "^2.0.0",
-    "rxjs": "^5.4.0"
+    "redux-immutable-state-invariant": "^2.0.0"
   },
   "devDependencies": {
     "cross-env": "^5.0.0",
