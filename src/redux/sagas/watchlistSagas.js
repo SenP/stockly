@@ -10,7 +10,6 @@ import {
 import { WatchlistService, QuotesService } from "../../services";
 import * as actionTypes from "../actions/actionTypes";
 import * as watchlistActions from "../actions/watchlistActions";
-import * as watchlistsActions from "../actions/watchlistsActions";
 import * as quotesActions from "../actions/quotesActions";
 
 function deleteCurrentWatchlist({ type, watchlist }, WL) {
