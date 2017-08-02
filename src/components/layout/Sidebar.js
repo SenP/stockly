@@ -17,7 +17,7 @@ const headerStyle = {
 function Sidebar({ children }) {
   return (
     <div style={sidebarStyle}>
-      <h3 style={headerStyle}>FinPro</h3>
+      <h3 style={headerStyle}>Stockly</h3>
       {children}
     </div>
   );
