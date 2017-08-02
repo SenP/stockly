@@ -2,6 +2,10 @@
   "name": "stockly-react",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": "7.5.0",
+    "npm": "5.2.0"
+  },
   "dependencies": {
     "@types/prop-types": "^15.5.1",
     "@types/react-autosuggest": "^8.0.1",
