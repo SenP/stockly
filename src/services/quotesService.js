@@ -72,27 +72,18 @@ export class QuotesService {
     });
   }
 
-  // Utility method to load list of tickers from tickers-list.json
-  static loadTickers() {
-    if (this.tickers.length === 0) {
-      this.tickers = Tickers;
-    }
-    return this.tickers;
-  }
-
   static searchTickers(value, exact = false) {
     if (exact) {
-      return this.tickers.filter(
+      return Tickers.filter(
         ticker => ticker.code === value || ticker.name === value
       );
     }
     let inputValue = value.trim().toLowerCase();
     let inputLength = inputValue.length;
-    return this.tickers.filter(
+    return Tickers.filter(
       ticker =>
         ticker.code.toLowerCase().slice(0, inputLength) === inputValue ||
         ticker.name.toLowerCase().slice(0, inputLength) === inputValue
     );
   }
 }
-

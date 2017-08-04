@@ -38,7 +38,6 @@ class App extends Component {
 
   componentDidMount() {
     this.props.actions.loadWatchlists();
-    QuotesService.loadTickers();
     this.setNextQuotesUpdate();
   }
 

@@ -6,7 +6,6 @@ import getToast from "../selectors/getToast";
 import { AddToast, RemoveToast } from "../../utils/Toaster";
 
 function* addToast(action) {
-  // TODO: Create key based on stock/watchlist op
   let { type, stock, watchlist, op } = action;
   let key, opMsg, msgType;
   switch (type) {

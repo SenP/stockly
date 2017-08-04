@@ -45,7 +45,6 @@ function* deleteWatchlist({ watchlist }) {
       yield put(watchlistsActions.deleteWatchlistSuccess(watchlist));
       watchlist.stocks.forEach(QuotesService.deregister.bind(QuotesService));
       yield put(watchlistsActions.endAsyncOpSuccess(watchlist, op));
-      // TODO: remove pending async op for stocks
     } else {
       throw res.status;
     }

@@ -14,21 +14,19 @@ const toastErrorOptions = {
 };
 
 export function AddToast(msg, msgtype) {
-  if (msgtype === "success") {
-    return toast.success(
-      <div style={{ color: "green" }}>
-        {msg}
-      </div>,
-      toastSuccessOptions
-    );
-  } else if (msgtype === "error") {
-    return toast.error(
-      <div style={{ color: "red" }}>
-        {msg}
-      </div>,
-      toastErrorOptions
-    );
-  } else return null;
+  return msgtype === "success"
+    ? toast.success(
+        <div>
+          {msg}
+        </div>,
+        toastSuccessOptions
+      )
+    : toast.error(
+        <div>
+          {msg}
+        </div>,
+        toastErrorOptions
+      );
 }
 
 export function RemoveToast(id) {

@@ -40,11 +40,8 @@ export default function StocksOpReducer(
     }
 
     case types.UPDATE_ASYNC_OP_STOCK: {
-      // TODO: modify for EDIT op
       let stockOp = getStockOp(state, stock, watchlist, op);
-      let idx = state.findIndex(
-        stockOp => stockOp.watchlist.id === watchlist.id && stockOp.op === op
-      );
+      let idx = getStockOpIndex(state, stock, watchlist, op);
       return !stockOp
         ? state
         : [
