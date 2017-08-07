@@ -8,12 +8,12 @@ import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
 import * as quotesActions from "../../redux/actions/quotesActions";
 import { loadWatchlists } from "../../redux/actions/watchlistsActions";
+import selectWatchlists from "../../redux/selectors/selectWatchlists";
 
 // components
 import Sidebar from "../layout/Sidebar";
 import Content from "../layout/Content";
 import Watchlists from "../watchlists";
-import { QuotesService } from "../../services";
 import DashboardButton from "../dashboard/DashboardButton";
 import ConfigInterval from "./ConfigInterval";
 
@@ -33,8 +33,6 @@ class App extends Component {
     selectedWatchlist: null,
     refInterval: 300
   };
-
-  quotesTimer;
 
   componentDidMount() {
     this.props.actions.loadWatchlists();
@@ -118,9 +116,9 @@ class App extends Component {
   }
 }
 
-function mapStateToProps(state, ownProps) {
+function mapStateToProps(state) {
   return {
-    watchlists: state.watchlists || []
+    watchlists: selectWatchlists(state) || []
   };
 }
 

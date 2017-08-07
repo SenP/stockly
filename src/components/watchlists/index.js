@@ -5,6 +5,7 @@ import { Panel } from "react-bootstrap";
 import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
 import selectWatchlists from "../../redux/selectors/selectWatchlists";
+import selectWatchlistOp from "../../redux/selectors/selectWatchlistOp";
 
 import { Watchlist } from "../../services";
 import * as watchlistsActions from "../../redux/actions/watchlistsActions";
@@ -70,7 +71,7 @@ class WatchlistsContainer extends Component {
           saving: false,
           error: null
         };
-      });      
+      });
     }
   };
 
@@ -109,9 +110,9 @@ class WatchlistsContainer extends Component {
       : this.props.actions.editWatchlist(wl);
   };
 
-  onDelete = () => {    
-    this.props.actions.deleteWatchlist(this.state.editedWatchlist);    
-    this.props.onChangeSelection(null);    
+  onDelete = () => {
+    this.props.actions.deleteWatchlist(this.state.editedWatchlist);
+    this.props.onChangeSelection(null);
   };
 
   onCancel = () => {
@@ -199,7 +200,7 @@ class WatchlistsContainer extends Component {
 function mapStateToProps(state) {
   return {
     watchlists: selectWatchlists(state) || [],
-    asyncOp: state.watchlistAsyncOp
+    asyncOp: selectWatchlistOp(state)
   };
 }
 

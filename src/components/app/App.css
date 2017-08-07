@@ -50,3 +50,7 @@
 .panel-watchlist .panel-body {
   padding: 0px;
 }
+
+.toastify-content {
+  font-size: 1.3rem;  
+}
