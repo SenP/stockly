@@ -32,18 +32,17 @@
     "react-toastify": "^2.0.0-rc.3",
     "redux": "^3.6.0",
     "redux-devtools-extension": "^2.13.2",
-    "redux-immutable-state-invariant": "^2.0.0",
     "redux-saga": "^0.15.6"
   },
   "devDependencies": {
-    "cross-env": "^5.0.0",
+    "@types/redux-immutable-state-invariant": "^2.0.0",
     "eslint-import-resolver-node": "^0.3.0",
     "eslint-import-resolver-webpack": "^0.8.1",
     "eslint-plugin-import": "^2.3.0",
-    "react-scripts": "1.0.7"
+    "react-scripts": "1.0.7",
+    "redux-immutable-state-invariant": "^2.0.0"
   },
   "scripts": {
-    "start1": "cross-env NODE_PATH=src/:src/components:src/assets:src/services react-scripts start",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
