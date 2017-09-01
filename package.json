@@ -40,7 +40,8 @@
     "eslint-import-resolver-webpack": "^0.8.1",
     "eslint-plugin-import": "^2.3.0",
     "react-scripts": "1.0.7",
-    "redux-immutable-state-invariant": "^2.0.0"
+    "redux-immutable-state-invariant": "^2.0.0",
+    "why-did-you-update": "0.0.8"
   },
   "scripts": {
     "start": "react-scripts start",
