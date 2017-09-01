@@ -3,21 +3,18 @@ import { number, object } from 'prop-types';
 import { Grid, Row, Col } from 'react-bootstrap';
 import injectTapEventPlugin from 'react-tap-event-plugin';
 import { ToastContainer } from 'react-toastify';
-
 // redux
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { fetchQuotes } from '../../redux/actions/quotesActions';
-import { loadWatchlists } from '../../redux/actions/watchlistsActions';
-import selectWatchlists from '../../redux/selectors/selectWatchlists';
-
+import { loadWatchlists, selectWatchlist } from '../../redux/actions/watchlistsActions';
+import selectQuotesInterval from '../../redux/selectors/selectQuotesInterval';
 // components
 import Sidebar from '../layout/Sidebar';
 import Content from '../layout/Content';
 import Watchlists from '../watchlists';
 import DashboardButton from '../dashboard/DashboardButton';
 import Config from '../Config';
-
 // styles
 import './App.css';
 import { sidebarColStyle, sidebarSpacingStyle, contentColStyle } from './App.styles.js';
@@ -41,7 +38,6 @@ class App extends Component {
 	}
 
 	componentWillReceiveProps(nextProps) {
-		console.log('receiving props:', nextProps);
 		if (nextProps.quotesRefInterval !== this.props.quotesRefInterval) {
 			clearTimeout(this.quotesTimer);
 			this.quotesRefInterval = nextProps.quotesRefInterval;
@@ -63,8 +59,11 @@ class App extends Component {
 	};
 
 	setQuotesTimer = () => {
-		console.log(this.quotesRefInterval);
 		this.quotesTimer = setTimeout(this.updateQuotes, this.quotesRefInterval * 1000);
+	};
+
+	showDashboard = () => {
+		this.props.actions.selectWatchlist(null);
 	};
 
 	render() {
@@ -86,7 +85,7 @@ class App extends Component {
 						<Col lg={2} md={4} className="hidden-sm hidden-xs" style={sidebarColStyle}>
 							<Sidebar>
 								<div style={sidebarSpacingStyle}>
-									<DashboardButton onClick={this.onSelect} />
+									<DashboardButton onClick={this.showDashboard} />
 								</div>
 								<div style={sidebarSpacingStyle}>
 									<Watchlists />
@@ -109,13 +108,13 @@ class App extends Component {
 
 function mapStateToProps(state) {
 	return {
-		quotesRefInterval: state.quotesRefInterval
+		quotesRefInterval: selectQuotesInterval(state)
 	};
 }
 
 function mapDispatchToProps(dispatch) {
 	return {
-		actions: bindActionCreators({ fetchQuotes, loadWatchlists }, dispatch)
+		actions: bindActionCreators({ fetchQuotes, loadWatchlists, selectWatchlist }, dispatch)
 	};
 }
 

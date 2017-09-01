@@ -16,7 +16,7 @@ export function loadWatchlistsSuccess(watchlists) {
 export function selectWatchlist(watchlist) {
 	return {
 		type: actions.SELECT_WATCHLIST,
-		watchlistId: watchlist.id
+		watchlistId: (watchlist && watchlist.id) || null
 	};
 }
 

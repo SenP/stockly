@@ -1,3 +1,3 @@
-export default function selectWatchlists(state) {
-  return state.watchlists;
+export default function selectWatchlists({ watchlistsById }) {
+	return Object.keys(watchlistsById).map(id => watchlistsById[id]);
 }

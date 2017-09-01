@@ -7,8 +7,8 @@ import toastsReducer from './toastsReducer';
 import quotesRefIntervalReducer from './quotesRefIntervalReducer';
 
 const rootReducer = combineReducers({
-	watchlists: watchlistsReducer,
-	selectedWatchlist: selectedWatchlistReducer,
+	watchlistsById: watchlistsReducer,
+	selectedWatchlistId: selectedWatchlistReducer,
 	watchlistAsyncOp: watchlistOpReducer,
 	stocksAsyncOp: stocksOpReducer,
 	toasts: toastsReducer,

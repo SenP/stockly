@@ -2,7 +2,7 @@ import * as types from '../actions/actionTypes.js';
 import initialState from '../initialState';
 import watchlistReducer from './watchlistReducer';
 
-export default function(state = initialState.watchlists, action) {
+export default function(state = initialState.watchlistsById, action) {
 	switch (action.type) {
 		case types.LOAD_WATCHLISTS_SUCCESS:
 			return loadWatchlists(action.watchlists);
@@ -31,7 +31,7 @@ export default function(state = initialState.watchlists, action) {
 function loadWatchlists(watchlists = []) {
 	// Transform watchlists array into hash
 	return watchlists.reduce((watchlistsHash, wl) => {
-		wl.stocks = wl.stocks.reduce((stocksHash, stock) => {
+		wl.stocksById = wl.stocks.reduce((stocksHash, stock) => {
 			stocksHash[stock.code] = stock;
 			return stocksHash;
 		}, {});

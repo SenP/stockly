@@ -1,10 +1,11 @@
 import React, { Component } from 'react';
-import { objectOf, instanceOf } from 'prop-types';
+import { arrayOf, instanceOf } from 'prop-types';
 import { Row, Col } from 'react-bootstrap';
 // redux
 import { connect } from 'react-redux';
 import selectWatchlists from '../../redux/selectors/selectWatchlists';
-
+import selectSelectedWatchlist from '../../redux/selectors/selectSelectedWatchlist';
+// deps
 import { Watchlist } from '../../services';
 import Charts from './ChartsComponent';
 import StocksTable from './StocksTable';
@@ -14,11 +15,11 @@ import './styles.css';
 
 class DashboardContainer extends Component {
 	static propTypes = {
-		watchlists: objectOf(instanceOf(Watchlist))
+		watchlists: arrayOf(instanceOf(Watchlist))
 	};
 
 	static defaultProps = {
-		watchlists: {}
+		watchlists: []
 	};
 
 	state = {
@@ -96,6 +97,7 @@ class DashboardContainer extends Component {
 	};
 
 	render() {
+		if (this.props.selectedWatchlist) return null;
 		return (
 			<div>
 				<Summary {...this.state} />
@@ -124,7 +126,8 @@ class DashboardContainer extends Component {
 
 function mapStateToProps(state) {
 	return {
-		watchlists: selectWatchlists(state) || {}
+		watchlists: selectWatchlists(state),
+		selectedWatchlist: selectSelectedWatchlist(state)
 	};
 }
 

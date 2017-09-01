@@ -1,10 +1,11 @@
 import React, { Component } from 'react';
-import { func, instanceOf, object, objectOf } from 'prop-types';
+import { func, instanceOf, object, arrayOf } from 'prop-types';
 import { Panel } from 'react-bootstrap';
 // redux
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import selectWatchlists from '../../redux/selectors/selectWatchlists';
+import selectSelectedWatchlist from '../../redux/selectors/selectSelectedWatchlist';
 import selectWatchlistOp from '../../redux/selectors/selectWatchlistOp';
 // deps
 import { Watchlist } from '../../services';
@@ -17,14 +18,14 @@ import Message from '../common/Message';
 
 class WatchlistsContainer extends Component {
 	static propTypes = {
-		watchlists: objectOf(instanceOf(Watchlist)),
+		watchlists: arrayOf(instanceOf(Watchlist)),
 		selected: instanceOf(Watchlist),
 		onChangeSelection: func,
 		asyncOp: object
 	};
 
 	static defaultProps = {
-		watchlists: {},
+		watchlists: [],
 		selected: null,
 		onChangeSelection: () => {},
 		asyncOp: null
@@ -154,31 +155,34 @@ class WatchlistsContainer extends Component {
 
 		return (
 			<Panel header={Title} bsStyle="primary" className="panel-watchlists">
-				{Object.keys(watchlists).length === 0 && isViewState && emptylistMsg}
+				{watchlists.length === 0 && isViewState && emptylistMsg}
 
-				{isViewState &&
+				{isViewState && (
 					<Watchlists
-						items={watchlists}
-						selectedItem={this.props.selected}
+						watchlists={watchlists}
+						selected={this.props.selected}
 						onClick={this.onChangeSelection}
-					/>}
+					/>
+				)}
 
-				{(adding || editing) &&
+				{(adding || editing) && (
 					<WatchlistForm
 						watchlist={editedWatchlist}
 						saving={saving}
 						error={error}
 						onSave={this.onSave}
 						onClose={this.onCancel}
-					/>}
+					/>
+				)}
 
-				{deleting &&
+				{deleting && (
 					<DeleteWatchlistForm
 						watchlist={editedWatchlist}
 						saving={saving}
 						onDelete={this.onDelete}
 						onClose={this.onCancel}
-					/>}
+					/>
+				)}
 
 				<div>
 					<Message
@@ -195,7 +199,7 @@ class WatchlistsContainer extends Component {
 function mapStateToProps(state) {
 	return {
 		watchlists: selectWatchlists(state),
-		selected: selectWatchlists(state)[state.selectedWatchlist],
+		selected: selectSelectedWatchlist(state),
 		asyncOp: selectWatchlistOp(state)
 	};
 }

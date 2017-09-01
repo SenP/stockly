@@ -1,27 +1,27 @@
 import React from 'react';
-import { objectOf, instanceOf, func } from 'prop-types';
+import { arrayOf, instanceOf, func } from 'prop-types';
 import { ListGroup, ListGroupItem } from 'react-bootstrap';
 
 import { Watchlist } from '../../services';
 
 Watchlists.propTypes = {
-	items: objectOf(instanceOf(Watchlist)),
-	selectedItem: instanceOf(Watchlist),
+	watchlists: arrayOf(instanceOf(Watchlist)),
+	selected: instanceOf(Watchlist),
 	onClick: func
 };
 
-function Watchlists({ items, selectedItem, onClick }) {
+function Watchlists({ watchlists = [], selected = null, onClick }) {
 	return (
 		<ListGroup>
-			{Object.values(items).map(wl =>
+			{watchlists.map(watchlist => (
 				<ListGroupItem
-					key={wl.id}
-					active={selectedItem && wl.id === selectedItem.id}
-					onClick={() => onClick(wl)}
+					key={watchlist.id}
+					active={selected && watchlist.id === selected.id}
+					onClick={() => onClick(watchlist)}
 				>
-					{wl.name}
+					{watchlist.name}
 				</ListGroupItem>
-			)}
+			))}
 		</ListGroup>
 	);
 }

@@ -6,14 +6,14 @@ export default function watchlistReducer(state = { stocks: {} }, action) {
 	switch (action.type) {
 		case types.SAVE_WATCHLIST_SUCCESS:
 			return Object.assign(new WatchlistModel(), action.watchlist, {
-				stocks: state.stocks
+				stocksByCode: state.stocksByCode
 			});
 
 		case types.FETCH_QUOTES_SUCCESS:
 		case types.SAVE_STOCK_SUCCESS:
 		case types.DELETE_STOCK_SUCCESS:
 			return Object.assign(new WatchlistModel(), state, {
-				stocks: stocksReducer(state.stocks, action)
+				stocksByCode: stocksReducer(state.stocksByCode, action)
 			});
 
 		default:
