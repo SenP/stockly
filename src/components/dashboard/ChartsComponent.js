@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import { object } from 'prop-types';
 import { Panel, Row, Col } from 'react-bootstrap';
 import ReactHighcharts from 'react-highcharts';

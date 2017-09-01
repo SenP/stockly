@@ -37,14 +37,14 @@ class DashboardContainer extends Component {
 	};
 
 	componentDidMount() {
-		this.updateDashboard();
+		this.updateDashboardData();
 	}
 
 	componentWillReceiveProps(nextProps) {
-		this.setState(() => ({ watchlists: nextProps.watchlists }), this.updateDashboard);
+		this.setState(() => ({ watchlists: nextProps.watchlists }), this.updateDashboardData);
 	}
 
-	updateDashboard = () => {
+	updateDashboardData = () => {
 		let portfolioDaychange, portfolioPnL, portfolioValue;
 		let stocksMap = new Map();
 		portfolioDaychange = portfolioPnL = portfolioValue = 0;
@@ -54,7 +54,7 @@ class DashboardContainer extends Component {
 			portfolioPnL += wl.totalPnL;
 			portfolioDaychange += wl.totalDayChange;
 			// update all stocks map
-			Object.values(wl.stocks).forEach(stock => {
+			Object.values(wl.stocksByCode).forEach(stock => {
 				let stockMap = stocksMap.get(stock.code);
 				if (stockMap) {
 					stockMap.marketValue += stock.marketValue;
@@ -75,10 +75,10 @@ class DashboardContainer extends Component {
 			portfolioDaychange,
 			stocksMap
 		}));
-		this.updateCharts();
+		this.updateChartsData();
 	};
 
-	updateCharts = () => {
+	updateChartsData = () => {
 		let chartData = {
 			dataLabels: [],
 			marketValues: [],
@@ -88,7 +88,6 @@ class DashboardContainer extends Component {
 
 		Object.values(this.state.watchlists).forEach(wl => {
 			chartData.dataLabels.push(wl.name);
-
 			chartData.marketValues.push([wl.name, wl.totalMarketValue]);
 			chartData.pnlValues.push(wl.totalPnL);
 			chartData.daychangeValues.push(wl.totalDayChange);

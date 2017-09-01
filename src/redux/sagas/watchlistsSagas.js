@@ -1,5 +1,5 @@
 import { call, put, takeEvery } from 'redux-saga/effects';
-import { WatchlistService, QuotesService } from '../../services';
+import { WatchlistService } from '../../services';
 import * as watchlistsActions from '../actions/watchlistsActions';
 import * as quotesActions from '../../redux/actions/quotesActions';
 import * as actionTypes from '../actions/actionTypes';
@@ -8,9 +8,6 @@ function* loadWatchlists() {
 	try {
 		const watchlists = yield call([WatchlistService, 'getWatchlists']);
 		yield put(watchlistsActions.loadWatchlistsSuccess(watchlists));
-		Object.values(watchlists).forEach(wl => {
-			Object.values(wl.stocks).forEach(QuotesService.register.bind(QuotesService));
-		});
 		yield put(quotesActions.fetchQuotes());
 	} catch (error) {
 		console.log(error);
@@ -40,7 +37,6 @@ function* deleteWatchlist({ watchlist }) {
 		const res = yield call([WatchlistService, 'deleteWatchlist'], watchlist);
 		if (res.status === 'success') {
 			yield put(watchlistsActions.deleteWatchlistSuccess(watchlist));
-			Object.values(watchlist.stocks).forEach(QuotesService.deregister.bind(QuotesService));
 			yield put(watchlistsActions.endAsyncOpSuccess(watchlist, op));
 		} else {
 			throw res.status;

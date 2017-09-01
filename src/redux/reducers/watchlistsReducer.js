@@ -1,5 +1,6 @@
 import * as types from '../actions/actionTypes.js';
 import initialState from '../initialState';
+import { Watchlist } from '../../services';
 import watchlistReducer from './watchlistReducer';
 
 export default function(state = initialState.watchlistsById, action) {
@@ -31,11 +32,13 @@ export default function(state = initialState.watchlistsById, action) {
 function loadWatchlists(watchlists = []) {
 	// Transform watchlists array into hash
 	return watchlists.reduce((watchlistsHash, wl) => {
-		wl.stocksById = wl.stocks.reduce((stocksHash, stock) => {
+		let wlHashed = Object.assign(new Watchlist(), wl);
+		wlHashed.stocksByCode = wl.stocks.reduce((stocksHash, stock) => {
 			stocksHash[stock.code] = stock;
 			return stocksHash;
 		}, {});
-		watchlistsHash[wl.id] = wl;
+		delete wlHashed.stocks;
+		watchlistsHash[wl.id] = wlHashed;
 		return watchlistsHash;
 	}, {});
 }

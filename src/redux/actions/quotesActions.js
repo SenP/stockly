@@ -3,7 +3,7 @@ import * as actions from './actionTypes';
 export function fetchQuotes(stock) {
 	return {
 		type: actions.FETCH_QUOTES,
-		stock
+		stock: (stock && stock.code.split(':')[0]) || null
 	};
 }
 

@@ -1,72 +1,51 @@
-import { Quote } from './quoteModel';
 import Tickers from '../assets/tickers-list.json';
-import jsonp from 'jsonp';
+import fetchJsonp from 'fetch-jsonp';
 
 export class QuotesService {
 	static base_url = 'https://finance.google.com/finance/info';
-	static quotesMap = new Map();
 	static tickers = []; // List of all supported tickers in NASDAQ, NYSE and ASX exchanges
 
-	static register(stock) {
-		if (!this.quotesMap.get(stock.code)) {
-			this.quotesMap.set(stock.code, new Quote());
-		}
-	}
-
-	static deregister(stock) {
-		this.quotesMap.delete(stock.code);
-	}
-
-	static reset() {
-		this.quotesMap.clear();
-	}
-
 	// Refresh the quotes map with latest quotes from Google Finance API
-	static refreshQuotes(stock) {
-		let stockcodes = '';
-
-		if (stock) {
-			stockcodes = stock.code.split(':')[0]; //.reverse().join(":");
-		} else if (this.quotesMap.size > 0) {
-			// create stock codes list, each stock code is in format 'exchange:stockcode'
-			this.quotesMap.forEach((value, key) => {
-				let stockcode = key.split(':')[0]; //.reverse().join(":");
-				stockcodes = `${stockcode},${stockcodes}`;
-			});
+	static async refreshQuotes(stockCodes) {
+		// console.log(stockCodes);
+		if (stockCodes) {
+			let gUrl = `${this.base_url}?q=${stockCodes}&format=json`;
+			try {
+				let response = await fetchJsonp(gUrl);
+				let newQuotes = await response.json();
+				return this.createQuotesMap(newQuotes);
+			} catch (err) {
+				console.error('error fetching, switching to random quotes.....', err.message);
+				return this.createRandomQuotesMap();
+			}
 		}
-
-		if (stockcodes !== '') {
-			let gUrl = `${this.base_url}?q=${stockcodes}&format=json`;
-
-			return new Promise((resolve, reject) => {
-				jsonp(gUrl, null, (err, newQuotes) => {
-					if (err) {
-						console.error(err.message);
-						resolve(null);
-					} else {
-						this.updateQuotesMap(newQuotes);
-						if (stock) {
-							let newQuote = this.quotesMap.get(stock.code);
-							resolve(new Map().set(stock.code, newQuote));
-						}
-						resolve(this.quotesMap);
-					}
-				});
-			});
-		}
-		return Promise.resolve(null);
+		return null;
 	}
 
 	// Update the quotes map with the new quote values from API (called from refreshQuotes method)
-	static updateQuotesMap(newquotes) {
+	static createQuotesMap(newquotes) {
+		let quotesMap = new Map();
 		newquotes.forEach(newquote => {
-			let quote = this.quotesMap.get(newquote.t + ':' + newquote.e);
-			if (quote) {
-				quote.lastPrice = parseFloat(newquote.l.replace(',', '')) * (1 + (Math.random() > 0.5 ? 1 : -1) * 0.1);
-				quote.change = parseFloat(newquote.c.replace(',', '')) + (Math.random() - 0.5);
-				quote.percentChange = parseFloat(newquote.cp) + (Math.random() - 0.5);
-			}
+			let quote = {};
+			quote.lastPrice = parseFloat(newquote.l.replace(',', '')) * (1 + (Math.random() > 0.5 ? 1 : -1) * 0.1);
+			quote.change = parseFloat(newquote.c.replace(',', '')) + (Math.random() - 0.5);
+			quote.percentChange = parseFloat(newquote.cp) + (Math.random() - 0.5);
+			quotesMap.set(newquote.t + ':' + newquote.e, quote);
 		});
+		return quotesMap;
+	}
+
+	// Update the quotes map with random quote values - fallback if API call fails
+	static createRandomQuotesMap(newquotes) {
+		let quotesMap = new Map();
+		newquotes.forEach(newquote => {
+			let quote = {};
+			quote.lastPrice = 1 + (Math.random() > 0.5 ? 1 : -1) * 0.1;
+			quote.change = Math.random() - 0.5;
+			quote.percentChange = Math.random() - 0.5;
+			quotesMap.set(newquote.t + ':' + newquote.e, quote);
+		});
+		return quotesMap;
 	}
 
 	static searchTickers(value, exact = false) {

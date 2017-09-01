@@ -35,20 +35,20 @@ export class Watchlist {
 	description = '';
 	owner = '';
 	createdOn = new Date();
-	stocks = [];
+	stocksByCode = {};
 
 	get totalMarketValue() {
-		let total = Object.values(this.stocks).reduce((totalV, wl) => totalV + wl.marketValue, 0);
+		let total = Object.values(this.stocksByCode).reduce((totalV, stock) => totalV + stock.marketValue, 0);
 		return parseFloat(total.toFixed(2));
 	}
 
 	get totalDayChange() {
-		let total = Object.values(this.stocks).reduce((totalV, wl) => totalV + wl.dayChange, 0);
+		let total = Object.values(this.stocksByCode).reduce((totalV, stock) => totalV + stock.dayChange, 0);
 		return parseFloat(total.toFixed(2));
 	}
 
 	get totalPnL() {
-		let total = Object.values(this.stocks).reduce((totalV, wl) => totalV + wl.netPnL, 0);
+		let total = Object.values(this.stocksByCode).reduce((totalV, stock) => totalV + stock.netPnL, 0);
 		return parseFloat(total.toFixed(2));
 	}
 }

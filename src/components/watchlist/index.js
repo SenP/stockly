@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { number, instanceOf } from 'prop-types';
+import { instanceOf } from 'prop-types';
 // redux
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
