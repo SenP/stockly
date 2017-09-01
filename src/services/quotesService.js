@@ -28,7 +28,7 @@ export class QuotesService {
 		if (stock) {
 			stockcodes = stock.code.split(':')[0];
 		} else if (this.quotesMap.size > 0) {
-			// create stock codes list, each stock code is in format 'exchange:stockcode'
+			// create stock codes list, exchage code not required now
 			this.quotesMap.forEach((value, key) => {
 				let stockcode = key.split(':')[0];
 				stockcodes = `${stockcode},${stockcodes}`;
