@@ -1,6 +1,6 @@
 import { Quote } from './quoteModel';
 import Tickers from '../assets/tickers-list.json';
-import jsonp from 'jsonp';
+import jsonp from 'fetch-jsonp';
 
 export class QuotesService {
 	static base_url = 'https://finance.google.com/finance/info';
@@ -22,7 +22,7 @@ export class QuotesService {
 	}
 
 	// Refresh the quotes map with latest quotes from Google Finance API
-	static refreshQuotes(stock) {
+	static async refreshQuotes(stock) {
 		let stockcodes = '';
 
 		if (stock) {
@@ -37,24 +37,24 @@ export class QuotesService {
 
 		if (stockcodes !== '') {
 			let gUrl = `${this.base_url}?q=${stockcodes}&format=json`;
+			let newQuotes;
 
-			return new Promise((resolve, reject) => {
-				jsonp(gUrl, null, (err, newQuotes) => {
-					if (err) {
-						console.error(err.message);
-						resolve(null);
-					} else {
-						this.updateQuotesMap(newQuotes);
-						if (stock) {
-							let newQuote = this.quotesMap.get(stock.code);
-							resolve(new Map().set(stock.code, newQuote));
-						}
-						resolve(this.quotesMap);
-					}
-				});
-			});
+			try {
+				let quotesRes = await jsonp(gUrl);
+				newQuotes = await quotesRes.json();
+			} catch (err) {
+				console.error('Error receiving quotes, swtiching to random quotes...');
+				newQuotes = this.generateRandomQuotes();
+			}
+
+			this.updateQuotesMap(newQuotes);
+			if (stock) {
+				let newQuote = this.quotesMap.get(stock.code);
+				return new Map().set(stock.code, newQuote);
+			}
+			return this.quotesMap;
 		}
-		return Promise.resolve(null);
+		return null;
 	}
 
 	// Update the quotes map with the new quote values from API (called from refreshQuotes method)
@@ -67,6 +67,21 @@ export class QuotesService {
 				quote.percentChange = parseFloat(newquote.cp) + (Math.random() - 0.5);
 			}
 		});
+	}
+
+	static generateRandomQuotes() {
+		let newQuotes = [];
+		this.quotesMap.forEach((quote, code) => {
+			let [t, e] = code.split(':');
+			newQuotes.push({
+				t,
+				e,
+				l: String(500 * Math.random()),
+				c: String(Math.random() - 0.5),
+				cp: String(Math.random() - 0.5)
+			});
+		});
+		return newQuotes;
 	}
 
 	static searchTickers(value, exact = false) {
