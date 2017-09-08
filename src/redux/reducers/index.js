@@ -9,9 +9,9 @@ import quotesRefIntervalReducer from './quotesRefIntervalReducer';
 const rootReducer = combineReducers({
 	watchlistsById: watchlistsReducer,
 	selectedWatchlistId: selectedWatchlistReducer,
-	watchlistAsyncOp: watchlistOpReducer,
-	stocksAsyncOp: stocksOpReducer,
-	toasts: toastsReducer,
+	watchlistOp: watchlistOpReducer,
+	stocksOpByKey: stocksOpReducer,
+	toastsByKey: toastsReducer,
 	quotesRefInterval: quotesRefIntervalReducer
 });
 

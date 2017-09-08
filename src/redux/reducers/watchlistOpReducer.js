@@ -1,37 +1,38 @@
-import * as actions from "../actions/actionTypes.js";
-import initialState from "../initialState";
+import * as actions from '../actions/actionTypes.js';
+import initialState from '../initialState';
 
-export default function(state = initialState.watchlistAsyncOp, action) {
-  switch (action.type) {
-    case actions.INIT_ASYNC_OP_WATCHLIST:
-      return {
-        watchlist: action.watchlist,
-        op: action.op,
-        status: "new",
-        error: null
-      };
+export default function(state = initialState.watchlistOp, action) {
+	if (!action.type.endsWith('WATCHLIST_OP')) {
+		return state;
+	}
 
-    case actions.START_ASYNC_OP_WATCHLIST:
-      return {
-        watchlist: action.watchlist,
-        op: action.op,
-        status: "pending",
-        error: null
-      };
+	switch (action.type) {
+		case actions.INIT_WATCHLIST_OP:
+			return {
+				watchlist: action.watchlist,
+				op: action.op,
+				status: 'new',
+				error: null
+			};
 
-    case actions.END_ASYNC_OP_WATCHLIST_ERROR:
-      return {
-        watchlist: action.watchlist,
-        op: action.op,
-        status: "complete",
-        error: action.error
-      };
+		case actions.START_WATCHLIST_OP:
+			return {
+				watchlist: action.watchlist,
+				op: action.op,
+				status: 'pending',
+				error: null
+			};
 
-    case actions.END_ASYNC_OP_WATCHLIST_SUCCESS:
-    case actions.RESET_ASYNC_OP_WATCHLIST:
-      return initialState.watchlistAsyncOp;
+		case actions.END_WATCHLIST_OP_ERROR:
+			return {
+				watchlist: action.watchlist,
+				op: action.op,
+				status: 'complete',
+				error: action.error
+			};
 
-    default:
-      return state;
-  }
+		case actions.END_WATCHLIST_OP_SUCCESS:
+		case actions.RESET_WATCHLIST_OP:
+			return initialState.watchlistOp;
+	}
 }

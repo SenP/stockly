@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "@types/fetch-jsonp": "^1.0.0",
+    "@types/jsonp": "^0.2.0",
     "@types/node": "^8.0.19",
     "@types/npm": "^2.0.28",
     "@types/prop-types": "^15.5.1",

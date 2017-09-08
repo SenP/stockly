@@ -57,7 +57,7 @@ export function deleteWatchlistSuccess(watchlist) {
 
 export function initAsyncOp(watchlist, op) {
 	return {
-		type: actions.INIT_ASYNC_OP_WATCHLIST,
+		type: actions.INIT_WATCHLIST_OP,
 		watchlist,
 		op
 	};
@@ -65,7 +65,7 @@ export function initAsyncOp(watchlist, op) {
 
 export function startAsyncOp(watchlist, op) {
 	return {
-		type: actions.START_ASYNC_OP_WATCHLIST,
+		type: actions.START_WATCHLIST_OP,
 		watchlist,
 		op
 	};
@@ -73,7 +73,7 @@ export function startAsyncOp(watchlist, op) {
 
 export function updateAsyncOp(watchlist, op) {
 	return {
-		type: actions.UPDATE_ASYNC_OP_WATCHLIST,
+		type: actions.UPDATE_WATCHLIST_OP,
 		watchlist,
 		op
 	};
@@ -81,7 +81,7 @@ export function updateAsyncOp(watchlist, op) {
 
 export function endAsyncOpSuccess(watchlist, op) {
 	return {
-		type: actions.END_ASYNC_OP_WATCHLIST_SUCCESS,
+		type: actions.END_WATCHLIST_OP_SUCCESS,
 		watchlist,
 		op,
 		error: null
@@ -90,7 +90,7 @@ export function endAsyncOpSuccess(watchlist, op) {
 
 export function endAsyncOpError(watchlist, op, error = null) {
 	return {
-		type: actions.END_ASYNC_OP_WATCHLIST_ERROR,
+		type: actions.END_WATCHLIST_OP_ERROR,
 		watchlist,
 		op,
 		error
@@ -99,6 +99,6 @@ export function endAsyncOpError(watchlist, op, error = null) {
 
 export function resetAsyncOp() {
 	return {
-		type: actions.RESET_ASYNC_OP_WATCHLIST
+		type: actions.RESET_WATCHLIST_OP
 	};
 }

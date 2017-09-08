@@ -7,45 +7,52 @@ export class QuotesService {
 
 	// Refresh the quotes map with latest quotes from Google Finance API
 	static async refreshQuotes(stockCodes) {
-		// console.log(stockCodes);
 		if (stockCodes) {
 			let gUrl = `${this.base_url}?q=${stockCodes}&format=json`;
+			let newQuotes;
+			let quotesMap;
 			try {
 				let response = await fetchJsonp(gUrl);
-				let newQuotes = await response.json();
-				return this.createQuotesMap(newQuotes);
+				newQuotes = await response.json();
 			} catch (err) {
-				console.error('error fetching, switching to random quotes.....', err.message);
-				return this.createRandomQuotesMap();
+				console.error('error fetching, switching to random quotes.....');
+				newQuotes = this.generateRandomQuotes(stockCodes);
 			}
+			quotesMap = this.updateQuotesMap(newQuotes);
+			if (stockCodes.split(',').length === 1) {
+				let newQuote = quotesMap.get(stockCodes);
+				return new Map().set(stockCodes, newQuote);
+			}
+			return quotesMap;
 		}
 		return null;
 	}
 
 	// Update the quotes map with the new quote values from API (called from refreshQuotes method)
-	static createQuotesMap(newquotes) {
+	static updateQuotesMap(newquotes) {
 		let quotesMap = new Map();
 		newquotes.forEach(newquote => {
 			let quote = {};
 			quote.lastPrice = parseFloat(newquote.l.replace(',', '')) * (1 + (Math.random() > 0.5 ? 1 : -1) * 0.1);
 			quote.change = parseFloat(newquote.c.replace(',', '')) + (Math.random() - 0.5);
 			quote.percentChange = parseFloat(newquote.cp) + (Math.random() - 0.5);
-			quotesMap.set(newquote.t + ':' + newquote.e, quote);
+			quotesMap.set(newquote.t, quote);
 		});
 		return quotesMap;
 	}
 
 	// Update the quotes map with random quote values - fallback if API call fails
-	static createRandomQuotesMap(newquotes) {
-		let quotesMap = new Map();
-		newquotes.forEach(newquote => {
-			let quote = {};
-			quote.lastPrice = 1 + (Math.random() > 0.5 ? 1 : -1) * 0.1;
-			quote.change = Math.random() - 0.5;
-			quote.percentChange = Math.random() - 0.5;
-			quotesMap.set(newquote.t + ':' + newquote.e, quote);
+	static generateRandomQuotes(stockCodes) {
+		let newQuotes = [];
+		stockCodes.split(',').forEach(code => {
+			newQuotes.push({
+				t: code,
+				l: String(500 * Math.random()),
+				c: String(Math.random() - 0.5),
+				cp: String(Math.random() - 0.5)
+			});
 		});
-		return quotesMap;
+		return newQuotes;
 	}
 
 	static searchTickers(value, exact = false) {

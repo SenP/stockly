@@ -15,7 +15,7 @@ export default function stockReducer(state = {}, action) {
 }
 
 function updateQuotes(state, action) {
-	let quote = action.quotes.get(state.code);
+	let quote = action.quotes.get(state.code.split(':')[0]);
 	if (quote) {
 		let newState = Object.assign(new Stock(), state);
 		newState.lastPrice = quote.lastPrice || 0;
