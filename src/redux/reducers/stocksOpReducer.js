@@ -1,9 +1,10 @@
+/* eslint-disable default-case */
 import * as types from '../actions/actionTypes.js';
 import initialState from '../initialState';
 
-export default function StocksOpReducer(state = initialState.stocksOpByKey, action) {
+export default function StocksOpReducer(stocksOp = initialState.stocksOpByKey, action) {
 	if (!action.type.includes('STOCK_OP')) {
-		return state;
+		return stocksOp;
 	}
 	let { stock, watchlist, op } = action;
 	const opKey = stock ? `${watchlist.id}-${stock.code}-${op}` : `${watchlist.id}-${op}`;
@@ -11,7 +12,7 @@ export default function StocksOpReducer(state = initialState.stocksOpByKey, acti
 		case types.INIT_STOCK_OP:
 		case types.UPDATE_STOCK_OP:
 			return {
-				...state,
+				...stocksOp,
 				[opKey]: {
 					stock,
 					watchlist,
@@ -23,7 +24,7 @@ export default function StocksOpReducer(state = initialState.stocksOpByKey, acti
 
 		case types.START_STOCK_OP:
 			return {
-				...state,
+				...stocksOp,
 				[opKey]: {
 					stock,
 					watchlist,
@@ -35,7 +36,7 @@ export default function StocksOpReducer(state = initialState.stocksOpByKey, acti
 
 		case types.END_STOCK_OP_ERROR:
 			return {
-				...state,
+				...stocksOp,
 				[opKey]: {
 					stock,
 					watchlist,
@@ -47,8 +48,8 @@ export default function StocksOpReducer(state = initialState.stocksOpByKey, acti
 
 		case types.END_STOCK_OP_SUCCESS:
 		case types.REMOVE_STOCK_OP: {
-			let { [opKey]: temp, ...newState } = state;
-			return newState;
+			let { [opKey]: temp, ...newStocksOp } = stocksOp;
+			return newStocksOp;
 		}
 	}
 }

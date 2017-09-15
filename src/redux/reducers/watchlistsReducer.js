@@ -3,15 +3,15 @@ import initialState from '../initialState';
 import { Watchlist } from '../../services';
 import watchlistReducer from './watchlistReducer';
 
-export default function(state = initialState.watchlistsById, action) {
+export default function(watchlists = initialState.watchlistsById, action) {
 	switch (action.type) {
 		case types.LOAD_WATCHLISTS_SUCCESS:
 			return loadWatchlists(action.watchlists);
 
 		case types.FETCH_QUOTES_SUCCESS: {
 			let newState = {};
-			for (const id in state) {
-				newState[id] = watchlistReducer(state[id], action);
+			for (const id in watchlists) {
+				newState[id] = watchlistReducer(watchlists[id], action);
 			}
 			return newState;
 		}
@@ -19,17 +19,17 @@ export default function(state = initialState.watchlistsById, action) {
 		case types.SAVE_WATCHLIST_SUCCESS:
 		case types.SAVE_STOCK_SUCCESS:
 		case types.DELETE_STOCK_SUCCESS:
-			return saveWatchlist(state, action);
+			return saveWatchlist(watchlists, action);
 
 		case types.DELETE_WATCHLIST_SUCCESS:
-			return deleteWatchlist(state, action);
+			return deleteWatchlist(watchlists, action);
 
 		default:
-			return state;
+			return watchlists;
 	}
 }
 
-function loadWatchlists(watchlists = []) {
+function loadWatchlists(watchlists = []) { 
 	// Transform watchlists array into hash
 	return watchlists.reduce((watchlistsHash, wl) => {
 		let wlHashed = Object.assign(new Watchlist(), wl);
@@ -43,13 +43,13 @@ function loadWatchlists(watchlists = []) {
 	}, {});
 }
 
-function saveWatchlist(state, action) {
-	let watchlist = state[action.watchlist.id] || undefined;
-	return Object.assign({}, state, { [action.watchlist.id]: watchlistReducer(watchlist, action) });
+function saveWatchlist(watchlists, action) {
+	let watchlist = watchlists[action.watchlist.id] || undefined;
+	return Object.assign({}, watchlists, { [action.watchlist.id]: watchlistReducer(watchlist, action) });
 }
 
-function deleteWatchlist(state, action) {
-	let tempState = { ...state };
-	delete tempState[action.watchlist.id];
-	return { ...tempState };
+function deleteWatchlist(watchlists, action) {
+	// eslint-disable-next-line no-unused-vars
+	let { [`${action.watchlist.id}`]: temp, ...newWatchlists } = watchlists;
+	return newWatchlists ? newWatchlists : {};
 }

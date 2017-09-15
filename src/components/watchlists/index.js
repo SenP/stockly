@@ -1,79 +1,33 @@
-import React, { Component } from 'react';
-import { func, instanceOf, object, arrayOf } from 'prop-types';
+import React, { PureComponent } from 'react';
+import { instanceOf, object, arrayOf } from 'prop-types';
 import { Panel } from 'react-bootstrap';
 // redux
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import selectWatchlists from '../../redux/selectors/selectWatchlists';
 import selectSelectedWatchlist from '../../redux/selectors/selectSelectedWatchlist';
-import selectWatchlistOp from '../../redux/selectors/selectWatchlistOp';
-// deps
-import { Watchlist } from '../../services';
+import selectOps from '../../redux/selectors/selectOps';
 import * as watchlistsActions from '../../redux/actions/watchlistsActions';
+import * as opsActions from '../../redux/actions/opsActions';
+import * as scopes from '../../redux/actions/scopes';
+// deps
+import { Watchlist, WatchlistService } from '../../services';
 import WatchlistForm from './WatchlistForm';
 import DeleteWatchlistForm from './DeleteWatchlistForm';
 import Header from './WatchlistsHeader';
 import Watchlists from './Watchlists';
-import Message from '../common/Message';
 
-class WatchlistsContainer extends Component {
+class WatchlistsContainer extends PureComponent {
 	static propTypes = {
 		watchlists: arrayOf(instanceOf(Watchlist)),
 		selected: instanceOf(Watchlist),
-		onChangeSelection: func,
-		asyncOp: object
+		opState: object
 	};
 
 	static defaultProps = {
 		watchlists: [],
 		selected: null,
-		onChangeSelection: () => {},
-		asyncOp: null
-	};
-
-	state = {
-		editedWatchlist: null,
-		editing: false,
-		adding: false,
-		deleting: false,
-		saving: false,
-		error: null
-	};
-
-	componentDidMount() {
-		this.setCompState(this.props);
-	}
-
-	componentWillReceiveProps(newProps) {
-		this.setCompState(newProps);
-	}
-
-	setCompState = props => {
-		let { asyncOp, selected } = props;
-		if (asyncOp) {
-			let { op, status, error } = asyncOp;
-			let editedWatchlist = asyncOp.watchlist;
-			let saving = status === 'pending' ? true : false;
-			this.setState(() => ({
-				editedWatchlist,
-				adding: op === 'CREATE',
-				editing: op === 'EDIT',
-				deleting: op === 'DELETE',
-				saving,
-				error
-			}));
-		} else {
-			this.setState(prevState => {
-				return {
-					editedWatchlist: selected,
-					adding: false,
-					editing: false,
-					deleting: false,
-					saving: false,
-					error: null
-				};
-			});
-		}
+		opState: null
 	};
 
 	onChangeSelection = wl => {
@@ -81,55 +35,42 @@ class WatchlistsContainer extends Component {
 	};
 
 	onAddClick = () => {
-		this.setState(
-			() => ({
-				adding: true,
-				editedWatchlist: new Watchlist()
-			}),
-			() => this.props.actions.initAsyncOp(this.state.editedWatchlist, 'CREATE')
-		);
+		this.props.actions.initOp(scopes.WATCHLIST, { watchlist: new Watchlist(), op: 'CREATE' });
 	};
 
 	onEditClick = () => {
-		this.setState(
-			() => ({
-				editing: true,
-				editedWatchlist: Object.assign(new Watchlist(), this.props.selected)
-			}),
-			() => this.props.actions.initAsyncOp(this.state.editedWatchlist, 'EDIT')
-		);
+		let editedWatchlist = Object.assign(new Watchlist(), this.props.selected);
+		this.props.actions.initOp(scopes.WATCHLIST, { watchlist: editedWatchlist, op: 'EDIT' });
 	};
 
 	onDeleteClick = () => {
-		this.setState(
-			() => ({
-				deleting: true
-			}),
-			() => this.props.actions.initAsyncOp(this.state.editedWatchlist, 'DELETE')
-		);
+		this.props.actions.initOp(scopes.WATCHLIST, { watchlist: this.props.selected, op: 'DELETE' });
 	};
 
-	onSave = wl => {
-		this.state.adding ? this.props.actions.createWatchlist(wl) : this.props.actions.editWatchlist(wl);
+	onSave = watchlist => {
+		let valid = WatchlistService.validateWatchlist(watchlist);
+		if (valid.status === 'error') {
+			return valid.msg;
+		}
+		this.props.opState.adding
+			? this.props.actions.createWatchlist(watchlist)
+			: this.props.actions.editWatchlist(watchlist);
 	};
 
 	onDelete = () => {
-		this.props.actions.deleteWatchlist(this.state.editedWatchlist);
-		this.props.onChangeSelection(null);
+		this.props.actions.deleteWatchlist(this.props.opState.editedWatchlist);
 	};
 
 	onCancel = () => {
-		this.setState({
-			editing: false,
-			deleting: false,
-			saving: false,
-			error: null
-		});
-		this.props.actions.resetAsyncOp();
+		let { removeOp } = this.props.actions;
+		let watchlist = this.props.opState.editedWatchlist;
+		removeOp(scopes.WATCHLIST, { op: 'CREATE' });
+		removeOp(scopes.WATCHLIST, { watchlist, op: 'EDIT' });
+		removeOp(scopes.WATCHLIST, { watchlist, op: 'DELETE' });
 	};
 
 	render() {
-		let { editedWatchlist, adding, editing, deleting, saving, error } = this.state;
+		let { editedWatchlist, adding, editing, deleting, saving, error } = this.props.opState;
 		let watchlists = this.props.watchlists;
 		let isViewState = !adding && !editing && !deleting;
 		let Title = (
@@ -179,34 +120,50 @@ class WatchlistsContainer extends Component {
 					<DeleteWatchlistForm
 						watchlist={editedWatchlist}
 						saving={saving}
+						error={error}
 						onDelete={this.onDelete}
 						onClose={this.onCancel}
 					/>
 				)}
-
-				<div>
-					<Message
-						msgtext={this.state.msg}
-						msgclass={this.state.msgClass}
-						msgstyle={{ background: '#222230', display: 'block' }}
-					/>
-				</div>
 			</Panel>
 		);
 	}
 }
 
 function mapStateToProps(state) {
+	let selected = selectSelectedWatchlist(state);
+	let [watchlistOp] = selectOps(state, 'watchlist');
+	let opState;
+	if (watchlistOp) {
+		let { op, status, error, watchlist: editedWatchlist } = watchlistOp;
+		opState = {
+			editedWatchlist,
+			adding: op === 'CREATE',
+			editing: op === 'EDIT',
+			deleting: op === 'DELETE',
+			saving: status === 'pending' ? true : false,
+			error
+		};
+	} else {
+		opState = {
+			editedWatchlist: selected,
+			adding: false,
+			editing: false,
+			deleting: false,
+			saving: false,
+			error: null
+		};
+	}
 	return {
 		watchlists: selectWatchlists(state),
-		selected: selectSelectedWatchlist(state),
-		asyncOp: selectWatchlistOp(state)
+		selected,
+		opState
 	};
 }
 
 function mapDispatchToProps(dispatch) {
 	return {
-		actions: bindActionCreators(watchlistsActions, dispatch)
+		actions: bindActionCreators({ ...watchlistsActions, ...opsActions }, dispatch)
 	};
 }
 

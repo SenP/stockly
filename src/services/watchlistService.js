@@ -78,10 +78,7 @@ export class WatchlistService {
 	// save the edited/new watchlist
 	static doSaveWatchlist(wlist) {
 		// Simulate error
-		// if (
-		//   wlist.name === "test55"
-		// )
-		//   return { status: "error in name", data: null };
+		if (wlist.name === 'test55') return { status: 'error in name', data: null };
 		// end simulate error
 		let i = this.watchlists.findIndex(wl => wl.id === wlist.id);
 		let data = null;
@@ -213,10 +210,7 @@ export class WatchlistService {
 
 	static doRemoveWatchlist(wlist) {
 		// Simulate error
-		// if (
-		//   wlist.name === "test55"
-		// )
-		//   return { status: "error in name", data: null };
+		if (wlist.name === 'test555') return { status: 'error in name', data: null };
 		// end simulate error
 		let i = this.watchlists.findIndex(w => w.id === wlist.id);
 

@@ -1,8 +1,7 @@
 export default {
 	watchlistsById: {},
 	selectedWatchlistId: null,
-	watchlistOp: null,
-	stocksOpByKey: {},
+	opsByKey: {},
 	toastsByKey: {},
 	quotesRefInterval: 300
 };

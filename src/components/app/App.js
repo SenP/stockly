@@ -67,17 +67,6 @@ class App extends Component {
 	};
 
 	render() {
-		// let selectedWatchlist = this.state.selectedWatchlist;
-		// let selectedWatchlistId;
-
-		// if (selectedWatchlist) {
-		// 	selectedWatchlist = selectedWatchlist.id
-		// 		? this.props.watchlists.find(wl => wl.id === selectedWatchlist.id)
-		// 		: this.props.watchlists[this.props.watchlists.length - 1];
-		// 	selectedWatchlistId = selectedWatchlist.id;
-		// } else {
-		// 	selectedWatchlistId = null;
-		// }
 		return (
 			<div>
 				<Grid fluid>

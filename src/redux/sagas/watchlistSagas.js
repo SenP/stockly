@@ -4,6 +4,8 @@ import { WatchlistService } from '../../services';
 import * as actionTypes from '../actions/actionTypes';
 import * as watchlistActions from '../actions/watchlistActions';
 import * as quotesActions from '../actions/quotesActions';
+import * as opsActions from '../actions/opsActions';
+import { STOCK } from '../actions/scopes';
 
 function deleteCurrentWatchlist({ type, watchlist }, WL) {
 	return type === actionTypes.DELETE_WATCHLIST && watchlist.id === WL.id;
@@ -19,21 +21,21 @@ function* saveStockMain(action) {
 
 function* saveStock({ type, stock, watchlist }) {
 	let op = type === actionTypes.ADD_STOCK ? 'ADD' : 'EDIT';
-	yield put(watchlistActions.startAsyncOp(stock, watchlist, op));
+	yield put(opsActions.startOp(STOCK, { stock, watchlist, op }));
 	try {
 		const { status, data: newStock } = yield call([WatchlistService, 'saveStock'], stock, watchlist);
 		if (status === 'success') {
 			yield put(watchlistActions.saveStockSuccess(newStock, watchlist));
 			yield put(quotesActions.fetchQuotes(newStock));
-			yield put(watchlistActions.endAsyncOpSuccess(newStock, watchlist, op));
+			yield put(opsActions.endOpSuccess(STOCK, { stock: newStock, watchlist, op }));
 		} else {
 			throw status;
 		}
 	} catch (error) {
-		yield put(watchlistActions.endAsyncOpError(stock, watchlist, op, error));
+		yield put(opsActions.endOpError(STOCK, { stock, watchlist, op, error }));
 	} finally {
 		if (yield cancelled()) {
-			yield put(watchlistActions.removeAsyncOp(stock, watchlist, op));
+			yield put(opsActions.removeOp(STOCK, { stock, watchlist, op }));
 		}
 	}
 }
@@ -48,20 +50,20 @@ function* deleteStockMain(action) {
 
 function* deleteStock({ stock, watchlist }) {
 	let op = 'DELETE';
-	yield put(watchlistActions.startAsyncOp(stock, watchlist, op));
+	yield put(opsActions.startOp(STOCK, { stock, watchlist, op }));
 	try {
 		const res = yield call([WatchlistService, 'deleteStock'], stock, watchlist);
 		if (res.status === 'success') {
 			yield put(watchlistActions.deleteStockSuccess(stock, watchlist));
-			yield put(watchlistActions.endAsyncOpSuccess(stock, watchlist, op));
+			yield put(opsActions.endOpSuccess(STOCK, { stock, watchlist, op }));
 		} else {
 			throw res.status;
 		}
 	} catch (error) {
-		yield put(watchlistActions.endAsyncOpError(stock, watchlist, op, error));
+		yield put(opsActions.endOpError(STOCK, { stock, watchlist, op, error }));
 	} finally {
 		if (yield cancelled()) {
-			yield put(watchlistActions.removeAsyncOp(stock, watchlist, op));
+			yield put(opsActions.removeOp(STOCK, { stock, watchlist, op }));
 		}
 	}
 }
