@@ -10,15 +10,12 @@ import formatCash from '../../utils/formatCash';
 
 StocksList.propTypes = {
 	watchlist: instanceOf(Watchlist).isRequired,
-	onEditClick: func.isRequired,
-	onDeleteClick: func.isRequired,
-	onChange: func.isRequired,
 	onSave: func.isRequired,
-	onDelete: func.isRequired,
-	onCancel: func.isRequired
+	onDelete: func.isRequired
 };
 
-export default function StocksList({ watchlist, onEditClick, onDeleteClick, onChange, onSave, onDelete, onCancel }) {
+export default function StocksList({ watchlist, onSave, onDelete }) {
+	const stocks = Object.values(watchlist.stocksByCode);
 	const Dollar = <FontAwesome name="usd" />;
 	const CashField = ({ value }) => {
 		return (
@@ -49,7 +46,7 @@ export default function StocksList({ watchlist, onEditClick, onDeleteClick, onCh
 		</thead>
 	);
 
-	const totalsRow = watchlist.stocks.length > 1 && (
+	const totalsRow = stocks.length > 1 && (
 		<tr className="active">
 			<td>
 				<strong>Totals </strong>
@@ -78,17 +75,13 @@ export default function StocksList({ watchlist, onEditClick, onDeleteClick, onCh
 		<Table bordered responsive>
 			{headerRow}
 			<tbody>
-				{watchlist.stocks.map(stock => (
+				{stocks.map(stock => (
 					<StockRow
 						key={watchlist.id + stock.code}
 						stock={stock}
 						watchlist={watchlist}
-						onEditClick={onEditClick}
-						onChange={onChange}
 						onSave={onSave}
-						onDeleteClick={onDeleteClick}
 						onDelete={onDelete}
-						onCancel={onCancel}
 					/>
 				))}
 				{totalsRow}

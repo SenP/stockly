@@ -1,50 +1,50 @@
  .chart-title {
-   background: #aabbbb;
-   text-align: center;
-   display: inline-block;
-   line-height: 2rem;
-   width: 100%;
+     background: #aabbbb;
+     text-align: center;
+     display: inline-block;
+     line-height: 2rem;
+     width: 100%;
  }
 
  .chart-panel {
-   padding-right: 5px;
+     padding-right: 5px;
  }
 
  .chart {
-   display: block;
+     display: block;
  }
 
  .topstocks-title {
-   display: inline-block;
-   background: #aabbbb;
-   width: 100%;
-   line-height: 2rem;
-   padding: 10px 5px 0px 0px;
-   text-align: center;
+     display: inline-block;
+     background: #aabbbb;
+     width: 100%;
+     line-height: 2rem;
+     padding: 10px 5px 0px 0px;
+     text-align: center;
  }
 
  .topstocks-title-text {
-   display: inline-block;
-   font-size: 1.7rem;
-   padding-top: 5px;
+     display: inline-block;
+     font-size: 1.7rem;
+     padding-top: 5px;
  }
 
  .topstocks-input {
-   display: inline-block;
-   margin-right: 5px;
+     display: inline-block;
+     margin-right: 5px;
  }
 
  .topstocks-input .form-group {
-   display: inline-block;
-   margin-bottom: 10px;
+     display: inline-block;
+     margin-bottom: 10px;
  }
 
  .topstocks-input .form-control {
-   background: #aabbbb;
-   font-size: 1.5rem;
-   font-weight: 600;
+     background: #aabbbb;
+     font-size: 1.5rem;
+     font-weight: 600;
  }
 
  .topstocks-table {
-   background: white
+     background: white
  }

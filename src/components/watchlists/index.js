@@ -27,8 +27,21 @@ class WatchlistsContainer extends PureComponent {
 	static defaultProps = {
 		watchlists: [],
 		selected: null,
-		opState: null
+		opState: {
+			editedWatchlist: null,
+			adding: false,
+			editing: false,
+			deleting: false,
+			saving: false,
+			error: null
+		}
 	};
+
+	componentWillReceiveProps(newProps) {
+		// console.log('watchlists changed? ', newProps.watchlists !== this.props.watchlists);
+		// console.log('selected changed? ', newProps.selected !== this.props.selected);
+		// console.log('opstate changed? ', newProps.opState !== this.props.opState);
+	}
 
 	onChangeSelection = wl => {
 		this.props.actions.selectWatchlist(wl);
@@ -93,7 +106,6 @@ class WatchlistsContainer extends PureComponent {
 				<h5> No Watchlists available! </h5>
 			</div>
 		);
-
 		return (
 			<Panel header={Title} bsStyle="primary" className="panel-watchlists">
 				{watchlists.length === 0 && isViewState && emptylistMsg}
@@ -132,7 +144,7 @@ class WatchlistsContainer extends PureComponent {
 
 function mapStateToProps(state) {
 	let selected = selectSelectedWatchlist(state);
-	let [watchlistOp] = selectOps(state, 'watchlist');
+	let watchlistOp = selectOps(state, 'watchlist');
 	let opState;
 	if (watchlistOp) {
 		let { op, status, error, watchlist: editedWatchlist } = watchlistOp;
@@ -143,15 +155,6 @@ function mapStateToProps(state) {
 			deleting: op === 'DELETE',
 			saving: status === 'pending' ? true : false,
 			error
-		};
-	} else {
-		opState = {
-			editedWatchlist: selected,
-			adding: false,
-			editing: false,
-			deleting: false,
-			saving: false,
-			error: null
 		};
 	}
 	return {

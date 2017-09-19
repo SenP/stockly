@@ -111,7 +111,7 @@ export class WatchlistService {
 				return result;
 			}
 			// check duplicates
-			if (watchlist.stocks.findIndex(stk => stk.code === stock.code) !== -1) {
+			if (watchlist.stocksByCode[`${stock.code}`]) {
 				result.status = 'error';
 				result.msg = "'" + stock.code + "' already exists in this watchlist";
 				return result;
@@ -122,7 +122,7 @@ export class WatchlistService {
 					status: 'error',
 					msg: 'Invalid stock code'
 				};
-			} else if (watchlist.stocks.length === 30) {
+			} else if (Object.keys(watchlist.stocksByCode).length === 30) {
 				//stocks limit reached
 				return {
 					status: 'error',
@@ -242,7 +242,7 @@ export class WatchlistService {
 			return { status: 'success', data: null };
 		}
 		let wl = this.watchlists[wlIdx];
-		let i = wlist.stocks.findIndex(stk => stk.code === stock.code);
+		let i = wl.stocks.findIndex(stk => stk.code === stock.code);
 		if (i !== -1) {
 			wl.stocks.splice(i, 1);
 			this.saveWatchlistsToStorage();

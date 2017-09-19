@@ -8,7 +8,7 @@ export default function getOpKey(scope, payload) {
 		}
 		case STOCK: {
 			let { stock, watchlist, op } = payload;
-			return stock && stock.code
+			return stock && stock.code && op !== 'ADD'
 				? `${scope}-${watchlist.id}-${stock.code}-${op}`
 				: `${scope}-${watchlist.id}-${op}`;
 		}

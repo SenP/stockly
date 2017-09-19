@@ -4,15 +4,12 @@ import { instanceOf } from 'prop-types';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import * as watchlistActions from '../../redux/actions/watchlistActions';
-import * as opsActions from '../../redux/actions/opsActions';
 
 import selectSelectedWatchlist from '../../redux/selectors/selectSelectedWatchlist';
-import selectOps from '../../redux/selectors/selectOps';
-import { STOCK } from '../../redux/actions/scopes';
 
 import { Panel } from 'react-bootstrap';
 
-import { Stock, Watchlist, WatchlistService } from '../../services';
+import { Watchlist, WatchlistService } from '../../services';
 import StocksList from './StocksList';
 import AddStockPanel from './AddStockPanel';
 import Header from './WatchlistHeader';
@@ -22,50 +19,17 @@ export class WatchlistContainer extends PureComponent {
 		watchlist: instanceOf(Watchlist)
 	};
 
-	onAddClick = () => {
-		this.props.actions.initOp(STOCK, { watchlist: this.props.watchlist, op: 'ADD' });
-	};
-
-	onEditClick = stock => {
-		let editedStock = Object.assign(new Stock(), stock);
-		this.props.actions.initOp(STOCK, { watchlist: this.props.watchlist, stock: editedStock, op: 'EDIT' });
-	};
-
-	onDeleteClick = stk => {
-		let { stock, watchlist } = this.state;
-		this.setState(
-			() => ({
-				deleting: true
-			}),
-			() => this.props.actions.initOp(stock, watchlist, 'DELETE')
-		);
-	};
-
-	onSave = watchlist => {
-		let valid = WatchlistService.validateWatchlist(watchlist);
+	onSaveStock = (stock, isAdding) => {
+		let { watchlist, actions } = this.props;
+		let valid = WatchlistService.validateStock(watchlist, stock, isAdding);
 		if (valid.status === 'error') {
 			return valid.msg;
 		}
-		this.props.opState.adding
-			? this.props.actions.createWatchlist(watchlist)
-			: this.props.actions.editWatchlist(watchlist);
+		isAdding ? actions.addStock(stock, watchlist) : actions.editStock(stock, watchlist);
 	};
 
-	onDelete = (stock, watchlist) => {
-		this.props.actions.deleteStock(stock, watchlist);
-	};
-
-	onChange = editedStock => {
-		this.props.actions.updateOp(STOCK, { watchlist: this.props.watchlist, stock: editedStock, op: 'EDIT' });
-	};
-
-	onCancel = () => {
-		let { removeOp } = this.props.actions;
-		let stock = this.props.opState.editedStock;
-		let { watchlist } = this.props;
-		removeOp(STOCK, { op: 'ADD' });
-		removeOp(STOCK, { stock, watchlist, op: 'EDIT' });
-		removeOp(STOCK, { stock, watchlist, op: 'DELETE' });
+	onDeleteStock = stock => {
+		this.props.actions.deleteStock(stock, this.props.watchlist);
 	};
 
 	render() {
@@ -86,24 +50,16 @@ export class WatchlistContainer extends PureComponent {
 				<h3> Watchlist is empty! </h3>
 			</div>
 		);
-
+		// console.log('render watchlist...');
 		return (
 			<div>
 				{TitlePanel}
 				<div>
-					{watchlist && watchlist.stocks.length === 0 && emptylistMsg}
-					<AddStockPanel watchlist={watchlist} />
+					{watchlist && Object.values(watchlist.stocksByCode).length === 0 && emptylistMsg}
+					<AddStockPanel watchlist={watchlist} onSave={this.onSaveStock} />
 				</div>
 
-				<StocksList
-					watchlist={watchlist}
-					onEditClick={this.onEditClick}
-					onChange={this.onChange}
-					onSave={this.onSave}
-					onDeleteClick={this.onDeleteClick}
-					onDelete={this.onDelete}
-					onCancel={this.onCancel}
-				/>
+				<StocksList watchlist={watchlist} onSave={this.onSaveStock} onDelete={this.onDeleteStock} />
 
 				<div className="pull-right">
 					<small> Price data from Google Finance (delayed and randomized). </small>
@@ -116,42 +72,14 @@ export class WatchlistContainer extends PureComponent {
 function mapStateToProps(state) {
 	let watchlist = selectSelectedWatchlist(state);
 	if (!watchlist) return {};
-	let stocksOp = selectOps(state, 'stock');
-	let stocks = watchlist.stocks;
-	let stocksWithOp = stocks.map(stock => {
-		let opState;
-		let stockOp = stocksOp.filter(op => op.stock.code === stock.code && op.watchlist.id === watchlist.id)[0];
-		if (stockOp) {
-			let { op, status, error, stock: editedStock } = stockOp;
-			opState = {
-				editedStock,
-				adding: op === 'CREATE',
-				editing: op === 'EDIT',
-				deleting: op === 'DELETE',
-				saving: status === 'pending' ? true : false,
-				error
-			};
-		} else {
-			opState = {
-				editedStock: stock,
-				adding: false,
-				editing: false,
-				deleting: false,
-				saving: false,
-				error: null
-			};
-		}
-		return Object.assign(new Stock(), { ...stock, opState });
-	});
-
 	return {
-		watchlist: Object.assign(new Watchlist(), watchlist, { stocks: stocksWithOp })
+		watchlist
 	};
 }
 
 function mapDispatchToProps(dispatch) {
 	return {
-		actions: bindActionCreators({ ...opsActions, ...watchlistActions }, dispatch)
+		actions: bindActionCreators(watchlistActions, dispatch)
 	};
 }
 

@@ -1,3 +1,4 @@
-export default function selectWatchlists({ watchlistsById }) {
-	return Object.values(watchlistsById);
-}
+import { createSelector } from 'reselect';
+import getWatchlistsById from './getWatchlistsById';
+
+export default createSelector(getWatchlistsById, watchlistsById => Object.values(watchlistsById));

@@ -9,7 +9,7 @@ export default function watchlistReducer(watchlist = { stocks: {} }, action) {
 			let newWatchlist = Object.assign(new WatchlistModel(), action.watchlist, {
 				stocksByCode
 			});
-			delete newWatchlist.stocks;
+			// delete newWatchlist.stocks;
 			return newWatchlist;
 		}
 
@@ -19,7 +19,7 @@ export default function watchlistReducer(watchlist = { stocks: {} }, action) {
 			let newWatchlist = Object.assign(new WatchlistModel(), watchlist, {
 				stocksByCode: stocksReducer(watchlist.stocksByCode, action)
 			});
-			delete newWatchlist.stocks;
+			// delete newWatchlist.stocks;
 			return newWatchlist;
 		}
 

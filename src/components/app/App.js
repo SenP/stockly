@@ -31,6 +31,10 @@ class App extends Component {
 		actions: object
 	};
 
+	static defaultProps = {
+		quotesRefInterval: 300
+	};
+
 	componentDidMount() {
 		this.props.actions.loadWatchlists();
 		this.quotesRefInterval = this.props.quotesRefInterval;

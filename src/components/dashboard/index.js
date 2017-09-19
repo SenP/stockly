@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 import { arrayOf, instanceOf } from 'prop-types';
 import { Row, Col } from 'react-bootstrap';
 // redux
@@ -13,42 +13,17 @@ import Summary from './Summary';
 
 import './styles.css';
 
-class DashboardContainer extends Component {
+class DashboardContainer extends PureComponent {
 	static propTypes = {
-		watchlists: arrayOf(instanceOf(Watchlist))
+		watchlists: arrayOf(instanceOf(Watchlist)),
+		selectedWatchlist: instanceOf(Watchlist)
 	};
 
-	static defaultProps = {
-		watchlists: []
-	};
-
-	state = {
-		watchlists: this.props.watchlists,
-		portfolioValue: 0,
-		portfolioPnL: 0,
-		portfolioDaychange: 0,
-		stocksMap: null,
-		chartData: {
-			dataLabels: [],
-			marketValues: [],
-			pnlValues: [],
-			daychangeValues: []
-		}
-	};
-
-	componentDidMount() {
-		this.updateDashboardData();
-	}
-
-	componentWillReceiveProps(nextProps) {
-		this.setState(() => ({ watchlists: nextProps.watchlists }), this.updateDashboardData);
-	}
-
-	updateDashboardData = () => {
+	getDashboardData = () => {
 		let portfolioDaychange, portfolioPnL, portfolioValue;
 		let stocksMap = new Map();
 		portfolioDaychange = portfolioPnL = portfolioValue = 0;
-		Object.values(this.state.watchlists).forEach(wl => {
+		Object.values(this.props.watchlists).forEach(wl => {
 			//update portfolio values
 			portfolioValue += wl.totalMarketValue;
 			portfolioPnL += wl.totalPnL;
@@ -69,53 +44,53 @@ class DashboardContainer extends Component {
 				}
 			});
 		});
-		this.setState(() => ({
-			portfolioValue,
-			portfolioPnL,
-			portfolioDaychange,
+		return {
+			summary: {
+				portfolioValue,
+				portfolioPnL,
+				portfolioDaychange
+			},
 			stocksMap
-		}));
-		this.updateChartsData();
+		};
 	};
 
-	updateChartsData = () => {
+	getChartsData = () => {
 		let chartData = {
 			dataLabels: [],
 			marketValues: [],
 			pnlValues: [],
 			daychangeValues: []
 		};
-
-		Object.values(this.state.watchlists).forEach(wl => {
+		let { watchlists } = this.props;
+		Object.values(watchlists).forEach(wl => {
 			chartData.dataLabels.push(wl.name);
 			chartData.marketValues.push([wl.name, wl.totalMarketValue]);
 			chartData.pnlValues.push(wl.totalPnL);
 			chartData.daychangeValues.push(wl.totalDayChange);
 		});
-		this.setState({ chartData });
+		return chartData;
 	};
 
 	render() {
 		if (this.props.selectedWatchlist) return null;
+
+		let { summary, stocksMap } = this.getDashboardData();
+
 		return (
 			<div>
-				<Summary {...this.state} />
+				<Summary {...summary} />
 
-				<Charts chartData={this.state.chartData} />
+				<Charts chartData={this.getChartsData()} />
 
 				<Row>
 					<Col md={4}>
-						<StocksTable
-							stocks={this.state.stocksMap}
-							title="Stocks by Market Value"
-							orderBy="marketValue"
-						/>
+						<StocksTable stocks={stocksMap} title="Stocks by Market Value" orderBy="marketValue" />
 					</Col>
 					<Col md={4}>
-						<StocksTable stocks={this.state.stocksMap} title="Stocks by Net P/L" orderBy="netPnL" />
+						<StocksTable stocks={stocksMap} title="Stocks by Net P/L" orderBy="netPnL" />
 					</Col>
 					<Col md={4}>
-						<StocksTable stocks={this.state.stocksMap} title="Stocks by Day Change" orderBy="dayChange" />
+						<StocksTable stocks={stocksMap} title="Stocks by Day Change" orderBy="dayChange" />
 					</Col>
 				</Row>
 			</div>

@@ -2,55 +2,55 @@
 @import '../../assets/styles/bootstrap.flatly.min.css';
 @import '../../assets/styles/font-awesome.min.css';
 .number-field {
-  text-align: right
+    text-align: right
 }
 
 .msg {
-  font-style: italic;
-  font-size: 1em;
-  padding: 5px;
-  margin: 5px;
+    font-style: italic;
+    font-size: 1em;
+    padding: 5px;
+    margin: 5px;
 }
 
 .number-field {
-  text-align: right
+    text-align: right
 }
 
 .panel-watchlists .panel-heading {
-  border: 0;
-  border-radius: 0;
+    border: 0;
+    border-radius: 0;
 }
 
 .panel-watchlists .panel-body {
-  padding: 5px;
-  background: #222230;
+    padding: 5px;
+    background: #222230;
 }
 
 .panel-watchlists .list-group {
-  margin: 0px;
+    margin: 0px;
 }
 
 .panel-watchlists .list-group-item {
-  background: lightblue;
+    background: lightblue;
 }
 
 .panel-watchlists .list-group-item:first-child {
-  border-radius: 0;
+    border-radius: 0;
 }
 
 .panel-watchlists .active,
 .panel-watchlists .active:focus {
-  background: steelblue;
+    background: steelblue;
 }
 
 .panel-watchlist .panel-heading {
-  font-size: 2em;
+    font-size: 2em;
 }
 
 .panel-watchlist .panel-body {
-  padding: 0px;
+    padding: 0px;
 }
 
 .toastify-content {
-  font-size: 1.3rem;
+    font-size: 1.3rem;
 }

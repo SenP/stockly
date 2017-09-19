@@ -1,9 +1,8 @@
 import React from 'react';
-import { instanceOf, func, object } from 'prop-types';
+import { func, object } from 'prop-types';
 import { Button } from 'react-bootstrap';
 import FontAwesome from 'react-fontawesome';
 
-import { Stock as StockModel } from '../../../services';
 import Colored from '../../common/Colored';
 import formatCash from '../../../utils/formatCash';
 
@@ -14,9 +13,6 @@ StockView.propTypes = {
 };
 
 export default function StockView({ stock, onEdit, onDelete }) {
-	const onEditClick = () => onEdit(stock);
-	const onDeleteClick = () => onDelete(stock);
-
 	return (
 		<tr>
 			<td>{stock.code}</td>
@@ -64,10 +60,10 @@ export default function StockView({ stock, onEdit, onDelete }) {
 
 			<td>
 				<span className="center-block">
-					<Button bsSize="xsmall" bsStyle="warning" onClick={onEditClick} style={{ marginRight: '10px' }}>
+					<Button bsSize="xsmall" bsStyle="warning" onClick={onEdit} style={{ marginRight: '10px' }}>
 						<FontAwesome name="pencil-square-o" />
 					</Button>
-					<Button bsSize="xsmall" bsStyle="danger" onClick={onDeleteClick}>
+					<Button bsSize="xsmall" bsStyle="danger" onClick={onDelete}>
 						<FontAwesome name="trash-o" />
 					</Button>
 				</span>

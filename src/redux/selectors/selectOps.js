@@ -5,5 +5,7 @@ export default function selectOps(state, scope, payload) {
 		const opKey = getOpKey(scope, payload);
 		return state.opsByKey[opKey];
 	}
-	return Object.values(state.opsByKey).filter(op => op.scope === scope);
+	const opKey = Object.keys(state.opsByKey).filter(key => key.startsWith(scope));
+
+	return opKey.length > 0 ? state.opsByKey[opKey] : null;
 }

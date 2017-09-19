@@ -27,11 +27,11 @@ function ConfigInterval({ intervals, interval = 60, onChange }) {
 					value={interval}
 					onChange={changeInterval}
 				>
-					{intervals.map(interval =>
+					{intervals.map(interval => (
 						<option key={interval[0]} value={interval[0]}>
 							{interval[1]}
 						</option>
-					)}
+					))}
 				</FormControl>
 			</FormGroup>
 		</div>

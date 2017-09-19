@@ -2,7 +2,7 @@ import React, { PureComponent } from 'react';
 import { instanceOf, func, bool, string } from 'prop-types';
 import { Button, FormControl } from 'react-bootstrap';
 import FontAwesome from 'react-fontawesome';
-
+// deps
 import { Stock, Watchlist } from '../../../services';
 import Message from '../../common/Message';
 
@@ -42,23 +42,22 @@ export default class EditStockForm extends PureComponent {
 
 	submitForm = evt => {
 		this.setState({ error: '' });
-		const error = this.props.onSave(this.state.watchlist);
+		const error = this.props.onSave(this.state.stock);
 		error && this.setState({ error });
 	};
 
 	closeForm = () => {
 		let { stock, onClose } = this.props;
-		this.setState(() => ({
+		this.setState({
 			stock: Object.assign(new Stock(), stock),
-			msg: '',
-			msgClass: ''
-		}));
+			error: ''
+		});
 		onClose();
 	};
 
 	render = () => {
-		let { saving, stock, error = null } = this.props;
-		let msg = saving ? 'Saving...please wait.' : error;
+		let { saving, stock } = this.props;
+		let msg = saving ? 'Saving...please wait.' : this.state.error || this.props.error;
 		let msgClass = saving ? msgClasses.info : msgClasses.error;
 
 		return (
