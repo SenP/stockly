@@ -10,8 +10,10 @@ const msgClasses = {
 	error: 'msg text-center text-danger',
 	info: 'msg text-center text-info'
 };
+const ButtonStyle = { marginRight: '10px' };
+const MsgStyle = { textAlign: 'center', marginTop: '10px' };
 
-export default class EditStockForm extends PureComponent {
+class EditStockForm extends PureComponent {
 	static propTypes = {
 		stock: instanceOf(Stock).isRequired,
 		watchlist: instanceOf(Watchlist).isRequired,
@@ -25,7 +27,7 @@ export default class EditStockForm extends PureComponent {
 	state = { stock: this.props.stock, error: '' };
 
 	isFormValid = () => {
-		let { stock } = this.state;
+		const { stock } = this.state;
 		return stock.unitsOwned.trim() !== '' && stock.avgPrice.trim() !== '';
 	};
 
@@ -47,7 +49,7 @@ export default class EditStockForm extends PureComponent {
 	};
 
 	closeForm = () => {
-		let { stock, onClose } = this.props;
+		const { stock, onClose } = this.props;
 		this.setState({
 			stock: Object.assign(new Stock(), stock),
 			error: ''
@@ -56,9 +58,9 @@ export default class EditStockForm extends PureComponent {
 	};
 
 	render = () => {
-		let { saving, stock } = this.props;
-		let msg = saving ? 'Saving...please wait.' : this.state.error || this.props.error;
-		let msgClass = saving ? msgClasses.info : msgClasses.error;
+		const { saving, stock } = this.props;
+		const msg = saving ? 'Saving...please wait.' : this.state.error || this.props.error;
+		const msgClass = saving ? msgClasses.info : msgClasses.error;
 
 		return (
 			<tr>
@@ -89,9 +91,9 @@ export default class EditStockForm extends PureComponent {
 						<Button
 							bsSize="small"
 							bsStyle="success"
-							style={{ marginRight: '10px' }}
+							style={ButtonStyle}
 							onClick={this.submitForm}
-							disabled={saving}
+							disabled={saving || !this.isFormValid()}
 						>
 							<FontAwesome name="check" />
 						</Button>
@@ -100,7 +102,7 @@ export default class EditStockForm extends PureComponent {
 							<FontAwesome name="close" />
 						</Button>
 
-						<span style={{ textAlign: 'center', marginTop: '10px' }}>
+						<span style={MsgStyle}>
 							<Message msgtext={msg} msgclass={msgClass} />
 						</span>
 					</span>
@@ -109,3 +111,5 @@ export default class EditStockForm extends PureComponent {
 		);
 	};
 }
+
+export default EditStockForm;

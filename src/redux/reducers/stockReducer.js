@@ -1,12 +1,12 @@
-import * as types from '../actions/actionTypes.js';
+import { SAVE_STOCK_SUCCESS, FETCH_QUOTES_SUCCESS } from '../actions/actionTypes.js';
 import { Stock } from '../../services';
 
-export default function stockReducer(stock = {}, action) {
+function stockReducer(stock = {}, action) {
 	switch (action.type) {
-		case types.SAVE_STOCK_SUCCESS:
+		case SAVE_STOCK_SUCCESS:
 			return Object.assign(new Stock(), action.stock);
 
-		case types.FETCH_QUOTES_SUCCESS:
+		case FETCH_QUOTES_SUCCESS:
 			return updateQuotes(stock, action);
 
 		default:
@@ -24,3 +24,5 @@ function updateQuotes(stock, action) {
 			})
 		: stock;
 }
+
+export default stockReducer;

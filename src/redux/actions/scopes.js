@@ -1,2 +1,2 @@
-export const WATCHLIST = 'watchlist';
-export const STOCK = 'stock';
+export const WATCHLIST = 'WATCHLIST';
+export const STOCK = 'STOCK';

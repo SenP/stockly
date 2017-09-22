@@ -1,7 +1,7 @@
 import React from 'react';
 import { instanceOf, func, bool } from 'prop-types';
 import { Button } from 'react-bootstrap';
-
+// deps
 import { Stock } from '../../../services';
 import Message from '../../common/Message';
 
@@ -12,12 +12,12 @@ const msgClasses = {
 
 DeleteStockForm.propTypes = {
 	stock: instanceOf(Stock).isRequired,
+	saving: bool,
 	onDelete: func.isRequired,
-	onClose: func.isRequired,
-	saving: bool
+	onClose: func.isRequired
 };
 
-export default function DeleteStockForm({ stock, saving = false, onDelete, onClose }) {
+function DeleteStockForm({ stock, saving = false, onDelete, onClose }) {
 	const msg = saving ? `Deleting ${stock.name}...please wait.` : `  Delete '${stock.name}' from this watchlist?  `;
 	const msgClass = saving ? msgClasses.info : msgClasses.error;
 
@@ -48,3 +48,5 @@ export default function DeleteStockForm({ stock, saving = false, onDelete, onClo
 		</tr>
 	);
 }
+
+export default DeleteStockForm;

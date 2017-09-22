@@ -1,6 +1,7 @@
 import React, { PureComponent } from 'react';
 import { instanceOf, bool, string, func } from 'prop-types';
 import { ButtonToolbar, Button, Form, FormGroup, FormControl, ControlLabel } from 'react-bootstrap';
+// deps
 import { Watchlist } from '../../services';
 import Message from '../common/Message';
 
@@ -9,7 +10,7 @@ const msgClasses = {
 	info: 'msg text-center text-info'
 };
 
-export default class WatchlistForm extends PureComponent {
+class WatchlistForm extends PureComponent {
 	static propTypes = {
 		watchlist: instanceOf(Watchlist).isRequired,
 		onSave: func.isRequired,
@@ -37,7 +38,7 @@ export default class WatchlistForm extends PureComponent {
 	};
 
 	closeForm = () => {
-		let { watchlist, onClose } = this.props;
+		const { watchlist, onClose } = this.props;
 		this.setState(() => ({
 			watchlist,
 			msg: '',
@@ -113,3 +114,5 @@ export default class WatchlistForm extends PureComponent {
 		);
 	};
 }
+
+export default WatchlistForm;

@@ -12,98 +12,90 @@ Charts.defaultProps = {
 };
 
 export default function Charts({ chartData }) {
-	let configDaychangeChart;
-	let configPnLChart;
-	let configMarketValueChart;
+	const tooltipFn = txt => '<strong>{x}</strong><br/> ' + txt + '<b>$ {point.y}</b>';
 
-	const setChartOptions = () => {
-		let tooltipFn = txt => '<strong>{x}</strong><br/> ' + txt + '<b>$ {point.y}</b>';
-
-		let chartStyle = {
-			'font-family': "Lato,'Helvetica Neue', Helvetica, Arial,'sans-serif'"
-		};
-
-		let optionsBaseChart = {
-			title: {
-				text: null
-			},
-			xAxis: {
-				categories: chartData.dataLabels
-			},
-			yAxis: {
-				title: {
-					text: null
-				}
-			},
-			legend: {
-				enabled: false
-			},
-			credits: {
-				enabled: true
-			}
-		};
-
-		configPnLChart = Object.assign({}, optionsBaseChart, {
-			chart: {
-				type: 'column',
-				style: chartStyle
-			},
-			series: [
-				{
-					data: chartData.pnlValues,
-					dataLabels: { enabled: true, format: '$ {y}' },
-					tooltip: { pointFormat: tooltipFn('Net P/L:') },
-					color: 'green',
-					negativeColor: 'red'
-				}
-			]
-		});
-
-		configDaychangeChart = Object.assign({}, optionsBaseChart, {
-			chart: {
-				type: 'column',
-				style: chartStyle
-			},
-			series: [
-				{
-					data: chartData.daychangeValues,
-					dataLabels: { enabled: true, format: '$ {y}' },
-					tooltip: { pointFormat: tooltipFn('Day Change:') },
-					color: 'green',
-					negativeColor: 'red'
-				}
-			]
-		});
-
-		configMarketValueChart = Object.assign({}, optionsBaseChart, {
-			chart: {
-				type: 'pie',
-				style: chartStyle
-			},
-			plotOptions: {
-				pie: {
-					innerSize: '40%',
-					center: ['50%', '50%'],
-					borderColor: null
-				}
-			},
-			series: [
-				{
-					data: chartData.marketValues,
-					dataLabels: {
-						enabled: true,
-						format: '{key}<br><b>$ {y}</b>',
-						distance: 15,
-						connectorPadding: 5,
-						connectorWidth: 2
-					},
-					tooltip: { pointFormat: tooltipFn('Market Value:') }
-				}
-			]
-		});
+	const chartStyle = {
+		'font-family': "Lato,'Helvetica Neue', Helvetica, Arial,'sans-serif'"
 	};
 
-	setChartOptions();
+	const optionsBaseChart = {
+		title: {
+			text: null
+		},
+		xAxis: {
+			categories: chartData.dataLabels
+		},
+		yAxis: {
+			title: {
+				text: null
+			}
+		},
+		legend: {
+			enabled: false
+		},
+		credits: {
+			enabled: true
+		}
+	};
+
+	const configPnLChart = Object.assign({}, optionsBaseChart, {
+		chart: {
+			type: 'column',
+			style: chartStyle
+		},
+		series: [
+			{
+				data: chartData.pnlValues,
+				dataLabels: { enabled: true, format: '$ {y}' },
+				tooltip: { pointFormat: tooltipFn('Net P/L:') },
+				color: 'green',
+				negativeColor: 'red'
+			}
+		]
+	});
+
+	const configDaychangeChart = Object.assign({}, optionsBaseChart, {
+		chart: {
+			type: 'column',
+			style: chartStyle
+		},
+		series: [
+			{
+				data: chartData.daychangeValues,
+				dataLabels: { enabled: true, format: '$ {y}' },
+				tooltip: { pointFormat: tooltipFn('Day Change:') },
+				color: 'green',
+				negativeColor: 'red'
+			}
+		]
+	});
+
+	const configMarketValueChart = Object.assign({}, optionsBaseChart, {
+		chart: {
+			type: 'pie',
+			style: chartStyle
+		},
+		plotOptions: {
+			pie: {
+				innerSize: '40%',
+				center: ['50%', '50%'],
+				borderColor: null
+			}
+		},
+		series: [
+			{
+				data: chartData.marketValues,
+				dataLabels: {
+					enabled: true,
+					format: '{key}<br><b>$ {y}</b>',
+					distance: 15,
+					connectorPadding: 5,
+					connectorWidth: 2
+				},
+				tooltip: { pointFormat: tooltipFn('Market Value:') }
+			}
+		]
+	});
 
 	return (
 		<Row>

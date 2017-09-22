@@ -1,11 +1,13 @@
-import * as actions from '../actions/actionTypes.js';
+import { SELECT_WATCHLIST } from '../actions/actionTypes.js';
 import initialState from '../initialState';
 
-export default function(selectedWatchlistId = initialState.selectedWatchlistId, action) {
-	switch (action.type) {
-		case actions.SELECT_WATCHLIST:
-			return action.watchlistId;
+function selectedWatchlistReducer(selectedWatchlistId = initialState.selectedWatchlistId, { type, watchlist }) {
+	switch (type) {
+		case SELECT_WATCHLIST:
+			return (watchlist && watchlist.id) || null;
 		default:
 			return selectedWatchlistId;
 	}
 }
+
+export default selectedWatchlistReducer;

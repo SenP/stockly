@@ -2,7 +2,7 @@ import React from 'react';
 import { func, object } from 'prop-types';
 import { Button } from 'react-bootstrap';
 import FontAwesome from 'react-fontawesome';
-
+// deps
 import Colored from '../../common/Colored';
 import formatCash from '../../../utils/formatCash';
 
@@ -12,14 +12,13 @@ StockView.propTypes = {
 	onDelete: func
 };
 
-export default function StockView({ stock, onEdit, onDelete }) {
+function StockView({ stock, onEdit, onDelete }) {
 	return (
 		<tr>
 			<td>{stock.code}</td>
 			<td className="number-field">{parseInt(stock.unitsOwned, 10)}</td>
 			<td className="number-field">{parseFloat(stock.avgPrice).toFixed(2)}</td>
 			<td className="number-field">{parseFloat(stock.lastPrice).toFixed(2)}</td>
-
 			<td className="number-field">
 				<Colored
 					value={formatCash(parseFloat(stock.change, 10), {
@@ -28,7 +27,6 @@ export default function StockView({ stock, onEdit, onDelete }) {
 					})}
 				/>
 			</td>
-
 			<td className="number-field">
 				<Colored
 					value={formatCash(parseFloat(stock.percentChange, 10), {
@@ -37,9 +35,7 @@ export default function StockView({ stock, onEdit, onDelete }) {
 					})}
 				/>
 			</td>
-
 			<td className="number-field">{parseFloat(stock.marketValue).toFixed(2)}</td>
-
 			<td className="number-field">
 				<Colored
 					value={formatCash(parseFloat(stock.dayChange, 10), {
@@ -48,7 +44,6 @@ export default function StockView({ stock, onEdit, onDelete }) {
 					})}
 				/>
 			</td>
-
 			<td className="number-field">
 				<Colored
 					value={formatCash(parseFloat(stock.netPnL, 10), {
@@ -57,7 +52,6 @@ export default function StockView({ stock, onEdit, onDelete }) {
 					})}
 				/>
 			</td>
-
 			<td>
 				<span className="center-block">
 					<Button bsSize="xsmall" bsStyle="warning" onClick={onEdit} style={{ marginRight: '10px' }}>
@@ -71,3 +65,4 @@ export default function StockView({ stock, onEdit, onDelete }) {
 		</tr>
 	);
 }
+export default StockView;

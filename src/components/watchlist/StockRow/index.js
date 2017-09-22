@@ -33,18 +33,18 @@ class StockRow extends PureComponent {
 	};
 
 	onEditClick = () => {
-		let { watchlist, stock, actions } = this.props;
-		let editedStock = Object.assign(new Stock(), stock);
+		const { watchlist, stock, actions } = this.props;
+		const editedStock = Object.assign(new Stock(), stock);
 		actions.initOp(STOCK, { watchlist, stock: editedStock, op: 'EDIT' });
 	};
 
 	onDeleteClick = () => {
-		let { watchlist, stock, actions } = this.props;
+		const { watchlist, stock, actions } = this.props;
 		actions.initOp(STOCK, { watchlist, stock, op: 'DELETE' });
 	};
 
 	onChange = editedStock => {
-		let { watchlist, actions } = this.props;
+		const { watchlist, actions } = this.props;
 		actions.updateOp(STOCK, { watchlist, stock: editedStock, op: 'EDIT' });
 	};
 
@@ -59,15 +59,15 @@ class StockRow extends PureComponent {
 	};
 
 	onCancel = () => {
-		let { removeOp } = this.props.actions;
-		let { stock, watchlist } = this.props;
+		const { removeOp } = this.props.actions;
+		const { stock, watchlist } = this.props;
 		removeOp(STOCK, { stock, watchlist, op: 'EDIT' });
 		removeOp(STOCK, { stock, watchlist, op: 'DELETE' });
 	};
 
 	render() {
-		let { stock, watchlist } = this.props;
-		let { editedStock, editing, deleting, saving, error } = this.props.opState;
+		const { stock, watchlist } = this.props;
+		const { editedStock, editing, deleting, saving, error } = this.props.opState;
 
 		return (
 			(!editing &&
@@ -97,13 +97,13 @@ class StockRow extends PureComponent {
 }
 
 function mapStateToProps(state, ownProps) {
-	let { watchlist, stock } = ownProps;
-	let stockOp =
-		selectOps(state, 'stock', { stock, watchlist, op: 'EDIT' }) ||
-		selectOps(state, 'stock', { stock, watchlist, op: 'DELETE' });
+	const { watchlist, stock } = ownProps;
+	const stockOp =
+		selectOps(state, STOCK, { stock, watchlist, op: 'EDIT' }) ||
+		selectOps(state, STOCK, { stock, watchlist, op: 'DELETE' });
 	let opState;
 	if (stockOp) {
-		let { op, status, error, stock: editedStock } = stockOp;
+		const { op, status, error, stock: editedStock } = stockOp;
 		opState = {
 			editedStock,
 			editing: op === 'EDIT',

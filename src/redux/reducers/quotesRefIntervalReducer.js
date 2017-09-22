@@ -1,11 +1,13 @@
-import * as actions from '../actions/actionTypes.js';
+import { SET_QUOTES_INTERVAL } from '../actions/actionTypes.js';
 import initialState from '../initialState';
 
-export default function(quotesRefInterval = initialState.quotesRefInterval, action) {
-	switch (action.type) {
-		case actions.SET_QUOTES_INTERVAL:
-			return action.interval;
+function quotesRefIntervalReducer(quotesRefInterval = initialState.quotesRefInterval, { type, interval }) {
+	switch (type) {
+		case SET_QUOTES_INTERVAL:
+			return interval;
 		default:
 			return quotesRefInterval;
 	}
 }
+
+export default quotesRefIntervalReducer;

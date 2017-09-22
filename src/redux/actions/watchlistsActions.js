@@ -1,56 +1,10 @@
 import * as actions from './actionTypes';
 
-export function loadWatchlists() {
-	return {
-		type: actions.LOAD_WATCHLISTS
-	};
-}
-
-export function loadWatchlistsSuccess(watchlists) {
-	return {
-		type: actions.LOAD_WATCHLISTS_SUCCESS,
-		watchlists
-	};
-}
-
-export function selectWatchlist(watchlist) {
-	return {
-		type: actions.SELECT_WATCHLIST,
-		watchlistId: (watchlist && watchlist.id) || null
-	};
-}
-
-export function createWatchlist(watchlist) {
-	return {
-		type: actions.CREATE_WATCHLIST,
-		watchlist
-	};
-}
-
-export function editWatchlist(watchlist) {
-	return {
-		type: actions.EDIT_WATCHLIST,
-		watchlist
-	};
-}
-
-export function saveWatchlistSuccess(watchlist) {
-	return {
-		type: actions.SAVE_WATCHLIST_SUCCESS,
-		watchlist
-	};
-}
-
-export function deleteWatchlist(watchlist) {
-	return {
-		type: actions.DELETE_WATCHLIST,
-		watchlist
-	};
-}
-
-export function deleteWatchlistSuccess(watchlist) {
-	return {
-		type: actions.DELETE_WATCHLIST_SUCCESS,
-		watchlist
-	};
-}
+export const selectWatchlist = watchlist => ({ type: actions.SELECT_WATCHLIST, watchlist });
+export const loadWatchlists = () => ({ type: actions.LOAD_WATCHLISTS });
+export const loadWatchlistsSuccess = watchlists => ({ type: actions.LOAD_WATCHLISTS_SUCCESS, watchlists });
+export const createWatchlist = watchlist => ({ type: actions.CREATE_WATCHLIST, watchlist });
+export const editWatchlist = watchlist => ({ type: actions.EDIT_WATCHLIST, watchlist });
+export const saveWatchlistSuccess = watchlist => ({ type: actions.SAVE_WATCHLIST_SUCCESS, watchlist });
+export const deleteWatchlist = watchlist => ({ type: actions.DELETE_WATCHLIST, watchlist });
+export const deleteWatchlistSuccess = watchlist => ({ type: actions.DELETE_WATCHLIST_SUCCESS, watchlist });

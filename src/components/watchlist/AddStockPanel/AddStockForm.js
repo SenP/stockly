@@ -1,6 +1,7 @@
 import React, { PureComponent } from 'react';
 import { instanceOf, func, bool, string } from 'prop-types';
 import { Panel, Button, Form, FormGroup, FormControl, ControlLabel } from 'react-bootstrap';
+// deps
 import { Stock, QuotesService } from '../../../services';
 import Autosuggest from 'react-autosuggest';
 import './autoSuggestStyles.css';
@@ -10,7 +11,11 @@ const msgClasses = {
 	error: 'msg text-center text-danger',
 	info: 'msg text-center text-info'
 };
+const PanelStyle = { marginBottom: '5px' };
+const ButtonStyle = { margin: '0px 5px' };
+const MsgStyle = { textAlign: 'center', marginTop: '10px' };
 
+// start - autosuggest helper functions
 const getSuggestions = (value, minLength = 0, exact = false) => {
 	const inputValue = exact ? value : value.trim().toLowerCase();
 	const inputLength = inputValue.length;
@@ -24,6 +29,7 @@ const renderSuggestion = ticker => (
 		{ticker.name} <br /> (<em> {ticker.code} </em>)
 	</div>
 );
+// end - autosuggest helper functions
 
 export default class AddStockForm extends PureComponent {
 	static propTypes = {
@@ -42,7 +48,7 @@ export default class AddStockForm extends PureComponent {
 	};
 
 	isFormValid = () => {
-		let { stock } = this.state;
+		const { stock } = this.state;
 		return (
 			stock.code &&
 			stock.code.trim() !== '' &&
@@ -64,6 +70,7 @@ export default class AddStockForm extends PureComponent {
 		);
 	};
 
+	// autosuggest helpers
 	onStockSelect = (event, { newValue }) => {
 		this.setState(
 			prevState => ({
@@ -82,6 +89,7 @@ export default class AddStockForm extends PureComponent {
 	onSuggestionsClearRequested = () => {
 		this.setState({ suggestions: [] });
 	};
+	// end autosuggest helpers
 
 	submitForm = evt => {
 		this.setState({ error: '' });
@@ -98,12 +106,10 @@ export default class AddStockForm extends PureComponent {
 	};
 
 	render = () => {
-		let { suggestions } = this.state;
-		let { saving } = this.props;
-		let msg = saving ? 'Saving...please wait.' : this.state.error || this.props.error;
-		let msgClass = saving ? msgClasses.info : msgClasses.error;
-
-		let { code = '', name = '', unitsOwned = 0, avgPrice = 0 } = this.state.stock;
+		const { saving } = this.props;
+		const msg = saving ? 'Saving...please wait.' : this.state.error || this.props.error;
+		const msgClass = saving ? msgClasses.info : msgClasses.error;
+		const { code = '', name = '', unitsOwned = 0, avgPrice = 0 } = this.state.stock;
 
 		const formTitle = (
 			<span style={{ textAlign: 'center' }}>
@@ -111,6 +117,8 @@ export default class AddStockForm extends PureComponent {
 			</span>
 		);
 
+		// autosuggest props
+		const { suggestions } = this.state;
 		const inputProps = {
 			placeholder: 'Enter stock code...',
 			value: code,
@@ -123,11 +131,12 @@ export default class AddStockForm extends PureComponent {
 				<input type="text" name="code" {...inputProps} autoFocus />
 			</div>
 		);
+		// end autosuggest props
 
 		const Spacing = <span>&nbsp;&nbsp;&nbsp;</span>;
 
 		return (
-			<Panel header={formTitle} style={{ marginBottom: '5px' }}>
+			<Panel header={formTitle} style={PanelStyle}>
 				<Form inline>
 					<FormGroup>
 						<ControlLabel>Stock: </ControlLabel>{' '}
@@ -177,7 +186,7 @@ export default class AddStockForm extends PureComponent {
 							bsSize="small"
 							onClick={this.submitForm}
 							disabled={saving || !this.isFormValid()}
-							style={{ margin: '0px 5px' }}
+							style={ButtonStyle}
 						>
 							Submit
 						</Button>
@@ -191,7 +200,7 @@ export default class AddStockForm extends PureComponent {
 							Cancel
 						</Button>
 					</span>
-					<div style={{ textAlign: 'center', marginTop: '10px' }}>
+					<div style={MsgStyle}>
 						<Message msgtext={msg} msgclass={msgClass} />
 					</div>
 				</Form>

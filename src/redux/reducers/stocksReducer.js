@@ -1,15 +1,20 @@
-import * as types from '../actions/actionTypes.js';
+import { SAVE_STOCK_SUCCESS, DELETE_STOCK_SUCCESS, FETCH_QUOTES_SUCCESS } from '../actions/actionTypes.js';
 import stockReducer from './stockReducer';
 
-export default function stocksReducer(stocks = [], action) {
+function stocksReducer(stocks = [], action) {
 	switch (action.type) {
-		case types.SAVE_STOCK_SUCCESS:
-			return saveStock(stocks, action);
+		case SAVE_STOCK_SUCCESS: {
+			const { code } = action.stock;
+			const stock = stocks[code] || undefined;
+			return Object.assign({}, stocks, { [code]: stockReducer(stock, action) });
+		}
 
-		case types.DELETE_STOCK_SUCCESS:
-			return deleteStock(stocks, action);
-
-		case types.FETCH_QUOTES_SUCCESS: {
+		case DELETE_STOCK_SUCCESS: {
+			const { [action.stock.code]: temp, ...newStocks } = stocks;
+			return newStocks;
+		}
+		
+		case FETCH_QUOTES_SUCCESS: {
 			let newStocks = {};
 			for (const code in stocks) {
 				newStocks[code] = stockReducer(stocks[code], action);
@@ -22,12 +27,4 @@ export default function stocksReducer(stocks = [], action) {
 	}
 }
 
-function saveStock(stocks, action) {
-	let stock = stocks[action.stock.code] || undefined;
-	return Object.assign({}, stocks, { [action.stock.code]: stockReducer(stock, action) });
-}
-
-function deleteStock(stocks, action) {
-	let { [action.stock.code]: temp, ...newStocks } = stocks;
-	return newStocks;
-}
+export default stocksReducer;

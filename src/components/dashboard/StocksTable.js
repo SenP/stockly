@@ -2,10 +2,12 @@ import React, { PureComponent } from 'react';
 import { instanceOf, string } from 'prop-types';
 import { Panel, Table, FormControl, FormGroup } from 'react-bootstrap';
 import FontAwesome from 'react-fontawesome';
-
+// deps
 import transformMap from '../../utils/transformMap';
 import Colored from '../common/Colored';
 import formatCash from '../../utils/formatCash';
+
+const ITEMS_TO_SHOW_OPTIONS = [5, 10, 15, 20];
 
 export default class StocksTable extends PureComponent {
 	static propTypes = {
@@ -76,9 +78,9 @@ export default class StocksTable extends PureComponent {
 							value={numItems}
 							onChange={this.onChange}
 						>
-							{[5, 10, 15, 20].map(n => (
-								<option key={n} value={n}>
-									{n}
+							{ITEMS_TO_SHOW_OPTIONS.map(itemsToShowOption => (
+								<option key={itemsToShowOption} value={itemsToShowOption}>
+									{itemsToShowOption}
 								</option>
 							))}
 						</FormControl>

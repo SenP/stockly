@@ -1,5 +1,5 @@
 import React from 'react';
-import { instanceOf, func } from 'prop-types';
+import { instanceOf, func, number } from 'prop-types';
 import { Table } from 'react-bootstrap';
 import FontAwesome from 'react-fontawesome';
 
@@ -8,27 +8,29 @@ import StockRow from './StockRow';
 import Colored from '../common/Colored';
 import formatCash from '../../utils/formatCash';
 
+const Dollar = <FontAwesome name="usd" />;
+CashField.propTypes = { value: number };
+
+function CashField({ value = '0' }) {
+	return (
+		<Colored
+			value={formatCash(parseFloat(value, 10), {
+				minimumFractionDigits: 2,
+				maximumFractionDigits: 2
+			})}
+			prefix={Dollar}
+		/>
+	);
+}
+
 StocksList.propTypes = {
 	watchlist: instanceOf(Watchlist).isRequired,
 	onSave: func.isRequired,
 	onDelete: func.isRequired
 };
 
-export default function StocksList({ watchlist, onSave, onDelete }) {
+function StocksList({ watchlist, onSave, onDelete }) {
 	const stocks = Object.values(watchlist.stocksByCode);
-	const Dollar = <FontAwesome name="usd" />;
-	const CashField = ({ value }) => {
-		return (
-			<Colored
-				value={formatCash(parseFloat(value, 10), {
-					minimumFractionDigits: 2,
-					maximumFractionDigits: 2
-				})}
-				prefix={Dollar}
-			/>
-		);
-	};
-
 	const headerRow = (
 		<thead>
 			<tr className="active">
@@ -89,3 +91,5 @@ export default function StocksList({ watchlist, onSave, onDelete }) {
 		</Table>
 	);
 }
+
+export default StocksList;

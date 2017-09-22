@@ -1,7 +1,7 @@
+import { bool, func, instanceOf, string } from 'prop-types';
 import React from 'react';
-import { instanceOf, func, bool, string } from 'prop-types';
 import { Button } from 'react-bootstrap';
-
+// deps
 import { Watchlist } from '../../services';
 import Message from '../common/Message';
 
@@ -9,6 +9,8 @@ const msgClasses = {
 	error: 'msg text-center text-danger',
 	info: 'msg text-center text-info'
 };
+const MsgStyle = { textAlign: 'center', marginTop: '20px' };
+const BtnStyle = { marginLeft: '5px' };
 
 DeleteWatchlistForm.propTypes = {
 	watchlist: instanceOf(Watchlist).isRequired,
@@ -18,7 +20,7 @@ DeleteWatchlistForm.propTypes = {
 	error: string
 };
 
-export default function DeleteWatchlistForm({ watchlist, saving = false, onDelete, onClose, error = null }) {
+function DeleteWatchlistForm({ watchlist, saving = false, onDelete, onClose, error = null }) {
 	const msg = saving ? `Deleting ${watchlist.name}...please wait.` : `  Delete '${watchlist.name}' watchlist?  `;
 	const msgClass = saving ? msgClasses.info : msgClasses.error;
 
@@ -28,28 +30,18 @@ export default function DeleteWatchlistForm({ watchlist, saving = false, onDelet
 				<Message msgtext={msg} msgclass={msgClass} />
 			</div>
 			<div className="text-center">
-				<Button
-					bsStyle="danger"
-					bsSize="xsmall"
-					style={{ marginLeft: '5px' }}
-					onClick={onDelete}
-					disabled={saving}
-				>
+				<Button bsStyle="danger" bsSize="xsmall" style={BtnStyle} onClick={onDelete} disabled={saving}>
 					Yes
 				</Button>
-				<Button
-					bsStyle="default"
-					bsSize="xsmall"
-					style={{ marginLeft: '5px' }}
-					onClick={onClose}
-					disabled={saving}
-				>
+				<Button bsStyle="default" bsSize="xsmall" style={BtnStyle} onClick={onClose} disabled={saving}>
 					No
 				</Button>
 			</div>
-			<div style={{ textAlign: 'center', marginTop: '20px' }}>
+			<div style={MsgStyle}>
 				<Message msgtext={error} msgclass={msgClass} />
 			</div>
 		</div>
 	);
 }
+
+export default DeleteWatchlistForm;

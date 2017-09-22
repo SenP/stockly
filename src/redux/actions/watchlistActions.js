@@ -1,41 +1,7 @@
-import * as actionTypes from './actionTypes';
+import * as actions from './actionTypes';
 
-export function addStock(stock, watchlist) {
-	return {
-		type: actionTypes.ADD_STOCK,
-		watchlist,
-		stock
-	};
-}
-
-export function editStock(stock, watchlist) {
-	return {
-		type: actionTypes.EDIT_STOCK,
-		watchlist,
-		stock
-	};
-}
-
-export function saveStockSuccess(stock, watchlist) {
-	return {
-		type: actionTypes.SAVE_STOCK_SUCCESS,
-		watchlist,
-		stock
-	};
-}
-
-export function deleteStock(stock, watchlist) {
-	return {
-		type: actionTypes.DELETE_STOCK,
-		watchlist,
-		stock
-	};
-}
-
-export function deleteStockSuccess(stock, watchlist) {
-	return {
-		type: actionTypes.DELETE_STOCK_SUCCESS,
-		watchlist,
-		stock
-	};
-}
+export const addStock = (stock, watchlist) => ({ type: actions.ADD_STOCK, stock, watchlist });
+export const editStock = (stock, watchlist) => ({ type: actions.EDIT_STOCK, stock, watchlist });
+export const saveStockSuccess = (stock, watchlist) => ({ type: actions.SAVE_STOCK_SUCCESS, stock, watchlist });
+export const deleteStock = (stock, watchlist) => ({ type: actions.DELETE_STOCK, stock, watchlist });
+export const deleteStockSuccess = (stock, watchlist) => ({ type: actions.DELETE_STOCK_SUCCESS, stock, watchlist });

@@ -29,12 +29,12 @@ class AddStockPanel extends PureComponent {
 	};
 
 	onAddClick = () => {
-		let { watchlist, actions } = this.props;
+		const { watchlist, actions } = this.props;
 		actions.initOp(STOCK, { watchlist, newStock: new Stock(), op: 'ADD' });
 	};
 
 	onChange = newStock => {
-		let { watchlist, actions } = this.props;
+		const { watchlist, actions } = this.props;
 		actions.updateOp(STOCK, { watchlist, newStock, op: 'ADD' });
 	};
 
@@ -43,13 +43,13 @@ class AddStockPanel extends PureComponent {
 	};
 
 	onCancel = () => {
-		let { removeOp } = this.props.actions;
-		let { watchlist } = this.props;
+		const { removeOp } = this.props.actions;
+		const { watchlist } = this.props;
 		removeOp(STOCK, { watchlist, op: 'ADD' });
 	};
 
 	render = () => {
-		let { adding, saving, error, newStock } = this.props.opState;
+		const { adding, saving, error, newStock } = this.props.opState;
 		const AddButton = (
 			<div className="text-right">
 				<Button bsStyle="success" onClick={this.onAddClick} style={{ marginBottom: '10px' }}>
@@ -77,11 +77,11 @@ class AddStockPanel extends PureComponent {
 }
 
 function mapStateToProps(state, ownProps) {
-	let { watchlist } = ownProps;
-	let stockOp = selectOps(state, 'stock', { watchlist, op: 'ADD' });
+	const { watchlist } = ownProps;
+	const stockOp = selectOps(state, STOCK, { watchlist, op: 'ADD' });
 	let opState;
 	if (stockOp) {
-		let { status, error, newStock } = stockOp;
+		const { status, error, newStock } = stockOp;
 		opState = {
 			newStock,
 			adding: true,

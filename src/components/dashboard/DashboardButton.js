@@ -1,6 +1,11 @@
 import React from 'react';
+import { func } from 'prop-types';
 import { Button } from 'react-bootstrap';
 import FontAwesome from 'react-fontawesome';
+
+DashboardButton.propTypes = {
+	onClick: func.isRequired
+};
 
 function DashboardButton({ onClick }) {
 	return (

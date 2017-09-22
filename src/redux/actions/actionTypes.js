@@ -29,7 +29,7 @@ export const SAVE_STOCK_SUCCESS = 'SAVE_STOCK_SUCCESS';
 export const DELETE_STOCK = 'DELETE_STOCK';
 export const DELETE_STOCK_SUCCESS = 'DELETE_STOCK_SUCCESS';
 
-//Operations
+// Operations
 export const INIT_OP = 'INIT_OP';
 export const START_OP = 'START_OP';
 export const UPDATE_OP = 'UPDATE_OP';

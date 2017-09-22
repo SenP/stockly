@@ -1,4 +1,5 @@
 import React from 'react';
+import { arrayOf, element } from 'prop-types';
 
 const sidebarStyle = {
 	padding: '0px 0px',
@@ -12,6 +13,9 @@ const headerStyle = {
 	textAlign: 'center',
 	padding: '5px',
 	margin: '0px -5px'
+};
+Sidebar.propTypes = {
+	children: arrayOf(element)
 };
 
 function Sidebar({ children }) {
