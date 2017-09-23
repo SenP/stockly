@@ -1,61 +1,69 @@
-import { call, put, takeEvery } from "redux-saga/effects";
-import { WatchlistService, QuotesService } from "../../services";
-import * as watchlistsActions from "../actions/watchlistsActions";
-import * as quotesActions from "../../redux/actions/quotesActions";
-import * as actionTypes from "../actions/actionTypes";
+import { call, put, takeEvery, select } from 'redux-saga/effects';
+import { WatchlistService } from '../../services';
+import {
+	loadWatchlistsSuccess,
+	saveWatchlistSuccess,
+	deleteWatchlistSuccess,
+	selectWatchlist
+} from '../actions/watchlistsActions';
+import { fetchQuotes } from '../actions/quotesActions';
+import { startOp, endOpError, endOpSuccess } from '../actions/opsActions';
+import { LOAD_WATCHLISTS, CREATE_WATCHLIST, EDIT_WATCHLIST, DELETE_WATCHLIST } from '../actions/actionTypes';
+import selectSelectedWatchlist from '../selectors/selectSelectedWatchlist';
+import selectWatchlists from '../selectors/selectWatchlists';
+import { WATCHLIST } from '../actions/scopes';
 
 function* loadWatchlists() {
-  try {
-    const watchlists = yield call([WatchlistService, "getWatchlists"]);
-    yield put(watchlistsActions.loadWatchlistsSuccess(watchlists));
-    watchlists.forEach(wl => {
-      wl.stocks.forEach(QuotesService.register.bind(QuotesService));
-    });
-    yield put(quotesActions.fetchQuotes());
-  } catch (error) {
-    console.log(error);
-  }
+	try {
+		const watchlists = yield call([WatchlistService, 'getWatchlists']);
+		yield put(loadWatchlistsSuccess(watchlists));
+		yield put(fetchQuotes());
+	} catch (error) {
+		console.log(error);
+	}
 }
 
 function* saveWatchlist({ type, watchlist }) {
-  let op = type === actionTypes.CREATE_WATCHLIST ? "CREATE" : "EDIT";
-  yield put(watchlistsActions.startAsyncOp(watchlist, op));
-  try {
-    const { status, data: newWL } = yield call(
-      [WatchlistService, "saveWatchlist"],
-      watchlist
-    );
-    if (status === "success") {
-      yield put(watchlistsActions.saveWatchlistSuccess(newWL));
-      yield put(watchlistsActions.endAsyncOpSuccess(watchlist, op));
-    } else {
-      throw status;
-    }
-  } catch (error) {
-    yield put(watchlistsActions.endAsyncOpError(watchlist, op, error));
-  }
+	let op = type === CREATE_WATCHLIST ? 'CREATE' : 'EDIT';
+	yield put(startOp(WATCHLIST, { watchlist, op }));
+	try {
+		const { status, data: newWL } = yield call([WatchlistService, 'saveWatchlist'], watchlist);
+		if (status === 'success') {
+			yield put(saveWatchlistSuccess(newWL));
+			yield put(endOpSuccess(WATCHLIST, { watchlist, op }));
+		} else {
+			throw status;
+		}
+	} catch (error) {
+		yield put(endOpError(WATCHLIST, { watchlist, op, error }));
+	}
 }
 
 function* deleteWatchlist({ watchlist }) {
-  let op = "DELETE";
-  yield put(watchlistsActions.startAsyncOp(watchlist, op));
-  try {
-    const res = yield call([WatchlistService, "deleteWatchlist"], watchlist);
-    if (res.status === "success") {
-      yield put(watchlistsActions.deleteWatchlistSuccess(watchlist));
-      watchlist.stocks.forEach(QuotesService.deregister.bind(QuotesService));
-      yield put(watchlistsActions.endAsyncOpSuccess(watchlist, op));
-    } else {
-      throw res.status;
-    }
-  } catch (error) {
-    yield put(watchlistsActions.endAsyncOpError(watchlist, op, error));
-  }
+	const op = 'DELETE';
+	yield put(startOp(WATCHLIST, { watchlist, op }));
+	try {
+		const res = yield call([WatchlistService, 'deleteWatchlist'], watchlist);
+		if (res.status === 'success') {
+			const selected = yield select(selectSelectedWatchlist);
+			yield put(deleteWatchlistSuccess(watchlist));
+			yield put(endOpSuccess(WATCHLIST, { watchlist, op }));
+			// reset selected watchlist to first watchlist, if user has not moved to dashboard view
+			if (selected) {
+				const watchlists = yield select(selectWatchlists);
+				watchlists.length > 0 ? yield put(selectWatchlist(watchlists[0])) : yield put(selectWatchlist(null));
+			}
+		} else {
+			throw res.status;
+		}
+	} catch (error) {
+		yield put(endOpError(WATCHLIST, { watchlist, op, error }));
+	}
 }
 
 export default [
-  takeEvery(actionTypes.LOAD_WATCHLISTS, loadWatchlists),
-  takeEvery(actionTypes.CREATE_WATCHLIST, saveWatchlist),
-  takeEvery(actionTypes.EDIT_WATCHLIST, saveWatchlist),
-  takeEvery(actionTypes.DELETE_WATCHLIST, deleteWatchlist)
+	takeEvery(LOAD_WATCHLISTS, loadWatchlists),
+	takeEvery(CREATE_WATCHLIST, saveWatchlist),
+	takeEvery(EDIT_WATCHLIST, saveWatchlist),
+	takeEvery(DELETE_WATCHLIST, deleteWatchlist)
 ];

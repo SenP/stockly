@@ -1,91 +1,47 @@
-import React, { Component } from "react";
-import { instanceOf, func, bool } from "prop-types";
-import { Button } from "react-bootstrap";
-
-import { Watchlist } from "../../services";
-import Message from "../common/Message";
+import { bool, func, instanceOf, string } from 'prop-types';
+import React from 'react';
+import { Button } from 'react-bootstrap';
+// deps
+import { Watchlist } from '../../services';
+import Message from '../common/Message';
 
 const msgClasses = {
-  error: "msg text-center text-danger",
-  info: "msg text-center text-info"
+	error: 'msg text-center text-danger',
+	info: 'msg text-center text-info'
+};
+const MsgStyle = { textAlign: 'center', marginTop: '20px' };
+const BtnStyle = { marginLeft: '5px' };
+
+DeleteWatchlistForm.propTypes = {
+	watchlist: instanceOf(Watchlist).isRequired,
+	onDelete: func.isRequired,
+	onClose: func.isRequired,
+	saving: bool,
+	error: string
 };
 
-export default class DeleteWatchlistForm extends Component {
-  static propTypes = {
-    watchlist: instanceOf(Watchlist).isRequired,
-    onDelete: func.isRequired,
-    onClose: func.isRequired,
-    saving: bool
-  };
+function DeleteWatchlistForm({ watchlist, saving = false, onDelete, onClose, error = null }) {
+	const msg = saving ? `Deleting ${watchlist.name}...please wait.` : `  Delete '${watchlist.name}' watchlist?  `;
+	const msgClass = saving ? msgClasses.info : msgClasses.error;
 
-  state = {
-    msg: null,
-    msgClass: null,
-    saving: false
-  };
-
-  componentWillMount() {
-    this.setCompState(this.props);
-  }
-
-  componentWillReceiveProps(newProps) {
-    this.setCompState(newProps);
-  }
-
-  setCompState = ({ saving, watchlist }) => {
-    let msg = saving
-      ? `Deleting ${watchlist.name}...please wait.`
-      : `  Delete '${watchlist.name}' watchlist?  `;
-    this.setState(() => ({
-      msg,
-      msgClass: saving ? msgClasses.info : msgClasses.error,
-      saving
-    }));
-  };
-
-  submitForm = evt => {
-    let { watchlist, onDelete } = this.props;
-    onDelete(watchlist);
-  };
-
-  closeForm = () => {
-    this.setState(() => ({
-      msg: "",
-      msgClass: "",
-      saving: false
-    }));
-    this.props.onClose();
-  };
-
-  render = () => {
-    let { saving } = this.props;
-
-    return (
-      <div>
-        <div className="text-center" style={{ margin: "10px" }}>
-          <Message msgtext={this.state.msg} msgclass={this.state.msgClass} />
-        </div>
-        <div className="text-center">
-            <Button
-              bsStyle="danger"
-              bsSize="xsmall"
-              style={{ marginLeft: "5px" }}
-              onClick={this.submitForm}
-              disabled={saving}
-            >
-              Yes
-            </Button>
-            <Button
-              bsStyle="default"
-              bsSize="xsmall"
-              style={{ marginLeft: "5px" }}
-              onClick={this.closeForm}
-              disabled={saving}
-            >
-              No
-            </Button>
-        </div>
-      </div>
-    );
-  };
+	return (
+		<div>
+			<div className="text-center" style={{ margin: '10px' }}>
+				<Message msgtext={msg} msgclass={msgClass} />
+			</div>
+			<div className="text-center">
+				<Button bsStyle="danger" bsSize="xsmall" style={BtnStyle} onClick={onDelete} disabled={saving}>
+					Yes
+				</Button>
+				<Button bsStyle="default" bsSize="xsmall" style={BtnStyle} onClick={onClose} disabled={saving}>
+					No
+				</Button>
+			</div>
+			<div style={MsgStyle}>
+				<Message msgtext={error} msgclass={msgClass} />
+			</div>
+		</div>
+	);
 }
+
+export default DeleteWatchlistForm;

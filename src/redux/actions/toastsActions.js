@@ -1,17 +1,4 @@
-import * as actionTypes from "./actionTypes";
+import { ADD_TOAST, REMOVE_TOAST } from './actionTypes';
 
-export function addToast(key, msg, msgtype, id) {    
-  return {
-    type: actionTypes.ADD_TOAST,
-    key,
-    msgtype,
-    id
-  };
-}
-
-export function removeToast(id) {    
-  return {
-    type: actionTypes.REMOVE_TOAST,
-    id
-  };
-}
+export const addToast = (key, msgtype, id) => ({ type: ADD_TOAST, key, msgtype, id });
+export const removeToast = id => ({ type: REMOVE_TOAST, id });

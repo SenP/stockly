@@ -1,60 +1,56 @@
 export class Stock {
-  code = "";
-  name = "";
-  unitsOwned = 0;
-  avgPrice = 0;
-  lastPrice = 0;
-  change = 0;
-  percentChange = 0;
+	code = '';
+	name = '';
+	unitsOwned = 0;
+	avgPrice = 0;
+	lastPrice = 0;
+	change = 0;
+	percentChange = 0;
 
-  get marketValue() {
-    if (this.unitsOwned > 0 && this.lastPrice > 0) {
-      return this.unitsOwned * this.lastPrice;
-    }
-    return 0;
-  }
+	get marketValue() {
+		return this.unitsOwned > 0 && this.lastPrice > 0 ? this.unitsOwned * this.lastPrice : 0;
+	}
 
-  get dayChange() {
-    if (this.unitsOwned && this.change) {
-      return this.unitsOwned * this.change;
-    }
-    return 0;
-  }
+	get dayChange() {
+		return this.unitsOwned && this.change ? this.unitsOwned * this.change : 0;
+	}
 
-  get netPnL() {
-    if (this.unitsOwned && this.avgPrice && this.lastPrice) {
-      return this.unitsOwned * (this.lastPrice - this.avgPrice);
-    }
-    return 0;
-  }
+	get netPnL() {
+		return this.unitsOwned && this.avgPrice && this.lastPrice
+			? this.unitsOwned * (this.lastPrice - this.avgPrice)
+			: 0;
+	}
 }
 
 export class Watchlist {
-  id = null;
-  name = "";
-  description = "";
-  owner = "";
-  createdOn = new Date();
-  stocks = [];
+	id = null;
+	name = '';
+	description = '';
+	owner = '';
+	createdOn = new Date();
+	stocksByCode = {};
 
-  get totalMarketValue() {
-    let total = this.stocks.reduce(
-      (totalV, wl) => totalV + wl.marketValue,
-      0
-    );
-    return parseFloat(total.toFixed(2));
-  }
+	get totalMarketValue() {
+		return parseFloat(
+			Object.values(this.stocksByCode)
+				.reduce((totalV, stock) => totalV + stock.marketValue, 0)
+				.toFixed(2)
+		);
+	}
 
-  get totalDayChange() {
-    let total = this.stocks.reduce(
-      (totalV, wl) => totalV + wl.dayChange,
-      0
-    );
-    return parseFloat(total.toFixed(2));
-  }
+	get totalDayChange() {
+		return parseFloat(
+			Object.values(this.stocksByCode)
+				.reduce((totalV, stock) => totalV + stock.dayChange, 0)
+				.toFixed(2)
+		);
+	}
 
-  get totalPnL() {
-    let total = this.stocks.reduce((totalV, wl) => totalV + wl.netPnL, 0);
-    return parseFloat(total.toFixed(2));
-  }
+	get totalPnL() {
+		return parseFloat(
+			Object.values(this.stocksByCode)
+				.reduce((totalV, stock) => totalV + stock.netPnL, 0)
+				.toFixed(2)
+		);
+	}
 }

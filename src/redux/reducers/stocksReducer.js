@@ -1,38 +1,30 @@
-import * as types from "../actions/actionTypes.js";
-import stockReducer from "./stockReducer";
+import { SAVE_STOCK_SUCCESS, DELETE_STOCK_SUCCESS, FETCH_QUOTES_SUCCESS } from '../actions/actionTypes.js';
+import stockReducer from './stockReducer';
 
-export default function stocksReducer(state = [], action) {
-  switch (action.type) {
-    case types.SAVE_STOCK_SUCCESS:
-      return saveStock(state, action);
+function stocksReducer(stocks = [], action) {
+	switch (action.type) {
+		case SAVE_STOCK_SUCCESS: {
+			const { code } = action.stock;
+			const stock = stocks[code] || undefined;
+			return Object.assign({}, stocks, { [code]: stockReducer(stock, action) });
+		}
 
-    case types.DELETE_STOCK_SUCCESS:
-      return deleteStock(state, action);
+		case DELETE_STOCK_SUCCESS: {
+			const { [action.stock.code]: temp, ...newStocks } = stocks;
+			return newStocks;
+		}
+		
+		case FETCH_QUOTES_SUCCESS: {
+			let newStocks = {};
+			for (const code in stocks) {
+				newStocks[code] = stockReducer(stocks[code], action);
+			}
+			return newStocks;
+		}
 
-    case types.FETCH_QUOTES_SUCCESS:
-      return state.map(stock => stockReducer(stock, action));
-
-    default:
-      return state;
-  }
+		default:
+			return stocks;
+	}
 }
 
-function saveStock(state, action) {
-  let i = state.findIndex(stock => stock.code === action.stock.code);
-  if (i !== -1) {
-    // EDIT
-    return [
-      ...state.slice(0, i),
-      stockReducer(...state.slice(i, i + 1), action),
-      ...state.slice(i + 1)
-    ];
-  } else {
-    // CREATE
-    return [...state, stockReducer(undefined, action)];
-  }
-}
-
-function deleteStock(state, action) {
-  let i = state.findIndex(stock => stock.code === action.stock.code);
-  return i === -1 ? state : [...state.slice(0, i), ...state.slice(i + 1)];
-}
+export default stocksReducer;

@@ -1,147 +1,103 @@
-import React, { Component } from "react";
-import { instanceOf, object } from "prop-types";
-import { Button } from "react-bootstrap";
+import React, { PureComponent } from 'react';
+import { instanceOf, object, func } from 'prop-types';
+import { Button } from 'react-bootstrap';
 // redux
-import { connect } from "react-redux";
-import { bindActionCreators } from "redux";
-import selectStockOp from "../../../redux/selectors/selectStockOp";
+import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
+import * as opsActions from '../../../redux/actions/opsActions';
+import selectOps from '../../../redux/selectors/selectOps';
+import { STOCK } from '../../../redux/actions/scopes';
+// deps
+import { Stock, Watchlist } from '../../../services';
+import AddStockForm from './AddStockForm';
 
-import { Stock, Watchlist, WatchlistService } from "../../../services";
-import * as watchlistActions from "../../../redux/actions/watchlistActions";
-import AddStockForm from "./AddStockForm";
+class AddStockPanel extends PureComponent {
+	static propTypes = {
+		watchlist: instanceOf(Watchlist).isRequired,
+		onSave: func.isRequired,
+		opState: object,
+		actions: object
+	};
 
-class AddStockPanel extends Component {
-  static propTypes = {
-    watchlist: instanceOf(Watchlist).isRequired,
-    addStockOp: object
-  };
+	static defaultProps = {
+		opState: {
+			newStock: new Stock(),
+			adding: false,
+			saving: false,
+			error: null
+		}
+	};
 
-  state = {
-    watchlist: this.props.watchlist,
-    adding: false,
-    newStock: null,
-    saving: false,
-    error: null
-  };
+	onAddClick = () => {
+		const { watchlist, actions } = this.props;
+		actions.initOp(STOCK, { watchlist, newStock: new Stock(), op: 'ADD' });
+	};
 
-  componentDidMount() {
-    this.setCompState(this.props);
-  }
+	onChange = newStock => {
+		const { watchlist, actions } = this.props;
+		actions.updateOp(STOCK, { watchlist, newStock, op: 'ADD' });
+	};
 
-  componentWillReceiveProps(newProps) {
-    this.setCompState(newProps);
-  }
+	submitForm = newStock => {
+		return this.props.onSave(newStock, true);
+	};
 
-  resetOpStatus = () => {
-    let { newStock, watchlist } = this.state;
-    let { removeAsyncOp } = this.props.actions;
-    removeAsyncOp(newStock, watchlist, "ADD");
-  };
+	onCancel = () => {
+		const { removeOp } = this.props.actions;
+		const { watchlist } = this.props;
+		removeOp(STOCK, { watchlist, op: 'ADD' });
+	};
 
-  setCompState = props => {
-    let { addStockOp, watchlist } = props;
-    if (addStockOp) {
-      let newStock = addStockOp.stock;
-      let saving = addStockOp.status === "pending" ? true : false;
-      let error = addStockOp.error;
-      this.setState(() => ({
-        watchlist,
-        newStock,
-        adding: true,
-        saving,
-        error
-      }));
-    } else {
-      this.setState(prevState => ({
-        watchlist,
-        adding: false,
-        newStock: new Stock(),
-        saving: false,
-        error: null
-      }));
-    }
-  };
+	render = () => {
+		const { adding, saving, error, newStock } = this.props.opState;
+		const AddButton = (
+			<div className="text-right">
+				<Button bsStyle="success" onClick={this.onAddClick} style={{ marginBottom: '10px' }}>
+					Add Stock
+				</Button>
+			</div>
+		);
 
-  onAddClick = () => {
-    this.setState(
-      () => ({
-        adding: true
-      }),
-      () =>
-        this.props.actions.initAsyncOp(new Stock(), this.state.watchlist, "ADD")
-    );
-  };
-
-  onSave = stock => {
-    this.setState(
-      () => ({
-        newStock: stock
-      }),
-      () => this.props.actions.addStock(stock, this.state.watchlist)
-    );
-  };
-
-  onValidate = stock => {
-    return WatchlistService.validateStock(this.state.watchlist, stock, true);
-  };
-
-  handleChange = newStock => {
-    this.props.actions.updateAsyncOp(this.state.watchlist, newStock, "ADD");
-  };
-
-  onCancel = () => {
-    this.setState({
-      adding: false,
-      saving: false,
-      error: null,
-      newStock: new Stock()
-    });
-    this.resetOpStatus();
-  };
-
-  render = () => {
-    let { adding, saving, error, newStock } = this.state;
-
-    const AddButton = (
-      <div className="text-right">
-        <Button
-          bsStyle="success"
-          onClick={this.onAddClick}
-          style={{ marginBottom: "10px" }}
-        >
-          Add Stock
-        </Button>
-      </div>
-    );
-
-    return (
-      <div>
-        {!adding && AddButton}
-        {adding &&
-          <AddStockForm
-            stock={newStock}
-            saving={saving}
-            error={error}
-            onChange={this.handleChange}
-            onValidate={this.onValidate}
-            onSave={this.onSave}
-            onClose={this.onCancel}
-          />}
-      </div>
-    );
-  };
+		return (
+			<div>
+				{!adding && AddButton}
+				{adding && (
+					<AddStockForm
+						stock={newStock}
+						saving={saving}
+						error={error}
+						onChange={this.onChange}
+						onSave={this.submitForm}
+						onClose={this.onCancel}
+					/>
+				)}
+			</div>
+		);
+	};
 }
 
 function mapStateToProps(state, ownProps) {
-  return {
-    addStockOp: selectStockOp(state, null, ownProps.watchlist, "ADD")
-  };
+	const { watchlist } = ownProps;
+	const stockOp = selectOps(state, STOCK, { watchlist, op: 'ADD' });
+	let opState;
+	if (stockOp) {
+		const { status, error, newStock } = stockOp;
+		opState = {
+			newStock,
+			adding: true,
+			saving: status === 'pending' ? true : false,
+			error
+		};
+	}
+	return {
+		opState
+	};
 }
 
 function mapDispatchToProps(dispatch) {
-  return {
-    actions: bindActionCreators(watchlistActions, dispatch)
-  };
+	return {
+		actions: bindActionCreators(opsActions, dispatch)
+	};
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(AddStockPanel);

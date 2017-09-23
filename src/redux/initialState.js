@@ -1,6 +1,7 @@
 export default {
-  watchlists: [],
-  watchlistAsyncOp: null,
-  stocksAsyncOp: [],
-  toasts: []
+	watchlistsById: {},
+	selectedWatchlistId: null,
+	opsByKey: {},
+	toastsByKey: {},
+	quotesRefInterval: 300
 };

@@ -1,14 +1,16 @@
-import { combineReducers } from "redux";
-import watchlistsReducer from "./watchlistsReducer";
-import watchlistOpReducer from "./watchlistOpReducer";
-import stocksOpReducer from "./stocksOpReducer";
-import toastsReducer from "./toastsReducer";
+import { combineReducers } from 'redux';
+import watchlistsReducer from './watchlistsReducer';
+import selectedWatchlistReducer from './selectedWatchlistReducer';
+import opsReducer from './opsReducer';
+import toastsReducer from './toastsReducer';
+import quotesRefIntervalReducer from './quotesRefIntervalReducer';
 
 const rootReducer = combineReducers({
-  watchlists: watchlistsReducer,
-  watchlistAsyncOp: watchlistOpReducer,
-  stocksAsyncOp: stocksOpReducer,
-  toasts: toastsReducer
+	watchlistsById: watchlistsReducer,
+	selectedWatchlistId: selectedWatchlistReducer,
+	opsByKey: opsReducer,
+	toastsByKey: toastsReducer,
+	quotesRefInterval: quotesRefIntervalReducer
 });
 
 export default rootReducer;

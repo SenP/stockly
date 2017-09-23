@@ -1,59 +1,51 @@
-import { call, put, takeEvery, select } from "redux-saga/effects";
+import { call, put, takeEvery, select } from 'redux-saga/effects';
+import * as toastsActions from '../actions/toastsActions';
+import { START_OP, REMOVE_OP, END_OP_SUCCESS, END_OP_ERROR } from '../actions/actionTypes';
+import { WATCHLIST, STOCK } from '../actions/scopes';
+import getToast from '../selectors/getToast';
+import { AddToast, RemoveToast } from '../../utils/Toaster';
 
-import * as toastsActions from "../actions/toastsActions";
-import * as actionTypes from "../actions/actionTypes";
-import getToast from "../selectors/getToast";
-import { AddToast, RemoveToast } from "../../utils/Toaster";
+function* addToast({ type, key, payload }) {
+	const { op, scope, stock, watchlist } = payload;
+	const opMsgSuccess = ['CREATE', 'ADD', 'EDIT'].includes(op) ? 'Saved' : 'Deleted';
+	const opMsgError = `Failed to ${op.toLowerCase()}`;
+	let opMsg, msgType;
 
-function* addToast(action) {
-  let { type, stock, watchlist, op } = action;
-  let key, opMsg, msgType;
-  switch (type) {
-    case actionTypes.END_ASYNC_OP_WATCHLIST_SUCCESS:
-      key = `${watchlist.id}:${op}`;
-      opMsg = `${op === "CREATE" || op === "EDIT"
-        ? "Saved"
-        : "Deleted"} watchlist '${watchlist.name}'`;
-      msgType = "success";
-      break;
+	switch (type + scope) {
+		case END_OP_SUCCESS + WATCHLIST:
+			opMsg = `${opMsgSuccess} watchlist '${watchlist.name}'`;
+			msgType = 'success';
+			break;
 
-    case actionTypes.END_ASYNC_OP_STOCK_SUCCESS:
-      key = `${stock.code}:${watchlist.id}:${op}`;
-      opMsg = `${op === "ADD" || op === "EDIT"
-        ? "Saved"
-        : "Deleted"} stock '${stock.code}' on watchlist '${watchlist.name}'`;
-      msgType = "success";
-      break;
+		case END_OP_SUCCESS + STOCK:
+			opMsg = `${opMsgSuccess} stock '${stock.code}' on watchlist '${watchlist.name}'`;
+			msgType = 'success';
+			break;
 
-    case actionTypes.END_ASYNC_OP_STOCK_ERROR:
-      key = `${stock.code}:${watchlist.id}:${op}`;
-      opMsg = `Failed to ${op.toLowerCase()} stock '${stock.code}' on watchlist '${watchlist.name}'`;
-      msgType = "error";
-      break;
+		case END_OP_ERROR + STOCK:
+			opMsg = `${opMsgError} stock '${stock.code}' on watchlist '${watchlist.name}'`;
+			msgType = 'error';
+			break;
 
-    default:
-      return;
-  }
+		default:
+			return;
+	}
 
-  let id = yield call(AddToast, opMsg, msgType);
-  yield put(toastsActions.addToast(key, opMsg, msgType, id));
+	const id = yield call(AddToast, opMsg, msgType);
+	yield put(toastsActions.addToast(key, msgType, id));
 }
 
-function* removeToast(action) {
-  let { stock, watchlist, op } = action;
-  let key = `${stock.code}:${watchlist.id}:${op}`;
-  const toast = yield select(getToast, key);
-  if (toast && toast.length > 0) {
-    yield call(RemoveToast, toast[0].id);
-    yield put(toastsActions.removeToast(toast[0].id));
-  }
+function* removeToast({ key }) {
+	const toast = yield select(getToast, key);
+	if (toast) {
+		yield call(RemoveToast, toast.id);
+		yield put(toastsActions.removeToast(toast.id));
+	}
 }
 
 export default [
-  takeEvery(actionTypes.END_ASYNC_OP_WATCHLIST_SUCCESS, addToast),
-  takeEvery(actionTypes.END_ASYNC_OP_WATCHLIST_ERROR, addToast),
-  takeEvery(actionTypes.END_ASYNC_OP_STOCK_SUCCESS, addToast),
-  takeEvery(actionTypes.END_ASYNC_OP_STOCK_ERROR, addToast),
-  takeEvery(actionTypes.START_ASYNC_OP_STOCK, removeToast),
-  takeEvery(actionTypes.REMOVE_ASYNC_OP_STOCK, removeToast)
+	takeEvery(END_OP_SUCCESS, addToast),
+	takeEvery(END_OP_ERROR, addToast),
+	takeEvery(START_OP, removeToast),
+	takeEvery(REMOVE_OP, removeToast)
 ];

@@ -1,88 +1,85 @@
-import React, { Component } from "react";
-import { number, instanceOf } from "prop-types";
+import React, { PureComponent } from 'react';
+import { instanceOf } from 'prop-types';
+import { Panel } from 'react-bootstrap';
 // redux
-import { connect } from "react-redux";
-import { bindActionCreators } from "redux";
-import * as watchlistActions from "../../redux/actions/watchlistActions";
-import * as watchlistsActions from "../../redux/actions/watchlistsActions";
-import selectWatchlistById from "../../redux/selectors/selectWatchlistById";
+import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
+import * as watchlistActions from '../../redux/actions/watchlistActions';
+import selectSelectedWatchlist from '../../redux/selectors/selectSelectedWatchlist';
+// deps
+import { Watchlist, WatchlistService } from '../../services';
+import AddStockPanel from './AddStockPanel';
+import StocksList from './StocksList';
+import Header from './WatchlistHeader';
 
-import { Panel } from "react-bootstrap";
+class WatchlistContainer extends PureComponent {
+	static propTypes = {
+		watchlist: instanceOf(Watchlist)
+	};
 
-import { Watchlist as WatchlistModel } from "../../services";
-import StocksList from "./StocksList";
-import AddStockPanel from "./AddStockPanel";
-import Header from "./WatchlistHeader";
+	onSaveStock = (stock, isAdding) => {
+		const { watchlist, actions } = this.props;
+		const valid = WatchlistService.validateStock(watchlist, stock, isAdding);
+		if (valid.status === 'error') {
+			return valid.msg;
+		}
+		isAdding ? actions.addStock(stock, watchlist) : actions.editStock(stock, watchlist);
+	};
 
-export class WatchlistContainer extends Component {
-  static propTypes = {
-    watchlist: instanceOf(WatchlistModel),
-    watchlistId: number
-  };
+	onDeleteStock = stock => {
+		this.props.actions.deleteStock(stock, this.props.watchlist);
+	};
 
-  static defaultProps = {
-    watchlist: null,
-    watchlistId: null
-  };
+	render() {
+		const { watchlist } = this.props;
 
-  state = {
-    watchlist: this.props.watchlist
-  };
+		if (!watchlist) return null;
 
-  componentWillReceiveProps(newProps) {
-    this.setState({
-      watchlist: newProps.watchlist
-    });
-  }
+		const TitlePanel = (
+			<Panel
+				header={<Header watchlist={watchlist} />}
+				bsStyle="primary"
+				className="panel-watchlist text-center"
+			/>
+		);
 
-  render() {
-    const { watchlist } = this.state;
+		const emptylistMsg = (
+			<div className="jumbotron text-center">
+				<h3> Watchlist is empty! </h3>
+			</div>
+		);
 
-    const TitlePanel = (
-      <Panel
-        header={<Header watchlist={watchlist} />}
-        bsStyle="primary"
-        className="panel-watchlist text-center"
-      />
-    );
+		return (
+			<div>
+				{TitlePanel}
 
-    const emptylistMsg = (
-      <div className="jumbotron text-center">
-        <h3> Watchlist is empty! </h3>
-      </div>
-    );
+				<div>
+					{watchlist && Object.values(watchlist.stocksByCode).length === 0 && emptylistMsg}
+					<AddStockPanel watchlist={watchlist} onSave={this.onSaveStock} />
+				</div>
 
-    return (
-      <div>
-        {TitlePanel}
-        <div>
-          {watchlist && watchlist.stocks.length === 0 && emptylistMsg}
-          <AddStockPanel watchlist={watchlist} />
-        </div>
+				<StocksList watchlist={watchlist} onSave={this.onSaveStock} onDelete={this.onDeleteStock} />
 
-        <StocksList watchlist={watchlist} />
-
-        <div className="pull-right">
-          <small> Price data from Google Finance (delayed and randomized). </small>
-        </div>
-      </div>
-    );
-  }
+				<div className="pull-right">
+					<small> Price data from Google Finance (delayed and randomized). </small>
+				</div>
+			</div>
+		);
+	}
 }
 
-function mapStateToProps(state, ownProps) {
-  return {
-    watchlist: selectWatchlistById(state, ownProps.watchlistId)
-  };
+function mapStateToProps(state) {
+	const watchlist = selectSelectedWatchlist(state);
+	if (!watchlist) return {};
+	return {
+		watchlist
+	};
 }
 
 function mapDispatchToProps(dispatch) {
-  return {
-    actions: bindActionCreators(
-      { ...watchlistsActions, ...watchlistActions },
-      dispatch
-    )
-  };
+	return {
+		actions: bindActionCreators(watchlistActions, dispatch)
+	};
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(WatchlistContainer);

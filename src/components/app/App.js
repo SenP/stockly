@@ -1,131 +1,114 @@
-import React, { Component } from "react";
-import { Grid, Row, Col } from "react-bootstrap";
-import injectTapEventPlugin from "react-tap-event-plugin";
-import { ToastContainer } from "react-toastify";
-
+import React, { Component } from 'react';
+import { number, object } from 'prop-types';
+import { Grid, Row, Col } from 'react-bootstrap';
+import injectTapEventPlugin from 'react-tap-event-plugin';
+import { ToastContainer } from 'react-toastify';
 // redux
-import { connect } from "react-redux";
-import { bindActionCreators } from "redux";
-import * as quotesActions from "../../redux/actions/quotesActions";
-import { loadWatchlists } from "../../redux/actions/watchlistsActions";
-import selectWatchlists from "../../redux/selectors/selectWatchlists";
-
+import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
+import { fetchQuotes } from '../../redux/actions/quotesActions';
+import { loadWatchlists, selectWatchlist } from '../../redux/actions/watchlistsActions';
+import selectQuotesInterval from '../../redux/selectors/selectQuotesInterval';
 // components
-import Sidebar from "../layout/Sidebar";
-import Content from "../layout/Content";
-import Watchlists from "../watchlists";
-import DashboardButton from "../dashboard/DashboardButton";
-import ConfigInterval from "./ConfigInterval";
-
+import Sidebar from '../layout/Sidebar';
+import Content from '../layout/Content';
+import Watchlists from '../watchlists';
+import DashboardButton from '../dashboard/DashboardButton';
+import Config from '../Config';
 // styles
-import "./App.css";
-import {
-  sidebarColStyle,
-  sidebarSpacingStyle,
-  contentColStyle
-} from "./App.styles.js";
-import "react-toastify/dist/ReactToastify.min.css";
+import './App.css';
+import { sidebarColStyle, sidebarSpacingStyle, contentColStyle } from './App.styles.js';
+import 'react-toastify/dist/ReactToastify.min.css';
 
 injectTapEventPlugin();
 
 class App extends Component {
-  state = {
-    selectedWatchlist: null,
-    refInterval: 300
-  };
+	static quotesTimer;
+	static quotesRefInterval;
 
-  componentDidMount() {
-    this.props.actions.loadWatchlists();
-    this.setNextQuotesUpdate();
-  }
+	static propTypes = {
+		quotesRefInterval: number.isRequired,
+		actions: object
+	};
 
-  componentWillUnmount() {
-    clearTimeout(this.quotesTimer);
-  }
+	static defaultProps = {
+		quotesRefInterval: 300
+	};
 
-  updateQuotes = () => {
-    this.props.actions.fetchQuotes();
-    this.setNextQuotesUpdate();
-  };
+	componentDidMount() {
+		this.props.actions.loadWatchlists();
+		this.quotesRefInterval = this.props.quotesRefInterval;
+		this.setQuotesTimer();
+	}
 
-  setNextQuotesUpdate = () => {
-    this.quotesTimer = setTimeout(
-      this.updateQuotes,
-      this.state.refInterval * 1000
-    );
-  };
+	componentWillReceiveProps(nextProps) {
+		if (nextProps.quotesRefInterval !== this.props.quotesRefInterval) {
+			clearTimeout(this.quotesTimer);
+			this.quotesRefInterval = nextProps.quotesRefInterval;
+			this.setQuotesTimer();
+		}
+	}
 
-  onSelect = wl => {
-    this.setState(() => ({ selectedWatchlist: wl }));
-  };
+	shouldComponentUpdate() {
+		return false;
+	}
 
-  onChangeTimer = refInterval => {
-    clearTimeout(this.quotesTimer);
-    this.setState(() => ({ refInterval }), this.setNextQuotesUpdate);
-  };
+	componentWillUnmount() {
+		clearTimeout(this.quotesTimer);
+	}
 
-  render() {
-    let selectedWatchlist = this.state.selectedWatchlist;
-    let selectedWatchlistId;
+	updateQuotes = () => {
+		this.props.actions.fetchQuotes();
+		this.setQuotesTimer();
+	};
 
-    if (selectedWatchlist) {
-      selectedWatchlist = selectedWatchlist.id
-        ? this.props.watchlists.find(wl => wl.id === selectedWatchlist.id)
-        : this.props.watchlists[this.props.watchlists.length - 1];
-      selectedWatchlistId = selectedWatchlist.id;
-    } else {
-      selectedWatchlistId = null;
-    }
-    return (
-      <div>
-        <Grid fluid>
-          <Row className="app-container">
-            <Col
-              lg={2}
-              md={4}
-              className="hidden-sm hidden-xs"
-              style={sidebarColStyle}
-            >
-              <Sidebar>
-                <div style={sidebarSpacingStyle}>
-                  <DashboardButton onClick={this.onSelect} />
-                </div>
-                <div style={sidebarSpacingStyle}>
-                  <Watchlists
-                    onChangeSelection={this.onSelect}
-                    selected={selectedWatchlist}
-                  />
-                </div>
-                <div style={sidebarSpacingStyle}>
-                  <ConfigInterval
-                    interval={this.state.refInterval}
-                    onChange={this.onChangeTimer}
-                    style={sidebarSpacingStyle}
-                  />
-                </div>
-              </Sidebar>
-            </Col>
-            <Col lg={10} md={8} style={contentColStyle}>
-              <Content watchlistId={selectedWatchlistId} />
-            </Col>
-          </Row>
-        </Grid>
-        <ToastContainer />
-      </div>
-    );
-  }
+	setQuotesTimer = () => {
+		this.quotesTimer = setTimeout(this.updateQuotes, this.quotesRefInterval * 1000);
+	};
+
+	showDashboard = () => {
+		this.props.actions.selectWatchlist(null);
+	};
+
+	render() {
+		return (
+			<div>
+				<Grid fluid>
+					<Row className="app-container">
+						<Col lg={2} md={4} className="hidden-sm hidden-xs" style={sidebarColStyle}>
+							<Sidebar>
+								<div style={sidebarSpacingStyle}>
+									<DashboardButton onClick={this.showDashboard} />
+								</div>
+								<div style={sidebarSpacingStyle}>
+									<Watchlists />
+								</div>
+								<div style={sidebarSpacingStyle}>
+									<Config style={sidebarSpacingStyle} />
+								</div>
+							</Sidebar>
+						</Col>
+						<Col lg={10} md={8} style={contentColStyle}>
+							<Content />
+						</Col>
+					</Row>
+				</Grid>
+				<ToastContainer />
+			</div>
+		);
+	}
 }
 
 function mapStateToProps(state) {
-  return {
-    watchlists: selectWatchlists(state) || []
-  };
+	return {
+		quotesRefInterval: selectQuotesInterval(state)
+	};
 }
 
 function mapDispatchToProps(dispatch) {
-  return {
-    actions: bindActionCreators({ ...quotesActions, loadWatchlists }, dispatch)
-  };
+	return {
+		actions: bindActionCreators({ fetchQuotes, loadWatchlists, selectWatchlist }, dispatch)
+	};
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(App);
