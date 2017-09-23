@@ -27,6 +27,7 @@ function* saveStock({ type, stock, watchlist }) {
 			throw status;
 		}
 	} catch (error) {
+		console.log(error);
 		yield put(endOpError(STOCK, { stock, watchlist, op, error }));
 	} finally {
 		if (yield cancelled()) {

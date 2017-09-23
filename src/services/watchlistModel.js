@@ -8,24 +8,17 @@ export class Stock {
 	percentChange = 0;
 
 	get marketValue() {
-		if (this.unitsOwned > 0 && this.lastPrice > 0) {
-			return this.unitsOwned * this.lastPrice;
-		}
-		return 0;
+		return this.unitsOwned > 0 && this.lastPrice > 0 ? this.unitsOwned * this.lastPrice : 0;
 	}
 
 	get dayChange() {
-		if (this.unitsOwned && this.change) {
-			return this.unitsOwned * this.change;
-		}
-		return 0;
+		return this.unitsOwned && this.change ? this.unitsOwned * this.change : 0;
 	}
 
 	get netPnL() {
-		if (this.unitsOwned && this.avgPrice && this.lastPrice) {
-			return this.unitsOwned * (this.lastPrice - this.avgPrice);
-		}
-		return 0;
+		return this.unitsOwned && this.avgPrice && this.lastPrice
+			? this.unitsOwned * (this.lastPrice - this.avgPrice)
+			: 0;
 	}
 }
 
@@ -38,17 +31,26 @@ export class Watchlist {
 	stocksByCode = {};
 
 	get totalMarketValue() {
-		let total = Object.values(this.stocksByCode).reduce((totalV, stock) => totalV + stock.marketValue, 0);
-		return parseFloat(total.toFixed(2));
+		return parseFloat(
+			Object.values(this.stocksByCode)
+				.reduce((totalV, stock) => totalV + stock.marketValue, 0)
+				.toFixed(2)
+		);
 	}
 
 	get totalDayChange() {
-		let total = Object.values(this.stocksByCode).reduce((totalV, stock) => totalV + stock.dayChange, 0);
-		return parseFloat(total.toFixed(2));
+		return parseFloat(
+			Object.values(this.stocksByCode)
+				.reduce((totalV, stock) => totalV + stock.dayChange, 0)
+				.toFixed(2)
+		);
 	}
 
 	get totalPnL() {
-		let total = Object.values(this.stocksByCode).reduce((totalV, stock) => totalV + stock.netPnL, 0);
-		return parseFloat(total.toFixed(2));
+		return parseFloat(
+			Object.values(this.stocksByCode)
+				.reduce((totalV, stock) => totalV + stock.netPnL, 0)
+				.toFixed(2)
+		);
 	}
 }

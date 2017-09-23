@@ -28,7 +28,7 @@ class EditStockForm extends PureComponent {
 
 	isFormValid = () => {
 		const { stock } = this.state;
-		return stock.unitsOwned.trim() !== '' && stock.avgPrice.trim() !== '';
+		return stock.unitsOwned && stock.unitsOwned.trim() !== '' && stock.avgPrice && stock.avgPrice.trim() !== '';
 	};
 
 	handleChange = ({ target }) => {

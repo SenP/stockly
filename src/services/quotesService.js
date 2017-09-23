@@ -8,19 +8,19 @@ export class QuotesService {
 	// Refresh the quotes map with latest quotes from Google Finance API
 	static async refreshQuotes(stockCodes) {
 		if (stockCodes) {
-			let gUrl = `${this.base_url}?q=${stockCodes}&format=json`;
+			const gUrl = `${this.base_url}?q=${stockCodes}&format=json`;
 			let newQuotes;
 			let quotesMap;
 			try {
 				let response = await fetchJsonp(gUrl);
 				newQuotes = await response.json();
 			} catch (err) {
-				console.error('error fetching, switching to random quotes.....');
+				console.error('error fetching, switching to random quotes...');
 				newQuotes = this.generateRandomQuotes(stockCodes);
 			}
-			quotesMap = this.updateQuotesMap(newQuotes);
+			quotesMap = this.createQuotesMap(newQuotes);
 			if (stockCodes.split(',').length === 1) {
-				let newQuote = quotesMap.get(stockCodes);
+				const newQuote = quotesMap.get(stockCodes);
 				return new Map().set(stockCodes, newQuote);
 			}
 			return quotesMap;
@@ -28,8 +28,8 @@ export class QuotesService {
 		return null;
 	}
 
-	// Update the quotes map with the new quote values from API (called from refreshQuotes method)
-	static updateQuotesMap(newquotes) {
+	// Create the quotes map with the new quote values from API (called from refreshQuotes method)
+	static createQuotesMap(newquotes) {
 		let quotesMap = new Map();
 		newquotes.forEach(newquote => {
 			let quote = {};
@@ -41,7 +41,7 @@ export class QuotesService {
 		return quotesMap;
 	}
 
-	// Update the quotes map with random quote values - fallback if API call fails
+	// Create random quotes - fallback for Google Finance API
 	static generateRandomQuotes(stockCodes) {
 		let newQuotes = [];
 		stockCodes.split(',').forEach(code => {
@@ -59,8 +59,8 @@ export class QuotesService {
 		if (exact) {
 			return Tickers.filter(ticker => ticker.code === value || ticker.name === value);
 		}
-		let inputValue = value.trim().toLowerCase();
-		let inputLength = inputValue.length;
+		const inputValue = value.trim().toLowerCase();
+		const inputLength = inputValue.length;
 		return Tickers.filter(
 			ticker =>
 				ticker.code.toLowerCase().slice(0, inputLength) === inputValue ||
