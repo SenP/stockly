@@ -40,7 +40,6 @@
   },
   "devDependencies": {
     "@types/redux-immutable-state-invariant": "^2.0.0",
-    "@types/why-did-you-update": "0.0.7",
     "eslint-import-resolver-node": "^0.3.0",
     "eslint-import-resolver-webpack": "^0.8.1",
     "eslint-plugin-import": "^2.3.0",
