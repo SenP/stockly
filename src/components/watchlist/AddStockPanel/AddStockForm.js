@@ -53,9 +53,9 @@ export default class AddStockForm extends PureComponent {
 			stock.code &&
 			stock.code.trim() !== '' &&
 			stock.unitsOwned &&
-			stock.unitsOwned.trim() !== '' &&
+			stock.unitsOwned > 0 &&
 			stock.avgPrice &&
-			stock.avgPrice.trim() !== ''
+			stock.avgPrice > 0 
 		);
 	};
 
