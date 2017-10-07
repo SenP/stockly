@@ -1,5 +1,5 @@
-import React, { PureComponent } from 'react';
-import { arrayOf, instanceOf, object } from 'prop-types';
+import React, { Component } from 'react';
+import { arrayOf, instanceOf, object, bool, string } from 'prop-types';
 import { Panel } from 'react-bootstrap';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
@@ -17,48 +17,62 @@ import WatchlistForm from './WatchlistForm';
 import Watchlists from './Watchlists';
 import Header from './WatchlistsHeader';
 
-class WatchlistsContainer extends PureComponent {
+class WatchlistsContainer extends Component {
 	static propTypes = {
 		watchlists: arrayOf(instanceOf(Watchlist)),
 		selected: instanceOf(Watchlist),
-		opState: object,
-		actions: object
+		actions: object,
+		editedWatchlist: instanceOf(Watchlist),
+		adding: false,
+		editing: bool,
+		deleting: bool,
+		saving: bool,
+		error: string
 	};
 
 	static defaultProps = {
 		watchlists: [],
 		selected: null,
-		opState: {
-			editedWatchlist: null,
-			adding: false,
-			editing: false,
-			deleting: false,
-			saving: false,
-			error: null
-		}
+		editedWatchlist: null,
+		adding: false,
+		editing: false,
+		deleting: false,
+		saving: false,
+		error: null
 	};
 
-	onChangeSelection = wl => {
-		this.props.actions.selectWatchlist(wl);
+	state = {
+		editedWatchlist: this.props.editedWatchlist,
+		adding: this.props.adding,
+		editing: this.props.editing,
+		deleting: this.props.deleting,
+		saving: this.props.saving,
+		error: this.props.error
 	};
 
-	onAddClick = () => {
-		this.props.actions.initOp(WATCHLIST, { watchlist: new Watchlist(), op: 'CREATE' });
-	};
+	onAddClick = () => this.props.actions.initOp(WATCHLIST, { watchlist: new Watchlist(), op: 'CREATE' });
 
 	onEditClick = () => {
 		const editedWatchlist = Object.assign(new Watchlist(), this.props.selected);
 		this.props.actions.initOp(WATCHLIST, { watchlist: editedWatchlist, op: 'EDIT' });
 	};
 
-	onDeleteClick = () => {
-		this.props.actions.initOp(WATCHLIST, { watchlist: this.props.selected, op: 'DELETE' });
-	};
+	onDeleteClick = () => this.props.actions.initOp(WATCHLIST, { watchlist: this.props.selected, op: 'DELETE' });
+
+	onChange = ({ target }) =>
+		this.setState(prevState => ({
+			watchlist: Object.assign(new Watchlist(), prevState.watchlist, {
+				[target.name]: target.value.trim()
+			})
+		}));
+
+	isFormValid = () => this.state.watchlist.name.trim() !== '';
 
 	onSave = watchlist => {
+		this.setState({ error: '' });
 		const valid = WatchlistService.validateWatchlist(watchlist);
 		if (valid.status === 'error') {
-			return valid.msg;
+			return this.setState({ error: valid.msg });
 		}
 		this.props.opState.adding
 			? this.props.actions.createWatchlist(watchlist)
@@ -71,20 +85,28 @@ class WatchlistsContainer extends PureComponent {
 
 	onCancel = () => {
 		const { removeOp } = this.props.actions;
-		const watchlist = this.props.opState.editedWatchlist;
+		const watchlist = this.props.selected;
+		this.setState({			
+			editedWatchlist: null,
+			adding: false,
+			editing: false,
+			deleting: false,
+			saving: false,
+			error: null
+		});
 		removeOp(WATCHLIST, { op: 'CREATE' });
 		removeOp(WATCHLIST, { watchlist, op: 'EDIT' });
 		removeOp(WATCHLIST, { watchlist, op: 'DELETE' });
 	};
 
 	render() {
-		const { editedWatchlist, adding, editing, deleting, saving, error } = this.props.opState;
-		const watchlists = this.props.watchlists;
+		const { editedWatchlist, adding, editing, deleting, saving, error } = this.props;
+		const { selected, watchlists } = this.props;
 		const isViewState = !adding && !editing && !deleting;
 		const Title = (
 			<Header
 				showAdd={isViewState}
-				showEdit={!!this.props.selected && isViewState}
+				showEdit={!!selected && isViewState}
 				onAdd={this.onAddClick}
 				onEdit={this.onEditClick}
 				onDelete={this.onDeleteClick}
@@ -108,8 +130,8 @@ class WatchlistsContainer extends PureComponent {
 				{isViewState && (
 					<Watchlists
 						watchlists={watchlists}
-						selected={this.props.selected}
-						onClick={this.onChangeSelection}
+						selected={selected}
+						onClick={this.props.actions.selectWatchlist}
 					/>
 				)}
 
@@ -137,13 +159,12 @@ class WatchlistsContainer extends PureComponent {
 	}
 }
 
-function mapStateToProps(state) {
-	const selected = selectSelectedWatchlist(state);
+function mapStateToProps(state) {	
 	const watchlistOp = selectOps(state, WATCHLIST);
-	let opState;
+	let opState = {};
 	if (watchlistOp) {
 		const { op, status, error, watchlist: editedWatchlist } = watchlistOp;
-		opState = {
+		opState = {			
 			editedWatchlist,
 			adding: op === 'CREATE',
 			editing: op === 'EDIT',
@@ -154,8 +175,8 @@ function mapStateToProps(state) {
 	}
 	return {
 		watchlists: selectWatchlists(state),
-		selected,
-		opState
+		selected: selectSelectedWatchlist(state),
+		...opState
 	};
 }
 

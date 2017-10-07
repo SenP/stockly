@@ -1,7 +1,6 @@
 import { createSelector } from 'reselect';
 import getWatchlistsById from './getWatchlistsById';
-
-const getSelectedWatchlistId = state => state.selectedWatchlistId;
+import getSelectedWatchlistId from './getSelectedWatchlistId';
 
 export default createSelector(
 	getWatchlistsById,

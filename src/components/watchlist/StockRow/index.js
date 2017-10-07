@@ -1,5 +1,5 @@
-import React, { PureComponent } from 'react';
-import { instanceOf, func, object } from 'prop-types';
+import React, { Component } from 'react';
+import { instanceOf, func, object, bool, string } from 'prop-types';
 // redux
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
@@ -12,44 +12,83 @@ import StockView from './StockView';
 import EditStockForm from './EditStockForm';
 import DeleteStockForm from './DeleteStockForm';
 
-class StockRow extends PureComponent {
+class StockRow extends Component {
 	static propTypes = {
-		stock: object.isRequired,
+		stock: instanceOf(Stock).isRequired,
 		watchlist: instanceOf(Watchlist).isRequired,
 		onSave: func.isRequired,
 		onDelete: func.isRequired,
-		opState: object,
-		actions: object
+		actions: object,
+		editedStock: instanceOf(Stock),
+		editing: bool,
+		deleting: bool,
+		saving: bool,
+		error: string
 	};
 
 	static defaultProps = {
-		opState: {
-			editedStock: null,
-			editing: false,
-			deleting: false,
-			saving: false,
-			error: null
-		}
+		editedStock: null,
+		editing: false,
+		deleting: false,
+		saving: false,
+		error: null
 	};
+
+	state = {
+		editedStock: this.props.editedStock,
+		editing: this.props.editing,
+		deleting: this.props.deleting,
+		saving: this.props.saving,
+		error: this.props.error
+	};
+
+	componentWillReceiveProps(newProps) {
+		if (newProps.stock === this.props.stock) {
+			const { editedStock, editing, deleting, saving, error } = newProps;
+			this.setState({
+				editedStock,
+				editing,
+				deleting,
+				saving,
+				error
+			});
+		}
+	}
+
+	componentWillUnmount() {
+		// save local state to store
+		const { editing, deleting, editedStock } = this.state;
+		const op = editing ? 'EDIT' : deleting ? 'DELETE' : null;
+		if (op) {
+			const { watchlist, actions } = this.props;
+			actions.updateOp(STOCK, { watchlist, stock: editedStock, op });
+		}
+	}
 
 	onEditClick = () => {
-		const { watchlist, stock, actions } = this.props;
-		const editedStock = Object.assign(new Stock(), stock);
-		actions.initOp(STOCK, { watchlist, stock: editedStock, op: 'EDIT' });
+		const editedStock = Object.assign(new Stock(), this.props.stock);
+		this.setState({ editedStock, editing: true });
 	};
 
-	onDeleteClick = () => {
-		const { watchlist, stock, actions } = this.props;
-		actions.initOp(STOCK, { watchlist, stock, op: 'DELETE' });
+	onDeleteClick = () => this.setState({ editedStock: this.props.stock, deleting: true });
+
+	onChange = ({ target }) =>
+		// save form changes in local state
+		this.setState(prevState => ({
+			editedStock: Object.assign(new Stock(), prevState.editedStock, {
+				[target.name]: target.value.trim()
+			})
+		}));
+
+	isFormValid = () => {
+		const { editedStock } = this.state;
+		return editedStock.unitsOwned && editedStock.unitsOwned > 0 && editedStock.avgPrice && editedStock.avgPrice > 0;
 	};
 
-	onChange = editedStock => {
-		const { watchlist, actions } = this.props;
-		actions.updateOp(STOCK, { watchlist, stock: editedStock, op: 'EDIT' });
-	};
-
-	submitForm = editedStock => {
-		return this.props.onSave(editedStock, false);
+	onSave = evt => {
+		this.setState({ error: '' });
+		const error = this.props.onSave(this.state.editedStock);
+		error && this.setState({ error });
 	};
 
 	onDelete = () => {
@@ -61,13 +100,20 @@ class StockRow extends PureComponent {
 	onCancel = () => {
 		const { removeOp } = this.props.actions;
 		const { stock, watchlist } = this.props;
+		this.setState({
+			editedStock: null,
+			editing: false,
+			deleting: false,
+			saving: false,
+			error: null
+		});
 		removeOp(STOCK, { stock, watchlist, op: 'EDIT' });
 		removeOp(STOCK, { stock, watchlist, op: 'DELETE' });
 	};
 
 	render() {
 		const { stock, watchlist } = this.props;
-		const { editedStock, editing, deleting, saving, error } = this.props.opState;
+		const { editedStock, editing, deleting, saving, error } = this.state;
 
 		return (
 			(!editing &&
@@ -75,17 +121,17 @@ class StockRow extends PureComponent {
 			(editing && (
 				<EditStockForm
 					stock={editedStock}
-					watchlist={watchlist}
+					onChange={this.onChange}
+					onSave={this.onSave}
+					onClose={this.onCancel}
+					isFormValid={this.isFormValid()}
 					saving={saving}
 					error={error}
-					onChange={this.onChange}
-					onSave={this.submitForm}
-					onClose={this.onCancel}
 				/>
 			)) ||
 			(deleting && (
 				<DeleteStockForm
-					stock={stock}
+					stock={editedStock}
 					watchlist={watchlist}
 					saving={saving}
 					onDelete={this.onDelete}
@@ -101,10 +147,9 @@ function mapStateToProps(state, ownProps) {
 	const stockOp =
 		selectOps(state, STOCK, { stock, watchlist, op: 'EDIT' }) ||
 		selectOps(state, STOCK, { stock, watchlist, op: 'DELETE' });
-	let opState;
 	if (stockOp) {
 		const { op, status, error, stock: editedStock } = stockOp;
-		opState = {
+		return {
 			editedStock,
 			editing: op === 'EDIT',
 			deleting: op === 'DELETE',
@@ -112,9 +157,7 @@ function mapStateToProps(state, ownProps) {
 			error
 		};
 	}
-	return {
-		opState
-	};
+	// return {};
 }
 
 function mapDispatchToProps(dispatch) {

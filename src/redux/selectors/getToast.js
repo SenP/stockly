@@ -1,3 +1,1 @@
-export default function getToast(state, key) {
-	return state.toastsByKey[key];
-}
+export default (state, key) => state.toastsByKey[key];

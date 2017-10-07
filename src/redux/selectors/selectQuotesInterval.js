@@ -1,3 +1,1 @@
-export default function selectQuotesInterval({ quotesRefInterval }) {
-	return quotesRefInterval;
-}
+export default ({ quotesRefInterval }) => quotesRefInterval;
